@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .coupon {
+  position: relative;
+  width: 400px;
+  height: 160px;
+  margin: 100px auto;
+  text-align: -webkit-auto;
+  background-image: radial-gradient(
+      circle at 1px 8px,
+      transparent 6px,
+      #ff9e6d 6px,
+      #ff9e6d 0px
+    ),
+    radial-gradient(
+      circle at 199px 8px,
+      transparent 6px,
+      #ff9e6d 6px,
+      #ff9e6d 0px
+    );
+  background-size: 200px 18px;
+  background-position: 0 0, 200px 0;
+  background-repeat-x: no-repeat;
+
+  font-size: 60px;
+  color: #fff;
+  font-weight: bold;
+  line-height: 160px;
+  padding-left: 60px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.coupon::before {
+  position: absolute;
+  content: "";
+  left: 240px;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed #fff;
+}
+.coupon::after {
+  position: absolute;
+  content: "立即领取";
+  font-size: 26px;
+  width: 70px;
+  top: 50%;
+  right: 2%;
+  transform: translate(-50%, -50%);
+  line-height: 40px;
+  letter-spacing: 5px;
+}
+
+.radil{
+  width: 100%;
+ height: 10px;
+ background-image: -webkit-radial-gradient(circle, transparent, transparent 9px, orange 9px, orange 10px, transparent 10px, transparent);
+ background-image: -moz-radial-gradient(circle, transparent, transparent 9px, orange 9px, orange 10px, transparent 10px, transparent);
+ background-image: radial-gradient(circle, transparent, transparent 9px, orange 9px, orange 10px, transparent 10px, transparent);
+ background-size: 20px 20px;
+}
+
+.test{
+  width: 100px;
+  height: 50px;
+  background-image: radial-gradient(circle, transparent, transparent 9px, orange 9px, orange 10px, transparent 10px, transparent);
+  background-size: 20px 20px;
+}
+
+.toothbg {
+            width: 100%;
+            height: 25px;
+            margin: 100px 0px;
+            background: white;
+            background-image: radial-gradient(15px at 25px 25px, transparent, transparent, transparent, transparent, green);
+            background-size: 50px 50px;
+            background-repeat: repeat-x;
+            background-position: 0px 0px;
+        }
+  </style>
+</head>
+<body>
+  <div class="coupon"></div>
+  <div class="radil"></div>
+  <div class="test"></div>
+  <div class="toothbg"></div>
+</body>
+</html>

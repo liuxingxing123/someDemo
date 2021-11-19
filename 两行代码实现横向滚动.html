@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .container {
+      display: flex;
+      overflow-x: scroll;
+    }
+    .page {
+  width: 100vw;
+  height: 100vh;
+  flex-shrink: 0;
+}
+.scroll-container {
+  width: 500px;
+  height: 150px;
+  border: 1px solid #ddd;
+  padding: 15px;
+  overflow: auto;     /*必须*/
+}
+
+.scroll-container::-webkit-scrollbar{
+  height: 9px !important;
+  width: 9px !important;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  border-radius: 0;
+  border-style: dashed;
+  background-color: rgba(15, 65, 83, 0.4);
+  border-color: transparent;
+  border-width: 1.5px;
+  background-clip: padding-box;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: hsl(210deg, 50%, 50%);
+} 
+
+.page:nth-child(1) {
+  background: hsl(140deg, 50%, 50%);
+}
+
+.page:nth-child(2) {
+  background: hsl(210deg, 50%, 50%);
+}
+
+.page:nth-child(3) {
+  background: hsl(270deg, 50%, 50%);
+}
+a:after {content: " (" attr(href) ")";}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="container">
+      <div class="page">
+        <a href="//www.webqdkf.com">有课前端网</a>
+        <p class="scroll-container">
+          庭院深深，不知有多深？杨柳依依，飞扬起片片烟雾，一重重帘幕不知有多少层。豪华的车马停在贵族公子寻欢作乐的地方，她登楼向远处望去，却看不见那通向章台的大路。春已至暮，三月的雨伴随着狂风大作，再是重门将黄昏景色掩闭，也无法留住春意。泪眼汪汪问落花可知道我的心意，落花默默不语，纷乱的，零零落落一点一点飞到秋千外。庭院深深，不知有多深？杨柳依依，飞扬起片片烟雾，一重重帘幕不知有多少层。豪华的车马停在贵族公子寻欢作乐的地方，她登楼向远处望去，却看不见那通向章台的大路。春已至暮，三月的雨伴随着狂风大作，再是重门将黄昏景色掩闭，也无法留住春意。泪眼汪汪问落花可知道我的心意，落花默默不语，纷乱的，零零落落一点一点飞到秋千外。庭院深深，不知有多深？杨柳依依，飞扬起片片烟雾，一重重帘幕不知有多少层。豪华的车马停在贵族公子寻欢作乐的地方，她登楼向远处望去，却看不见那通向章台的大路。春已至暮，三月的雨伴随着狂风大作，再是重门将黄昏景色掩闭，也无法留住春意。泪眼汪汪问落花可知道我的心意，落花默默不语，纷乱的，零零落落一点一点飞到秋千外。庭院深深，不知有多深？杨柳依依，飞扬起片片烟雾，一重重帘幕不知有多少层。豪华的车马停在贵族公子寻欢作乐的地方，她登楼向远处望去，却看不见那通向章台的大路。春已至暮，三月的雨伴随着狂风大作，再是重门将黄昏景色掩闭，也无法留住春意。泪眼汪汪问落花可知道我的心意，落花默默不语，纷乱的，零零落落一点一点飞到秋千外。
+  </p>
+      </div>
+      <div class="page">Page2</div>
+      <div class="page">Page3</div>
+    </div>
+  </main>
+  <script>
+    let container = document.querySelector(".container");
+    container.addEventListener('wheel',event=>{
+      event.preventDefault()
+      container.scrollLeft += event.deltaY
+    })
+
+    const removeDuplicates = function(s, k) {
+    let stack = []
+    
+    for(let c of s) {
+        let prev = stack.pop()
+        if(!prev || prev[0] !== c) {
+          prev && stack.push(prev)
+            stack.push(c)
+        } else if(prev.length < k-1) {
+            stack.push(prev+c)
+        }
+    }
+    return stack.join('')
+};
+
+
+const n= function(s,k){ 
+    const stack = []
+    
+    for(let c of stack){
+        const prev = stack.pop()
+        if(!prev || prev[0]!==c){
+            stack.push(prev)
+            stack.push(c)
+         }else if(prev.length<k-1){
+            stack.push(prev+c)
+         }
+        
+    }
+    return stack.join('')
+}
+
+removeDuplicates('deeedbbcccbdaa',3)
+
+
+var longestCommonPrefix = function(strs) {
+    if (strs === null || strs.length === 0) return "";
+    let prevs = strs[0]
+    for(let i = 1; i < strs.length; i++) {
+        let j = 0
+        for(; j < prevs.length && j < strs[i].length; j++) {
+            if(prevs.charAt(j) !== strs[i].charAt(j)) break
+        }
+        prevs = prevs.substring(0, j)
+        if(prevs === "") return ""
+    }
+    return prevs
+};
+
+
+const result = longestCommonPrefix(["flower","flow","flight"])
+console.log(result)
+
+var longestCommonPrefix1 = function(strs) {
+  
+    if (strs === null || strs.length === 0) return "";
+    if(strs.length === 1) return strs[0]
+    let min = 0, max = 0
+    for(let i = 1; i < strs.length; i++) {
+        if(strs[min] > strs[i]) min = i
+        if(strs[max] < strs[i]) max = i
+    }
+    console.log(min,max)
+    for(let j = 0; j < strs[min].length; j++) {
+        if(strs[min].charAt(j) !== strs[max].charAt(j)) {
+            return strs[min].substring(0, j)
+        }
+    }
+    return strs[min]
+};
+
+const result1 = longestCommonPrefix1(["flower","flow","flight"])
+console.log(result1)
+
+let triangleNumber = function(nums) {
+    if(!nums || nums.length < 3) return 0
+    let count = 0
+    // 排序  先排序  以最长的边为最大  然后遍历前面的两边之和大于第三边 
+    // 先数组排序，排序完后，固定最长的边，利用双指针法判断其余边
+    nums.sort((a, b) => a - b) 
+    for(let k = nums.length - 1; k > 1; k--){
+        let i = 0, j = k - 1
+        while(i < j){ 
+            if(nums[i] + nums[j] > nums[k]){
+                count += j - i
+                j--
+            } else {
+                i++
+            }
+        }
+    }       
+    return count
+}
+console.log(triangleNumber([2,2,3,4,5]))
+  </script>
+</body>
+</html>

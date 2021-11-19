@@ -1,0 +1,56 @@
+// new
+$primary-color: #8b9be1;
+$hover-color:#4076E2;
+$active-color:#0844BC;
+$success-color:#049BD2;
+$error-color:#E03B3B;
+$warn-color:#F09C2B;
+$text-color1:#000000;
+$text-color2:#393b3e;
+$text-color3:#707274;
+$border-color:#e0e0e0;
+$banmaline:#f2f4f8;
+$no-color:#f5f5f5;
+$grey:#e3e6eb;
+$drop-success:#049BD3;
+$epic:#7a4bc0;
+$lignt-success:#e3f4fb;
+// old
+$background-color-base  : #f7f7f7;
+$border-color-base      : #dddee1;
+// $error-color            : #ed3f14;
+$error-color            : #F16767;
+$btn-disable-color      : #bbbec4;
+$table-td-hover-bg      : #ebf7ff;
+$warning-color          : #ff9900;
+$button-hover           : #C63136;;
+$info-color             : #2db7f5;
+$subsidiary-color       : #80848f;
+$border-color-split     : #e9eaec;
+$table-td-hover-bg      : #ebf7ff;
+$head-bg                : #f9fafc;
+$table-thead-bg         : #f8f8f9;
+$table-td-stripe-bg     : #f8f8f9;
+$body-background        : #fff;
+$devops-color           : #c63136;
+$el-pagination          : #E4E8F4;
+
+// 自定义变量
+$color: #ff4200;
+$fs: 14px;
+$ls: 1.2;
+
+// 自定义mixin
+@mixin size($w, $h: $w) {
+  width: $w;
+  height: $h;
+}
+
+body {
+  font-size: $fs;
+  background-color: #eaeaea;
+  .avatar {
+    @include size(150px);
+    transform: translateX(50px);
+  }
+}

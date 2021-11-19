@@ -1,0 +1,276 @@
+node {
+    //获取当前日期时间戳 年月日时分秒
+    def dateStr = sh(script: "date +%Y%m%d%H%M", returnStdout: true).trim()
+    def pipelineNameList = ["layout","authority", "base","servicetree",'stagetree',"InheritanceCenter","systemConfiguration","stageHome","stagePersonalCenter"]
+    def choiceModules = "${build_modules}".split(",")
+    def modules = []
+    def branches = [:]
+    for (choiceModule in choiceModules) {
+        if (!choiceModule.isEmpty()) {
+            modules.add(choiceModule)
+        }
+    }
+    stage("init") {
+        // 删除上次更新的包
+        sh "rm -rf ${env.WORKSPACE}/package/paas-web-micro"
+        sh "rm -rf ${env.WORKSPACE}/package/paas-web.tar"
+        sh "rm -rf ${env.WORKSPACE}/package/commitIds.txt"
+        // 确认包目录是否存在
+        res = sh(script: "test -d ${env.WORKSPACE}/package/paas-web && echo '1' || echo '0' ", returnStdout: true).trim()
+        if (res != '1') {
+            sh "mkdir -p ${env.WORKSPACE}/package/paas-web"
+        }
+        sh "touch ${env.WORKSPACE}/package/commitIds.txt"
+        // 判断模块是否完整
+        pipelineNameList.each { item ->
+            // 构建workspace目录是否完整
+            workspaceName = sh(script: "test -d  ${env.WORKSPACE}/paas-web/${item} && echo '1' || echo '0' ", returnStdout: true).trim()
+            if (workspaceName != '1') {
+                sh "mkdir -p ${env.WORKSPACE}/paas-web/${item}"
+            }
+            //如果不是全部构建则检查package/paas-web下是否完整
+            if ("${build_all_web}" != "1") {
+                packageNameName = sh(script: "test -d ${env.WORKSPACE}/package/paas-web/${item}Micro && echo '1' || echo '0' ", returnStdout: true).trim()
+                sh "echo ${packageNameName}"
+                // 判断文件目录是否存在，不存在则加入构建
+                if (packageNameName != '1') {
+                    if (!modules.contains(item)) {
+                        modules.add(item)
+                    }
+                }
+            } else {
+                modules = pipelineNameList
+            }
+        }
+    }
+
+    for (module in modules) {
+        stage(module) {
+            sh "echo ${module}"
+            sh "rm -rf ${env.WORKSPACE}/package/paas-web/${module}Micro"
+            dir("${env.WORKSPACE}/paas-web/${module}") {
+                // 确认分支
+                def gitBranch = "stage"
+                def credentialsId_ci = "oem-boc-pipeline"
+                def gitUrl = "http://192.168.1.25:8888/BeyondStage-Web/${module}.git"
+                def privateName = "bn-template@0.1.224 bn-ui@0.0.223 --no-save"
+                // def privateName = ""
+                switch (module) {
+                    case "base":
+                        gitUrl = "http://192.168.1.25:8888/BeyondStage-Web/base-app.git"
+                        privateName = "bn-micro-core"
+                        gitBranch = "${branch}"
+                        break
+                    case "layout":
+                        gitUrl = "http://192.168.1.25:8888/BeyondStage-Web/layout.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        privateName = "bn-template@0.1.226 bn-ui@0.0.223 --no-save"
+                        gitBranch = "${branch}"
+                        break
+                    case "authority":
+                        gitUrl = "http://58.210.154.140:8888/BeyondStage-Web/authority.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        gitBranch = "${branch}"
+                        break
+                    case "servicetree":
+                        gitUrl = "http://192.168.1.25:8888/BeyondStage-Web/service-tree.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        gitBranch = "${branch}"
+                        break
+                    case "stagetree":
+                        gitUrl = "http://58.210.154.140:8888/BeyondStage-Web/stage-tree.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        gitBranch = "${branch}"
+                        break
+                    case "InheritanceCenter":
+                        gitUrl = "http://58.210.154.140:8888/stage/InheritanceCenter.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        gitBranch = "${branch}"
+                        break
+                    case "stagePersonalCenter":
+                        gitUrl = "http://58.210.154.140:8888/stage/stagePersonalCenter.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        gitBranch = "${branch}"
+                        break
+                    case "systemConfiguration":
+                        gitUrl = "http://58.210.154.140:8888/stage/systemConfiguration.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        gitBranch = "${branch}"
+                        break
+                    case "stageHome":
+                        gitUrl = "http://58.210.154.140:8888/BeyondStage-Web/stage-home.git"
+                        credentialsId_ci = "oem-boc-pipeline"
+                        gitBranch = "${branch}"
+                        break
+                }
+
+                sh "ls | grep -v node_modules | xargs rm -rf"
+                env.NODEJS_HOME = "${tool 'nodejs12.16.3'}"
+                // on linux / mac
+                env.PATH = "${env.NODEJS_HOME}/bin:${env.PATH}"
+                echo "===================================git pull======================================="
+                //拉取代码
+                git branch: "${gitBranch}", credentialsId: "${credentialsId_ci}", url: "${gitUrl}"
+                //git构建commitID
+                def commitId = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                sh 'echo -n " "' + "${module}_commitId=${commitId} >> ${env.WORKSPACE}/package/commitIds.txt"
+                echo "===================================npm build===================================="
+                sh "npm cache clean --force"
+                sh "npm config set registry http://10.10.5.36:4873"
+                sh "rm -rf ${env.WORKSPACE}/package/paas-web/${module}/node_modules"
+                sh "rm -rf ${env.WORKSPACE}/package/paas-web/${module}/package-lock.json"
+                 if ("${get_public}" == "1") {
+                    //sh "npm install --registry=https://registry.npm.taobao.org"
+                     sh "npm install"
+                     sh "npm install core-js"
+                }
+                if ("${get_private}" == "1") {
+                    sh "npm install ${privateName}"
+                }
+                sh "npm run build"
+                sh "mv dist ${env.WORKSPACE}/package/paas-web/${module}Micro"
+            }
+        }
+    }
+
+    stage("package") {
+        sh "cp ${env.WORKSPACE}/paas-web/base/docker/JenkinsDockerfile ${env.WORKSPACE}/package/Dockerfile"
+        sh "cp ${env.WORKSPACE}/paas-web/base/docker/docker-entrypoint.sh ${env.WORKSPACE}/package/docker-entrypoint.sh"
+        sh "cp -r ${env.WORKSPACE}/package/paas-web ${env.WORKSPACE}/package/paas-web-micro"
+        sh "cp /opt/paas-web.conf ${env.WORKSPACE}/package"
+        dir("${env.WORKSPACE}/package") {
+            sh "cp -r ${env.WORKSPACE}/package/paas-web-micro/layoutMicro/static/ ${env.WORKSPACE}/package/paas-web-micro/static/"
+            sh "sed -i '/^LABEL/d' Dockerfile"
+            commit_file = "${env.WORKSPACE}/package/commitIds.txt"
+            file_contents = readFile commit_file
+            sh "sed -i '/MAINTAINER/i\\LABEL ${file_contents}' Dockerfile"
+            sh "tar -cvf paas-web.tar paas-web-micro"
+            echo "===================================docker build==================================="
+            //镜像名称
+            def IMAGE_NAME = "${registry_domain}:5000/${imageNamespace}/paas-web:${dateStr}"
+            echo IMAGE_NAME
+            //制作镜像
+            docker.withServer('tcp://192.168.2.191:2375') {
+                def testImage = docker.build("${IMAGE_NAME}", ".")
+                testImage.push();
+            }
+            // // 是否能够部署及是否部署
+            // if (deploy) {
+            //     //更新服务
+            //     def sshServer = getStageServer()
+            //     def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+            //     sshCommand remote: sshServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+            //     sshCommand remote: sshServer, command: "sh /opt/deploy/docker/stage_web.sh"
+
+                
+
+            //     def sshsServer = getDevopsServer()
+            //     //def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+            //     sshCommand remote: sshsServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+            //     sshCommand remote: sshsServer, command: "sh /opt/deploy/docker/stage_web.sh"
+            //     echo "===================================deploy success==================================="
+            // }
+            
+            if ("${deploy}" == "all") {
+            
+               //更新服务
+                def sshServer = getStageServer()
+                def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+                sshCommand remote: sshServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+                sshCommand remote: sshServer, command: "sh /opt/deploy/docker/stage_web.sh"
+
+
+               def sshs37Server = getStage37Server()
+                //def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+                sshCommand remote: sshs37Server, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+                sshCommand remote: sshs37Server, command: "sh /opt/deploy/docker/stage_web.sh"
+                echo "===================================deploy 银联 success==================================="
+
+                def sshsServer = getDevopsServer()
+                //def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+                sshCommand remote: sshsServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+                sshCommand remote: sshsServer, command: "sh /opt/deploy/docker/stage_web.sh"
+                echo "===================================deploy success==================================="
+            
+            } 
+            
+            
+            if ("${deploy}" == "1"){
+               //更新服务
+                def sshServer = getStageServer()
+                def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+                sshCommand remote: sshServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+                sshCommand remote: sshServer, command: "sh /opt/deploy/docker/stage_web.sh"
+
+
+                def sshsServer = getDevopsServer()
+                //def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+                sshCommand remote: sshsServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+                sshCommand remote: sshsServer, command: "sh /opt/deploy/docker/stage_web.sh"
+                echo "===================================deploy success==================================="
+             }
+             
+             
+            if ("${deploy}" == "2"){
+                echo "===================================deploy 银联 start==================================="
+                 def sshs37Server = getStage37Server()
+                 def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+                 sshCommand remote: sshs37Server, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+                 sshCommand remote: sshs37Server, command: "sh /opt/deploy/docker/stage_web.sh"
+                 echo "===================================deploy 银联 success==================================="
+             }
+
+
+//             if (deploy) {
+//                 //更新服务
+//                 def sshServer = getStageServer()
+//                 def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+//                 sshCommand remote: sshServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+//                 sshCommand remote: sshServer, command: "sh /opt/deploy/docker/stage_web.sh"
+// 
+//                 def sshsServer = getDevopsServer()
+//                 //def IMAGE_NAME_FORMAT = IMAGE_NAME.replaceAll("/","\\\\/")
+//                 sshCommand remote: sshsServer, command: "sed -i 's@\\(.*\\)\\(abcsys.cn.*\\)@"+IMAGE_NAME+"@g' /opt/deploy/docker/stage_web.sh"
+//                 sshCommand remote: sshsServer, command: "sh /opt/deploy/docker/stage_web.sh"
+//                 echo "===================================deploy success==================================="
+//             }
+        }
+        sh "rm -rf ${env.WORKSPACE}/package/Dockerfile"
+        sh "rm -rf ${env.WORKSPACE}/package/paas-web.conf"
+        sh "rm -rf ${env.WORKSPACE}/package/commitIds.txt"
+    }
+}
+
+def getStageServer() {
+    def remote = [:]
+    remote.name = "server-10.10.37.3"
+    remote.host = "10.10.37.3"
+    remote.port = 22
+    remote.allowAnyHosts = true
+    remote.user = "root"
+    remote.password = "Beyond#11"
+    return remote
+}
+
+//银联
+def getStage37Server() {
+    def remote = [:]
+    remote.name = "server-10.20.21.37"
+    remote.host = "10.20.21.37"
+    remote.port = 22
+    remote.allowAnyHosts = true
+    remote.user = "centos"
+    remote.password = "Beyondcent@13"
+    return remote
+}
+
+def getDevopsServer() {
+    def remote = [:]
+    remote.name = "server-10.10.43.206"
+    remote.host = "10.10.43.206"
+    remote.port = 22
+    remote.allowAnyHosts = true
+    remote.user = "root"
+    remote.password = "onceas"
+    return remote
+}

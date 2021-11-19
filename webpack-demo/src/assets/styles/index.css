@@ -1,0 +1,364 @@
+@import 'font/iconfont.css';
+
+* {
+  padding: 0;
+  margin: 0;
+  outline: none;
+}
+
+.left_part {
+  float: left;
+}
+
+.left_part img {
+  width: 140px;
+  height: 40px;
+  margin: 5px 10px 0 30px;
+}
+
+.el-menu--horizontal > .el-menu-item,
+.el-menu--horizontal > .el-submenu .el-submenu__title {
+  height: 52px !important;
+  line-height: 52px !important;
+}
+
+/* .line {
+  display: inline-block;
+  float: left;
+  width: 1px;
+  height: 20px;
+  margin-top: 18px;
+  margin-right: 10px;
+  background: #bcc6d9;
+} */
+
+.logout {
+  margin: 18px 30px 0 20px;
+  font-size: 20px;
+  color: #e4e5e6;
+  cursor: pointer;
+}
+
+.logout:focus {
+  outline: none;
+}
+
+/* table */
+.el-table__column-filter-trigger {
+  padding-left: 5px;
+}
+
+.el-table__column-filter-trigger i {
+  font-size: 20px;
+  vertical-align: middle;
+}
+
+/* 百分百高度 */
+.card {
+  position: relative;
+  height: 100%;
+  background: #fff;
+}
+
+.el-avatar--icon {
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.viwcard {
+  height: calc(100vh - 280px);
+}
+
+.el-drawer__header {
+  padding: 10px;
+  margin-bottom: 0 !important;
+}
+
+.el-scrollbar__wrap.ov {
+  overflow-x: hidden;
+}
+
+.drage {
+  display: block;
+  width: 100%;
+  min-height: 50px;
+}
+
+.el-collapse-item__header {
+  height: 32px !important;
+  padding-left: 10px;
+  margin-bottom: 10px;
+  line-height: 32px !important;
+  background: #f4f5f7 !important;
+}
+
+.middle {
+  vertical-align: middle;
+}
+
+/* .el-table__indent{
+  padding-left: 0 !important;
+} */
+.rightmenu {
+  font-size: 18px;
+  cursor: point;
+}
+
+.el-tabs--border-card > .el-tabs__content {
+  padding: 0 !important;
+}
+
+.el-dialog__title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.el-transfer-panel__item {
+  display: block !important;
+  margin-left: 0;
+}
+
+.el-transfer-panel {
+  width: 45%;
+}
+
+.el-transfer__buttons {
+  padding: 10px;
+
+  /* width:100%;
+  text-align: center;
+  padding: 10px 0 0 0; */
+}
+
+.el-transfer__buttons .el-button {
+  display: block;
+  padding: 10px !important;
+}
+
+.worked .el-checkbox {
+  margin-right: 10px !important;
+}
+
+.el-transfer .el-button + .el-button {
+  margin-left: 0 !important;
+}
+
+.content-pannel {
+  position: relative;
+  height: calc(100vh - 135px);
+  overflow-y: auto;
+  background-color: white;
+}
+
+.specialTable thead .el-checkbox__inner {
+  display: none !important;
+}
+
+.el-scrollbar__bar.is-vertical {
+  right: 0;
+  width: 9px !important;
+}
+
+.el-scrollbar__bar.is-horizontal {
+  height: 9px !important;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+
+  /* background-color: #fff; */
+}
+
+::-webkit-scrollbar-track {
+  /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); */
+  border-radius: 10px;
+
+  /* background-color: #fff; */
+}
+
+::-webkit-scrollbar-thumb {
+  /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3); */
+  background-color: #d4d4d5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #b7b8b9;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background: #d6e5f5;
+}
+
+.legent_box {
+  padding: 20px;
+  overflow: hidden;
+  border-bottom: 1px solid transparent;
+}
+
+.left-title {
+  float: left;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.right-legent {
+  float: right;
+}
+
+.legent {
+  display: inline-block;
+  margin-left: 15px;
+}
+
+.legent span {
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.legent_icon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  border-radius: 2px;
+}
+
+.el-tooltip__popper.is-dark {
+  max-width: 300px;
+}
+
+.mainmenu .logout {
+  margin-right: 20px;
+}
+
+@media screen and (max-width: 1000px) {
+  .left_part img {
+    width: 10vw;
+  }
+
+  .mainmenu .el-menu-item,
+  .leftm,
+  .mainmenu .el-submenu {
+    margin: 0 -2.25vw !important;
+    -webkit-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -o-transform: scale(0.5);
+    transform: scale(0.5);
+  }
+
+  .logout {
+    -webkit-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -o-transform: scale(0.5);
+    transform: scale(0.5);
+  }
+}
+
+@media screen and (min-width: 1000px) and (max-width: 1100px) {
+  .left_part img {
+    width: 10vw;
+  }
+
+  .mainmenu .el-menu-item,
+  .leftm,
+  .mainmenu .el-submenu {
+    margin: 0 -1.75vw !important;
+    -webkit-transform: scale(0.6);
+    -ms-transform: scale(0.6);
+    -moz-transform: scale(0.6);
+    -o-transform: scale(0.6);
+    transform: scale(0.6);
+  }
+
+  .logout {
+    -webkit-transform: scale(0.6);
+    -ms-transform: scale(0.6);
+    -moz-transform: scale(0.6);
+    -o-transform: scale(0.6);
+    transform: scale(0.6);
+  }
+}
+
+@media screen and (min-width: 1100px) and (max-width: 1200px) {
+  .left_part img {
+    width: 10vw;
+  }
+
+  .mainmenu .el-menu-item,
+  .leftm,
+  .mainmenu .el-submenu {
+    margin: 0 -1.25vw !important;
+    -webkit-transform: scale(0.7);
+    -ms-transform: scale(0.7);
+    -moz-transform: scale(0.7);
+    -o-transform: scale(0.7);
+    transform: scale(0.7);
+  }
+
+  .logout {
+    -webkit-transform: scale(0.7);
+    -ms-transform: scale(0.7);
+    -moz-transform: scale(0.7);
+    -o-transform: scale(0.7);
+    transform: scale(0.7);
+  }
+}
+
+@media screen and (min-width: 1200px) and (max-width: 1300px) {
+  .left_part img {
+    width: 10vw;
+  }
+
+  .mainmenu .el-menu-item,
+  .leftm,
+  .mainmenu .el-submenu {
+    margin: 0 -0.75vw !important;
+    -webkit-transform: scale(0.75);
+    -ms-transform: scale(0.75);
+    -moz-transform: scale(0.75);
+    -o-transform: scale(0.75);
+    transform: scale(0.75);
+  }
+
+  .logout {
+    -webkit-transform: scale(0.75);
+    -ms-transform: scale(0.75);
+    -moz-transform: scale(0.75);
+    -o-transform: scale(0.75);
+    transform: scale(0.75);
+  }
+}
+
+@media screen and (min-width: 1300px) and (max-width: 1550px) {
+  .left_part img {
+    width: 10vw;
+  }
+
+  .mainmenu .el-menu-item,
+  .leftm,
+  .mainmenu .el-submenu {
+    margin: 0 -0.5vw !important;
+    -webkit-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    -moz-transform: scale(0.8);
+    -o-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+
+  .logout {
+    -webkit-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    -moz-transform: scale(0.8);
+    -o-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+}
+
+/* 适用于加了显示数字的input */
+.padding-right-input > input {
+  padding-right: 50px;
+}
