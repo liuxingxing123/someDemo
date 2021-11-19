@@ -9,17 +9,27 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   // 入口文件
-  entry: './src/index.js',
+  entry: './src/index.ts',
+  externals: ['lodash'], // 忽略 lodash 的打包 (该选项常用于库的开发)
   // 输出文件
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: '[name].js',
     assetModuleFilename: 'assets/[name]_[hash][ext]',
     clean: true,
+    library: {
+      name: 'library', // library name
+      type: 'umd', // umd, var, this, commonjs, commonjs2, amd, system
+    }
   },
   // 模块
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.s?css$/i,
         use: [
@@ -92,6 +102,9 @@ module.exports = {
         }
       }
     ]
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
   },
   // 插件
   plugins: [
