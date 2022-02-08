@@ -29,10 +29,26 @@
   </style>
 </head>
 <body>
+  <div hidden>
+    Hello Hidden
+</div>
+<div id="div1" data-order-price="98.5" data-name="充电宝"></div>
+        <div id="div3"></div>
+        <div id="div2" draggable>111</div>
+        <h3 id="msg"></h3>
   <div id="container"></div>
+  <div contenteditable data-order-amount1=100>
+    Hello contentEditable
+</div>
+<span id="spanData" data-order-amount=100></span>
+<p>
+  <label>博客：</label>
+  <input type="url" name="blog" id="blog" value="" required="required"/>
+</p>
   <script>
+    console.log(spanData.getAttribute('data-order-amount'))
+    console.log(spanData.dataset.orderAmount)
     var lengthOfLongestSubstring = function(s) {
-      debugger
     let arr = [], max = 0
     for(let i = 0; i < s.length; i++) {
         let index = arr.indexOf(s[i])
@@ -45,6 +61,57 @@
     return max
 };
     lengthOfLongestSubstring('pwwkew')
+
+    window.onload = function() {
+                div1 = document.getElementById("div1");
+                div2 = document.getElementById("div2");
+                div3 = document.getElementById("div3");
+                msg = document.getElementById("msg");
+                
+                div2.ondragstart=function(){
+                    msg.innerHTML+="div2开始拖动了<br/>";
+                }
+                div2.ondrag=function(){
+                    msg.innerHTML+="拖动中<br/>";
+                }
+                div2.ondragend=function(){
+                    msg.innerHTML+="拖动结束<br/>";
+                }
+                
+                div1.ondragover = function(e) {
+                    e.preventDefault();
+                }
+                div1.ondrop = function(e) {
+                    div1.appendChild(div2);
+                }
+                div3.ondragover = function(e) {
+                    e.preventDefault();
+                }
+                div3.ondrop = function(e) {
+                    div3.appendChild(div2);
+                }
+                
+                
+                div1.setAttribute("data-order-price",998.7);
+            }
+
+
+  const imgUrl = 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fup.enterdesk.com%2Fphoto%2F2010-5-2%2Fenterdesk.com-B8767F2D8BADB3BD15975D4AD335523C.jpg&refer=http%3A%2F%2Fup.enterdesk.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1646903201&t=a6a2c5f60a963bc16277aa723e8c77e2'
+  function consoleImg(url){
+    let myImg = new Image()
+    myImg.onload = function(){
+      const style = `
+        font-size:100px;
+        padding-right:100px;
+        background-image:url(${url});
+        background-repeat:no-repeat;
+        background-size:100px 100px;
+      `
+      console.log('%c ',style)
+    }
+    myImg.src = url
+  }
+  consoleImg(imgUrl)
   </script>
 </body>
 </html>
