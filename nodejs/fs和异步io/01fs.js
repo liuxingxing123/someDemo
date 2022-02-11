@@ -1,5 +1,5 @@
 const fs = require("fs")
-
+console.log(Object.prototype.toString.call(process))
 //同步调用
 const data = fs.readFileSync('./file/conf.js')
 console.log(data.toString())
@@ -24,3 +24,4 @@ fs.readFile('./file/conf.js', (err, data) => {
   const data = await readFile('./file/conf.js')
   console.log(data.toString())
 })()
+

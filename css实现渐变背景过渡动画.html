@@ -26,9 +26,104 @@
         background-position: 100% 100%;
       }
     }
+    ::selection { background: #4da84d; }
+    .ex2 .parent {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .ex2 .box {
+    background-color: #4da84d;
+    flex: 1 1 350px; /*  flex-grow: 1 ，表示自动延展到最大宽度 */
+    margin: 5px;
+  }
+  .ex3 .parent {
+    display: grid;
+    grid-template-columns: minmax(150px, 25%) 1fr;
+  }
+  .ex5 .parent {
+    display: grid;
+    grid-template: auto 1fr auto / auto 1fr auto;
+  }
+
+  .ex5 header {
+    padding: 2rem;
+    grid-column: 1 / 4;
+    background: #4da84d;
+  }
+
+  .ex5 .left-side {
+    grid-column: 1 / 2;
+    background: #253a25;
+  }
+
+  .ex5 main {
+    grid-column: 2 / 3;
+    background-color: bisque;
+  }
+
+  .ex5 .right-side {
+    grid-column: 3 / 4;
+    background-color: rgb(255, 205, 212);
+  }
+  .ex5 footer {
+    grid-column: 1 / 4;
+    background-color: brown;
+  }
+  .wrap {
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  width: 358px;
+  resize: both;
+  box-shadow: 20px 20px 60px #bebebe,
+    -20px -20px 60px #ffffff;
+}
+
+.text{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: justify;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /*多行超出省略*/
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
+}
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <p class="text">CSS的 margin-bottom 属性用于设置元素的底部外边距，允许设置负数值。一个正数值将让它相对于正常流与邻近块更远，而负数值将使得更近。</p>
+    <a class="link">全文</a>
+  </div>
+  <div class="ex2">
+    <div class="parent white">
+      <div class="box green">1</div>
+      <div class="box green">2</div>
+      <div class="box green">3</div>
+    </div>
+  </div>
+  <div class="ex3">
+    <div class="parent">
+      <div class="section yellow" contenteditable>
+      Min: 150px / Max: 25%
+      </div>
+      <div class="section purple" contenteditable>
+        This element takes the second grid position (1fr), meaning
+        it takes up the rest of the remaining space.
+      </div>
+    </div>
+  </div>
+  <div class="ex5">
+    <div class="parent">
+      <header class="pink section">Header</header>
+      <div class="left-side blue section" contenteditable>Left Sidebar</div>
+      <main class="section coral" contenteditable> Main Content</main>
+      <div class="right-side yellow section" contenteditable>Right Sidebar</div>
+      <footer class="green section">Footer</footer>
+    </div>
+  </div>
   <div hidden>
     Hello Hidden
 </div>
@@ -112,6 +207,29 @@
     myImg.src = url
   }
   consoleImg(imgUrl)
+
+// 当然，你也可以把count作为属性放在a对象上
+// let count = 1;
+// let a = {
+//   valueOf: function () {
+//     return count++;
+//   },
+// };
+// console.log(a == 1 && a == 2 && a == 3); // true
+let count = 1;
+Object.defineProperty(window, 'a', {
+  get: function () {
+    return count++;
+  },
+});
+// console.log(a == 1 && a == 2 && a == 3); // true
+console.log(a === 1 && a === 2 && a === 3); // false
+let newarr=arr.map(i=>{
+  break;
+  return i+=1;
+})
+console.log(arr)//1,3,4---不会改变原数组
+console.log(newarr)//[2,4,5]---返回新数组
   </script>
 </body>
 </html>
