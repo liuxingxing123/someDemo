@@ -85,7 +85,7 @@ values()：返回一个包含集合中所有值得迭代器
 
 entries()：返回一个包含Set对象中所有元素得键值对迭代器
 
-forEach(callbackFn, thisArg)：用于对集合成员执行callbackFn操作，如果提供了 thisArg 参数，回调中的this会是这个参数，没有返回值
+forEach(callbackFn, selfArg)：用于对集合成员执行callbackFn操作，如果提供了 selfArg 参数，回调中的self会是这个参数，没有返回值
 
 let set = new Set([1, 2, 3])
 console.log(set.keys())	// SetIterator {1, 2, 3}
@@ -268,11 +268,11 @@ let map = new Map([
     ['des', 'JS']
 ])
 map.forEach(function(value, key, map) {
-  this.report(key, value);
+  self.report(key, value);
 }, reporter);
 // Key: name, Value: An
 // Key: des, Value: JS
-在这个例子中， forEach 方法的回调函数的 this，就指向 reporter
+在这个例子中， forEach 方法的回调函数的 self，就指向 reporter
 
 与其他数据结构的相互转换
 
@@ -394,7 +394,7 @@ console.log(data['[object HTMLCollection]']) // "metadata"
 第一眼看到这个题目的时候，脑海跳出的答案是 [1, 2, 3]，但是真正的答案是[1, NaN, NaN]。
 
 首先让我们回顾一下，map函数的第一个参数callback：
-var new_array = arr.map(function callback(currentValue[, index[, array]]) { // Return element for new_array }[, thisArg])
+var new_array = arr.map(function callback(currentValue[, index[, array]]) { // Return element for new_array }[, selfArg])
 这个callback一共可以接收三个参数，其中第一个参数代表当前被处理的元素，而第二个参数代表该元素的索引。
 
 而parseInt则是用来解析字符串的，使字符串成为指定基数的整数。
@@ -419,7 +419,7 @@ function debounce(fn) {
       return function () {
         clearTimeout(timeout); // 每当用户输入的时候把前一个 setTimeout clear 掉
         timeout = setTimeout(() => { // 然后又创建一个新的 setTimeout, 这样就能保证输入字符后的 interval 间隔内如果还有字符输入的话，就不会执行 fn 函数
-          fn.apply(this, arguments);
+          fn.apply(self, arguments);
         }, 500);
       };
     }
@@ -441,7 +441,7 @@ function throttle(fn) {
         if (!canRun) return; // 在函数开头判断标记是否为true，不为true则return
         canRun = false; // 立即设置为false
         setTimeout(() => { // 将外部传入的函数的执行放在setTimeout中
-          fn.apply(this, arguments);
+          fn.apply(self, arguments);
           // 最后在setTimeout执行完毕后再把标记设置为true(关键)表示可以执行下一次循环了。当定时器没有执行的时候标记永远是false，在开头被return掉
           canRun = true;
         }, 500);
@@ -497,10 +497,10 @@ Array.from(new Set(arr.flat(Infinity))).sort((a,b)=>{ return a-b})
 arr.toString().split(",").sort((a,b)=>{ return a-b})
 
 Array.prototype.flat= function() {
-    return [].concat(...this.map(item => (Array.isArray(item) ? item.flat() : [item])));
+    return [].concat(...self.map(item => (Array.isArray(item) ? item.flat() : [item])));
 }
 Array.prototype.unique = function() {
-    return [...new Set(this)]
+    return [...new Set(self)]
 }
 const sort = (a, b) => a - b;
 console.log(arr.flat().unique().sort(sort)); // [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ]
@@ -555,9 +555,9 @@ TCP是全双工信道，何为全双工就是客户端与服务端建立两条�
 服务端：我也要关闭输入通道了。
 客户端：好的你关闭吧，我也把这个通道关闭。
 
-在React中，如果是由React引发的事件处理（比如通过onClick引发的事件处理），调用setState不会同步更新this.state，除此之外的setState调用会同步执行this.state。所谓“除此之外”，指的是绕过React通过addEventListener直接添加的事件处理函数，还有通过setTimeout/setInterval产生的异步调用。
+在React中，如果是由React引发的事件处理（比如通过onClick引发的事件处理），调用setState不会同步更新self.state，除此之外的setState调用会同步执行self.state。所谓“除此之外”，指的是绕过React通过addEventListener直接添加的事件处理函数，还有通过setTimeout/setInterval产生的异步调用。
 
-**原因：**在React的setState函数实现中，会根据一个变量isBatchingUpdates判断是直接更新this.state还是放到队列中回头再说，而isBatchingUpdates默认是false，也就表示setState会同步更新this.state，但是，有一个函数batchedUpdates，这个函数会把isBatchingUpdates修改为true，而当React在调用事件处理函数之前就会调用这个batchedUpdates，造成的后果，就是由React控制的事件处理过程setState不会同步更新this.state。
+**原因：**在React的setState函数实现中，会根据一个变量isBatchingUpdates判断是直接更新self.state还是放到队列中回头再说，而isBatchingUpdates默认是false，也就表示setState会同步更新self.state，但是，有一个函数batchedUpdates，这个函数会把isBatchingUpdates修改为true，而当React在调用事件处理函数之前就会调用这个batchedUpdates，造成的后果，就是由React控制的事件处理过程setState不会同步更新self.state。
 对于异步渲染，我们应在 getSnapshotBeforeUpdate 中读取 state、props, 而不是 componentWillUpdate。但调用forceUpdate() 强制 render 时，会导致组件跳过 shouldComponentUpdate(),直接调用 render()。（https://github.com/sisterAn/blog/issues/26）
 
 promise构造函数是同步执行的，then方法是异步执行的
@@ -584,13 +584,13 @@ ES5/ES6 的继承除了写法以外还有什么区别
 class 声明会提升，但不会初始化赋值。Foo 进入暂时性死区，类似于 let、const 声明变量。
 const bar = new Bar(); // it's ok
 function Bar() {
-  this.bar = 42;
+  self.bar = 42;
 }
 
 const foo = new Foo(); // ReferenceError: Foo is not defined
 class Foo {
   constructor() {
-    this.foo = 42;
+    self.foo = 42;
   }
 }
 class 声明内部会启用严格模式。
@@ -609,36 +609,36 @@ const foo = new Foo();
 class 的所有方法（包括静态方法和实例方法）都是不可枚举的。
 // 引用一个未声明的变量
 function Bar() {
-  this.bar = 42;
+  self.bar = 42;
 }
 Bar.answer = function() {
   return 42;
 };
 Bar.prototype.print = function() {
-  console.log(this.bar);
+  console.log(self.bar);
 };
 const barKeys = Object.keys(Bar); // ['answer']
 const barProtoKeys = Object.keys(Bar.prototype); // ['print']
 
 class Foo {
   constructor() {
-    this.foo = 42;
+    self.foo = 42;
   }
   static answer() {
     return 42;
   }
   print() {
-    console.log(this.foo);
+    console.log(self.foo);
   }
 }
 const fooKeys = Object.keys(Foo); // []
 const fooProtoKeys = Object.keys(Foo.prototype); // []
 class 的所有方法（包括静态方法和实例方法）都没有原型对象 prototype，所以也没有[[construct]]，不能使用 new 来调用。
 function Bar() {
-  this.bar = 42;
+  self.bar = 42;
 }
 Bar.prototype.print = function() {
-  console.log(this.bar);
+  console.log(self.bar);
 };
 
 const bar = new Bar();
@@ -646,30 +646,30 @@ const barPrint = new bar.print(); // it's ok
 
 class Foo {
   constructor() {
-    this.foo = 42;
+    self.foo = 42;
   }
   print() {
-    console.log(this.foo);
+    console.log(self.foo);
   }
 }
 const foo = new Foo();
 const fooPrint = new foo.print(); // TypeError: foo.print is not a constructor
 必须使用 new 调用 class。
 function Bar() {
-  this.bar = 42;
+  self.bar = 42;
 }
 const bar = Bar(); // it's ok
 
 class Foo {
   constructor() {
-    this.foo = 42;
+    self.foo = 42;
   }
 }
 const foo = Foo(); // TypeError: Class constructor Foo cannot be invoked without 'new'
 class 内部无法重写类名。
 function Bar() {
   Bar = 'Baz'; // it's ok
-  this.bar = 42;
+  self.bar = 42;
 }
 const bar = new Bar();
 // Bar: 'Baz'
@@ -677,14 +677,14 @@ const bar = new Bar();
 
 class Foo {
   constructor() {
-    this.foo = 42;
+    self.foo = 42;
     Foo = 'Fol'; // TypeError: Assignment to constant variable
   }
 }
 const foo = new Foo();
 Foo = 'Fol'; // it's ok
 
-ES5 和 ES6 子类 this 生成顺序不同。ES5 的继承先生成了子类实例，再调用父类的构造函数修饰子类实例，ES6 的继承先生成父类实例，再调用子类的构造函数修饰父类实例。这个差别使得 ES6 可以继承内置对象。
+ES5 和 ES6 子类 self 生成顺序不同。ES5 的继承先生成了子类实例，再调用父类的构造函数修饰子类实例，ES6 的继承先生成父类实例，再调用子类的构造函数修饰父类实例。这个差别使得 ES6 可以继承内置对象。
 
 问题是继承的差异。
 
@@ -893,11 +893,11 @@ Dep是一个Class,它定义了一些属性和方法，它有一个静态属性ta
 
 Watcher是一个Class,在它的构造函数中定义了一些和Dep相关的属性：
 
-this.deps = []
-this.newDeps = []
-this.depIds = new Set()
-this.newDepIds = new Set()				
-收集过程：当我们实例化一个渲染watcher的时候，首先进入watcher的构造函数逻辑，然后执行他的this.get()方法，进入get函数把Dep.target赋值为当前渲染watcher并压栈（为了恢复用）。接着执行vm._render()方法，生成渲染VNode,并且在这个过程对vm上的数据访问，这个时候就触发数据对象的getter（在此期间执行Dep.target.addDep(this)方法，将watcher订阅到这个数据持有的dep的subs中，为后续数据变化时通知到哪些subs做准备）。然后递归遍历添加所有子项的getter。
+self.deps = []
+self.newDeps = []
+self.depIds = new Set()
+self.newDepIds = new Set()				
+收集过程：当我们实例化一个渲染watcher的时候，首先进入watcher的构造函数逻辑，然后执行他的self.get()方法，进入get函数把Dep.target赋值为当前渲染watcher并压栈（为了恢复用）。接着执行vm._render()方法，生成渲染VNode,并且在这个过程对vm上的数据访问，这个时候就触发数据对象的getter（在此期间执行Dep.target.addDep(self)方法，将watcher订阅到这个数据持有的dep的subs中，为后续数据变化时通知到哪些subs做准备）。然后递归遍历添加所有子项的getter。
 
 Watcher在构造函数中初始化两个Dep实例数组。newDeps代表新添加的Dep实例数组，deps代表上一次添加的Dep实例数组。
 依赖清空：在执行清空依赖（cleanupDeps）函数时，会首先遍历deps,移除对dep的订阅，然后把newDepsIds和depIds交换，newDeps和deps交换，并把newDepIds和newDeps清空。考虑场景，在条件渲染时，及时对不需要渲染数据的订阅移除，减少性能浪费。
@@ -912,7 +912,7 @@ Watcher在构造函数中初始化两个Dep实例数组。newDeps代表新添加
 *dep.notify() // 通知所有订阅者
 派发过程：当我们组件中对响应的数据做了修改，就会触发setter的逻辑，最后调用dep.notify()方法，它是Dep的一个实例方法。具体做法是遍历依赖收集中建立的subs，也就是Watcher的实例数组【subs数组在依赖收集getter中被添加，期间通过一些逻辑处理判断保证同一数据不会被添加多次】，然后调用每一个watcher的update方法。
 
-update函数中有个queueWatcher(this)方法引入了队列的概念，是vue在做派发更新时优化的一个点，它并不会每次数据改变都会触发watcher回调，而是把这些watcher先添加到一个队列中，然后在nextTick后执行watcher的run函数
+update函数中有个queueWatcher(self)方法引入了队列的概念，是vue在做派发更新时优化的一个点，它并不会每次数据改变都会触发watcher回调，而是把这些watcher先添加到一个队列中，然后在nextTick后执行watcher的run函数
 
 队列排序保证：
 
@@ -920,7 +920,7 @@ update函数中有个queueWatcher(this)方法引入了队列的概念，是vue�
 用户自定义watcher要早于渲染watcher执行，因为用户自定义watcher是在渲染watcher前创建的
 如果一个组件在父组件watcher执行期间被销毁，那么它对应的watcher执行都可以被跳过，所以父组件的watcher应该先执行。
 队列遍历：排序完成后，对队列进行遍历，拿到对应的watcher,执行watcher.run()。
-run函数解析：先通过this.get()得到它当前的值，然后做判断，如果满足新旧值不等、新值是对象类型、deep模式任何一个条件，则执行watcher的回调，注意回调函数执行的时候会把第一个参数和第二个参数传入新值value和旧值oldValue，这就是当我们自己添加watcher时候可以在参数中取到新旧值的来源。对应渲染watcher而言，在执行this.get()方法求值的时候，会执行getter方法。因此在我们修改组件相关数据时候，会触发组件重新渲染，接着重新执行patch的过程
+run函数解析：先通过self.get()得到它当前的值，然后做判断，如果满足新旧值不等、新值是对象类型、deep模式任何一个条件，则执行watcher的回调，注意回调函数执行的时候会把第一个参数和第二个参数传入新值value和旧值oldValue，这就是当我们自己添加watcher时候可以在参数中取到新旧值的来源。对应渲染watcher而言，在执行self.get()方法求值的时候，会执行getter方法。因此在我们修改组件相关数据时候，会触发组件重新渲染，接着重新执行patch的过程
 
 手写一个数据绑定：
 <input id="input" type="text" />
@@ -1244,11 +1244,11 @@ splice: ƒ splice()
 1、在input中绑定value(vuex中的state)，然后监听input的change或者input事件，在事件回调中调用mutation修改state的值
 2、使用带有setter的双向绑定计算属性。见以下例子（来自官方文档）：
 <input v-model="message">
-computed: { message: { get () { return this.$store.state.obj.message }, set (value) { this.$store.commit('updateMessage', value) } } }
+computed: { message: { get () { return self.$store.state.obj.message }, set (value) { self.$store.commit('updateMessage', value) } } }
 
 call 和 apply 的区别是什么，哪个性能更好一些
 Function.prototype.apply和Function.prototype.call 的作用是一样的，区别在于传入参数的不同；
-第一个参数都是，指定函数体内this的指向；
+第一个参数都是，指定函数体内self的指向；
 第二个参数开始不同，apply是传入带下标的集合，数组或者类数组，apply把它传给函数作为参数，call从第二个开始传入的参数是不固定的，都会传给函数作为参数。
 call比apply的性能要好，平常可以多用call, call传入参数的格式正是内部所需要的格式
 
@@ -1260,17 +1260,17 @@ call 比 apply 的性能好, 我的理解是内部少了一次将 apply 第二�
 
 实现 (5).add(3).minus(2) 功能
 Number.prototype.add = function(n) {
-  return this.valueOf() + n;
+  return self.valueOf() + n;
 };
 Number.prototype.minus = function(n) {
-  return this.valueOf() - n;
+  return self.valueOf() - n;
 };
 
 Number.prototype.add =  function(n){
-  return this + n
+  return self + n
 }
 Number.prototype.minus =  function(n){
-  return this - n
+  return self - n
 }
 console.log((5).add(3).minus(2))//6
 
@@ -1508,26 +1508,26 @@ Answer
 
 class LazyManClass {
     constructor(name) {
-        this.taskList = [];
-        this.name = name;
-        console.log(`Hi I am ${this.name}`);
+        self.taskList = [];
+        self.name = name;
+        console.log(`Hi I am ${self.name}`);
         setTimeout(() => {
-            this.next();
+            self.next();
         }, 0);
     }
     eat (name) {
-        var that = this;
+        var that = self;
         var fn = (function (n) {
             return function () {
                 console.log(`I am eating ${n}`)
                 that.next();
             }
         })(name);
-        this.taskList.push(fn);
-        return this;
+        self.taskList.push(fn);
+        return self;
     }
     sleepFirst (time) {
-        var that = this;
+        var that = self;
         var fn = (function (t) {
             return function () {
                 setTimeout(() => {
@@ -1536,11 +1536,11 @@ class LazyManClass {
                 }, t * 1000);  
             }
         })(time);
-        this.taskList.unshift(fn);
-        return this;
+        self.taskList.unshift(fn);
+        return self;
     }
     sleep (time) {
-        var that = this
+        var that = self
         var fn = (function (t) {
             return function () {
                 setTimeout(() => {
@@ -1549,11 +1549,11 @@ class LazyManClass {
                 }, t * 1000); 
             }
         })(time);
-        this.taskList.push(fn);
-        return this;
+        self.taskList.push(fn);
+        return self;
     }
     next () {
-        var fn = this.taskList.shift();
+        var fn = self.taskList.shift();
         fn && fn();
     }
 }
@@ -1591,13 +1591,13 @@ opacity: 0 ： 修改元素会造成重绘，性能消耗较少
 
 
 箭头函数是普通函数的简写，可以更优雅的定义一个函数，和普通函数相比，有以下几点差异：
-1、函数体内的 this 对象，就是定义时所在的对象，而不是使用时所在的对象。
+1、函数体内的 self 对象，就是定义时所在的对象，而不是使用时所在的对象。
 2、不可以使用 arguments 对象，该对象在函数体内不存在。如果要用，可以用 rest 参数代替。
 3、不可以使用 yield 命令，因此箭头函数不能用作 Generator 函数。
 4、不可以使用 new 命令，因为：
 
 箭头函数与普通函数（function）的区别是什么？构造函数（function）可以使用 new 生成实例，那么箭头函数可以吗？为什么
-没有自己的 this，无法调用 call，apply。
+没有自己的 self，无法调用 call，apply。
 没有 prototype 属性 ，而 new 命令在执行时需要将构造函数的 prototype 赋值给新的对象的 __proto__
 new 过程大致是这样的：
 function newFunc(father, ...rest) {
@@ -1784,15 +1784,15 @@ redux 为什么要把 reducer 设计成纯函数 ？
 
 模拟实现一个 Promise.finally?
 Promise.prototype.finally = function (callback) {
-  let P = this.constructor;
-  return this.then(
+  let P = self.constructor;
+  return self.then(
     value  => P.resolve(callback()).then(() => value, () => value),
     reason => P.resolve(callback()).then(() => { throw reason }, () => {throw reason})
   );
 };
 如上在阮大神关于 finally 的写法中补充了一点。不知是否正确，欢迎探讨和学习。
 
-callback 可能存在返回 promise，而该 promise 如果 reject，P.resolve 就会 reject，如果 P.resolve().then() 没有设置第二个回调，那么 this.then 的最终状态将是 reject 的状态，这与 es6 中所表现出来的 finally 的行为不一致。
+callback 可能存在返回 promise，而该 promise 如果 reject，P.resolve 就会 reject，如果 P.resolve().then() 没有设置第二个回调，那么 self.then 的最终状态将是 reject 的状态，这与 es6 中所表现出来的 finally 的行为不一致。
 
 如下是 es6 所表现的行为：
 new Promise((resolve, reject) => resolve(111)).finally(Promise.reject(222)) // 此时 es6 表现的行为状态为 resolve(111)，而非 reject(222)
@@ -2208,7 +2208,7 @@ for循环本来就是最原始的循环方案 foreach是基于它封装的
 for 循环没有任何额外的函数调用栈和上下文；
 
 forEach函数签名实际上是
-array.forEach(function(currentValue, index, arr), thisValue)
+array.forEach(function(currentValue, index, arr), selfValue)
 它不是普通的 for 循环的语法糖，还有诸多参数和上下文需要在执行的时候考虑进来，这里可能拖慢性能；
 
 介绍下 BFC、IFC、GFC 和 FFC?
@@ -2537,19 +2537,19 @@ https://github.com/yygmind/blog/issues/36#%E6%80%9D%E8%80%83%E9%A2%98
 react-router 里的 <Link> 标签和 <a> 标签有什么区别?
 先看Link点击事件handleClick部分源码
 
-      if (_this.props.onClick) _this.props.onClick(event);
+      if (_self.props.onClick) _self.props.onClick(event);
 
       if (!event.defaultPrevented && // onClick prevented default
       event.button === 0 && // ignore everything but left clicks
-      !_this.props.target && // let browser handle "target=_blank" etc.
+      !_self.props.target && // let browser handle "target=_blank" etc.
       !isModifiedEvent(event) // ignore clicks with modifier keys
       ) {
           event.preventDefault();
 
-          var history = _this.context.router.history;
-          var _this$props = _this.props,
-              replace = _this$props.replace,
-              to = _this$props.to;
+          var history = _self.context.router.history;
+          var _self$props = _self.props,
+              replace = _self$props.replace,
+              to = _self$props.to;
 
 
           if (replace) {
@@ -2876,7 +2876,7 @@ function Foo() {
     Foo.a = function() {
         console.log(1)
     }
-    this.a = function() {
+    self.a = function() {
         console.log(2)
     }
 }
@@ -2903,7 +2903,7 @@ let obj = new Foo();
 */
 
 obj.a();
-// 因为有直接方法 a ，不需要去访问原型链，所以使用的是构建方法里所定义的 this.a，
+// 因为有直接方法 a ，不需要去访问原型链，所以使用的是构建方法里所定义的 self.a，
 // # 输出 2
 
 Foo.a();
@@ -2958,7 +2958,7 @@ print(i);
 if (!window.localStorage) {
   window.localStorage = {
     getItem: function (sKey) {
-      if (!sKey || !this.hasOwnProperty(sKey)) { return null; }
+      if (!sKey || !self.hasOwnProperty(sKey)) { return null; }
       return unescape(document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1"));
     },
     key: function (nKeyId) {
@@ -2967,13 +2967,13 @@ if (!window.localStorage) {
     setItem: function (sKey, sValue) {
       if(!sKey) { return; }
       document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
-      this.length = document.cookie.match(/\=/g).length;
+      self.length = document.cookie.match(/\=/g).length;
     },
     length: 0,
     removeItem: function (sKey) {
-      if (!sKey || !this.hasOwnProperty(sKey)) { return; }
+      if (!sKey || !self.hasOwnProperty(sKey)) { return; }
       document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-      this.length--;
+      self.length--;
     },
     hasOwnProperty: function (sKey) {
       return (new RegExp("(?:^|;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
@@ -3380,8 +3380,8 @@ methodsToPatch.forEach(function(method) {
         len = arguments.length;
       while (len--) args[len] = arguments[len];
 
-      var result = original.apply(this, args);
-      var ob = this.__ob__;
+      var result = original.apply(self, args);
+      var ob = self.__ob__;
       var inserted;
       switch (method) {
         case 'push':
@@ -3556,7 +3556,7 @@ export default {
     methods: {
         handleClick () {
             for(let i = 0; i < 1000; i++) {
-                this.number++;
+                self.number++;
             }
         }
     }
@@ -3665,11 +3665,11 @@ var num2Str = myNum .toLocaleString(); //"10,000,000,000"
 num2Str.replace(/,/g, "."); //"10.000.000.000"
 
 手写二进制转 Base64 ?
-let encodedData = window.btoa("this is a example");
+let encodedData = window.btoa("self is a example");
 console.log(encodedData); // dGhpcyBpcyBhIGV4YW1wbGU=
 
 let decodeData = window.atob(encodedData);
-console.log(decodeData); // this is a example
+console.log(decodeData); // self is a example
 
 前端项目如何找出性能瓶颈 ?
 性能瓶颈一般是表现在用户体验方面，比如页面加载过慢，动画卡顿，交互延迟等等，具体问题具体分析。
@@ -3842,18 +3842,18 @@ var on = (function() {
 延迟运行
 js中的bind这个方法，用到的就是柯里化的这个特征。
 Function.prototype.bind = function (context) {
-    var _this = this
+    var _self = self
     var args = Array.prototype.slice.call(arguments, 1)
  
     return function() {
-        return _this.apply(context, args)
+        return _self.apply(context, args)
     }
 }
 
 // 支持多参数传递
 function progressCurrying(fn, args) {
 
-    var _this = this
+    var _self = self
     var len = fn.length;
     var args = args || [];
 
@@ -3863,11 +3863,11 @@ function progressCurrying(fn, args) {
 
         // 如果参数个数小于最初的fn.length，则递归调用，继续收集参数
         if (_args.length < len) {
-            return progressCurrying.call(_this, fn, _args);
+            return progressCurrying.call(_self, fn, _args);
         }
 
         // 参数收集完毕，则执行fn
-        return fn.apply(this, _args);
+        return fn.apply(self, _args);
     }
 }
 最后再扩展一道经典面试题
@@ -3961,14 +3961,14 @@ bootstrap的栅格系统为什么是12列，有没有18列，24列等等啊，�
 
 function fn() {
     console.log(6);
-    console.log(this); //这里面的this指向window
+    console.log(self); //这里面的self指向window
 }
 box.attachEvent('onclick', fn);
 box.attachEvent('onclick', fn);
 
 // 1. 顺序问题； attachEvent绑定的事件方法顺序是倒序的；
 // 2. 重复绑定的问题；可以给同一个元素的同一个事件绑定相同的方法；
-// 3. 函数方法中的this指向window，不指向绑定的那个元素；
+// 3. 函数方法中的self指向window，不指向绑定的那个元素；
 
 function addEvent(el, name, fn) {
     return el.addEventListener ?
@@ -3978,10 +3978,10 @@ function addEvent(el, name, fn) {
 
 柯粒化的特点  参数复用   提前确认   延迟执行
 
-谈谈This对象的理解
-this总是指向函数的直接调用者（而非间接调用者）
-如果有new关键字，this指向new出来的那个对象
-在事件中，this指向触发这个事件的对象，特殊的是，IE中的attachEvent中的this总是指向全局对象Window
+谈谈self对象的理解
+self总是指向函数的直接调用者（而非间接调用者）
+如果有new关键字，self指向new出来的那个对象
+在事件中，self指向触发这个事件的对象，特殊的是，IE中的attachEvent中的self总是指向全局对象Window
 
 事件模型
 W3C中定义事件的发生经历三个阶段：捕获阶段（capturing）、目标阶段（targetin）、冒泡阶段（bubbling）
@@ -3992,9 +3992,9 @@ DOM事件流：同时支持两种事件模型：捕获型事件和冒泡型事�
 阻止捕获：阻止事件的默认行为，例如click - <a>后的跳转。在W3c中，使用preventDefault()方法，在IE下设置window.event.returnValue = false
 
 new操作符具体干了什么呢?
-创建一个空对象，并且 this 变量引用该对象，同时还继承了该函数的原型
-属性和方法被加入到 this 引用的对象中
-新创建的对象由 this 所引用，并且最后隐式的返回 this
+创建一个空对象，并且 self 变量引用该对象，同时还继承了该函数的原型
+属性和方法被加入到 self 引用的对象中
+新创建的对象由 self 所引用，并且最后隐式的返回 self
 
 那些操作会造成内存泄漏？
 内存泄漏指任何对象在您不再拥有或需要它之后仍然存在
@@ -4116,12 +4116,12 @@ Vue.use(ElementUI)
 Vue.prototype.$message = ElementUI.Message
 Vue.prototype.$alert = ElementUI.MessageBox.alert
 
-this.$message({
+self.$message({
   type: 'error', // warning
   message: '这是一条消息' 
 })
 
-this.$message.error(e.message)
+self.$message.error(e.message)
 
 Vue中img的src是动态参数时不显示
 解决方法：使用require来加载图片
@@ -4187,21 +4187,21 @@ b.toFixed(1) // "0.3"  这里四舍五入又是成功的
 
 // 如果希望精准的保留1位小数可以   Math.round(a*10) / 10, 如果是两位 100，n位  Math.pow(10, n)
 Number.prototype.myToFixed = function (num) {
-  // 在原型方法注入 myToFixed函数，这里怎么获取当前的值呢？可以使用this
-  // 注意 this 是一个Number对象
+  // 在原型方法注入 myToFixed函数，这里怎么获取当前的值呢？可以使用self
+  // 注意 self 是一个Number对象
   // var a = Number(2)  // 2  typeof a 为 "number"
   // var b = new Number(2) // Number{2}  typeof b 为 "object"
   // 获取值需要使用 b.valueOf()  // 2
 
   // 如果没有传参数
   if (num === undefined) {
-    return Math.round(this.valueOf())
+    return Math.round(self.valueOf())
   }
 
   // 如果有传参，且为整数
   if (Number.isInteger(num)) {
     var tempCount = Math.pow(10, num)
-    var tempNum = Math.round(this.valueOf() * tempCount) / tempCount
+    var tempNum = Math.round(self.valueOf() * tempCount) / tempCount
     // 这一步其实已经就可以了。但对于保留整数后面两位小数来说，会有bug
     // var a = 2
     // a.myToFixed(2)  =>  2  而不是 2.00
@@ -4256,11 +4256,11 @@ scripts: {
   }
 </script>
 
-vuex设置后立即调用this.$router.back()按钮无法点击的问题
-今天测试机iPhone 7 plus，系统大概是iOS 11.3，vuex mutation操作后，立即调用 this.$router.back() 会导致页面里的下一步无法点击。
+vuex设置后立即调用self.$router.back()按钮无法点击的问题
+今天测试机iPhone 7 plus，系统大概是iOS 11.3，vuex mutation操作后，立即调用 self.$router.back() 会导致页面里的下一步无法点击。
 
 // 解决方法
-// vuex mutation操作 =>  this.$nextTick(() => { 将 this.$router.back() 放到这里即可 })
+// vuex mutation操作 =>  self.$nextTick(() => { 将 self.$router.back() 放到这里即可 })
 
 html2canvas 生成图片时，background-image模糊的问题
 PC端一般不会出现这个问题，主要是移动端，有两种解决方法：
@@ -4585,7 +4585,7 @@ element怎么动态改变校验rules且实时生效
 可选和必选切换，只需要改变rules里的require属性，true和false之间切换（我之前直接暴力删rule里的fields，这种方法不能关闭原来必选时触发的错误提示）
 对于动态修改rules后，必选的小红星以及之前的错误信息还在的问题，需要完全改变rules的值，才能重新触发校验，使前端页面更新
 // 强制触发表单校验更新
-this.rules = JSON.parse(JSON.stringify(this.rules))
+self.rules = JSON.parse(JSON.stringify(self.rules))
 
 axios文件上传进度及后台接收demo
 axios的config参数里，可以传入onUploadProgress参数来接收upload进度事件，在koa处理时使用 post-bodyparser 可以很好的解析 multipart/form-data 数据
@@ -4603,7 +4603,7 @@ axios的config参数里，可以传入onUploadProgress参数来接收upload进�
     // 当input文件输入框值改变时
     fileInput.onchange = () => {
       let file = fileInput.files[0]
-      this.uploadFile(file)
+      self.uploadFile(file)
     } 
 
     // 上传文件到后台
@@ -4938,9 +4938,9 @@ let newObj = JSON.parse(JSON.stringify(obj, ['total']))
 // newObj 值为 { total: 100 }
 
 // 实例：在vue项目中，用js删除当前url query参数中的id参数
-let query = this.$route.query
-this.$router.replace({ 
-  path: this.$route.path, 
+let query = self.$route.query
+self.$router.replace({ 
+  path: self.$route.path, 
   query: JSON.parse(JSON.stringify(query, Object.keys(query).filter(item => item !== 'id'))) 
 })
 详细处理没有字段序列化的值
@@ -5467,7 +5467,7 @@ var docCookies = {
     return true;
   },
   removeItem: function (sKey, sPath, sDomain) {
-    if (!sKey || !this.hasItem(sKey)) { return false; }
+    if (!sKey || !self.hasItem(sKey)) { return false; }
     document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + ( sDomain ? "; domain=" + sDomain : "") + ( sPath ? "; path=" + sPath : "");
     return true;
   },
@@ -5623,8 +5623,8 @@ export default {
   created() {
     // 这里修改值后数据，页面的$route.meta.include值并没有刷新，因此不能为了节省变量使用$route.meta来做include的控制
     setTimeout(() => {
-      this.$route.meta.include = "test"
-      console.log('this.$route.meta.include', 'test')
+      self.$route.meta.include = "test"
+      console.log('self.$route.meta.include', 'test')
     }, 3000)
   }
 };
@@ -5655,10 +5655,10 @@ export default {
   beforeRouteLeave(to, from, next) {
     if (to.name === "keepAliveC") {
       // 如果跳转的页面C组件，缓存页面数据
-      this.$parent.include = "PageB";
+      self.$parent.include = "PageB";
     } else {
       // 如果跳转的页面不是C组件，不缓存数据
-      this.$parent.include = "";
+      self.$parent.include = "";
     }
     next();
   }
@@ -5835,11 +5835,11 @@ rawConfig.output = Object.assign({
   // libraryTarget: 'esm' or target: 'universal'
   // https://github.com/webpack/webpack/issues/6522
   // https://github.com/webpack/webpack/issues/6525
-  globalObject: `(typeof self !== 'undefined' ? self : this)`
+  globalObject: `(typeof self !== 'undefined' ? self : self)`
 }, rawConfig.output, {
   filename: `${entryName}.js`,
   chunkFilename: `${entryName}.[name].js`,
-  // use dynamic publicPath so this can be deployed anywhere
+  // use dynamic publicPath so self can be deployed anywhere
   // the actual path will be determined at runtime by checking
   // document.currentScript.src.
   publicPath: ''
@@ -6196,8 +6196,8 @@ export default {
     },
     valueChange(e) {
       console.log(e.target.innerHTML, e.target.textContent);
-      this.textContent = e.target.textContent;
-      this.innerHTML = e.target.innerHTML;
+      self.textContent = e.target.textContent;
+      self.innerHTML = e.target.innerHTML;
     }
   }
 };
@@ -6709,102 +6709,6 @@ appOptions:[
     {label:'ccc',value:'ccc'},
 ],
 
-显示(本地)git所知道的所有本地和远程分支。
-git branch -a
-
-若要更新远程分支的本地列表，请执行以下操作：
-git remote update origin --prune
-
-git checkout develop_liuxingxing创建本地分支   并且关联到远程的develop_liuxingxing
-
-对于复杂的系统，我们可能要开好几个分支来开发，那么怎样使用git合并分支呢？
-
-合并步骤：
-1、进入要合并的分支（如开发分支合并到master，则进入master目录）
-
-git pull
-
-2、查看所有分支是否都pull下来了
-
-git branch -a
-
-3、使用merge合并开发分支
-
-git merge 分支名
-
-4、查看合并之后的状态
-
-git status 
-
-5、有冲突的话，通过IDE解决冲突；
-
-6、解决冲突之后，将冲突文件提交暂存区
-
-git add 冲突文件
-
-7、提交merge之后的结果
-
-git commit 
-
-如果不是使用git commit -m "备注" ，那么git会自动将合并的结果作为备注，提交本地仓库；
-
-8、本地仓库代码提交远程仓库
-
-git push
-
-git将分支合并到分支，将master合并到分支的操作步骤是一样的；
-
-使用git stash命令保存和恢复进度
-git stash
-保存当前工作进度，会把暂存区和工作区的改动保存起来。执行完这个命令后，在运行git status命令，就会发现当前是一个干净的工作区，没有任何改动。使用git stash save 'message...'可以添加一些注释
-
-git stash list
-显示保存进度的列表。也就意味着，git stash命令可以多次执行。
-
-git stash pop [–index] [stash_id]
-git stash pop 恢复最新的进度到工作区。git默认会把工作区和暂存区的改动都恢复到工作区。
-git stash pop --index 恢复最新的进度到工作区和暂存区。（尝试将原来暂存区的改动还恢复到暂存区）
-git stash pop stash@{1}恢复指定的进度到工作区。stash_id是通过git stash list命令得到的 
-通过git stash pop命令恢复进度后，会删除当前进度。
-git stash apply [–index] [stash_id]
-除了不删除恢复的进度之外，其余和git stash pop 命令一样。
-
-git stash drop [stash_id]
-删除一个存储的进度。如果不指定stash_id，则默认删除最新的存储进度。
-
-git stash clear
-删除所有存储的进度。
-
-Git Bash:
-
-切换到要操作的项目文件夹 
-命令行 : $ cd <ProjectPath>
-
-查看项目的分支们(包括本地和远程) 
-命令行 : $ git branch -a
-
-删除本地分支 
-命令行 : $ git branch -d <BranchName>
-
-删除远程分支 
-命令行 : $ git push origin --delete <BranchName>
-
-查看删除后分支们 
-命令行 : $ git branch -a
-
-git怎么回退到某个历史版本
-
-首先在 code.aliyun.com 的找到你所要回滚的分支提交记录，点击右侧红框中的连接即可得到 提交记录编号，截图如下：
-
-2. 在Terminal 或者git控制条 执行 回退到某个版本命令
-
-git reset --hard 139dcfaa558e3276b30b6b2e5cbbb9c00bbdca96 
-
-3. 强制提交到master_ptu分支（具体需要提交到哪个分支请酌情修改，此例为提交到master_ptu分支）
-
-git push -f -u origin master_ptu
-
-
 js多层for循环中跳出
 bbq:
 for(var j=0;j<a.length;j++){
@@ -6822,7 +6726,7 @@ for(var j=0;j<a.length;j++){
 provide和inject的用法
 provide (){
     return {
-      reload:this.reload
+      reload:self.reload
     }
 },
 data(){
@@ -6831,14 +6735,14 @@ data(){
   }
 },
 reload (){//方法中
-    this.isRouterAlive = false
-    this.$nextTick(function(){
-      this.isRouterAlive = true
+    self.isRouterAlive = false
+    self.$nextTick(function(){
+      self.isRouterAlive = true
     })
 }
 
 inject:['reload'],//子组件中
-this.reload()//在需要执行重新加载的步骤后面执行该函数
+self.reload()//在需要执行重新加载的步骤后面执行该函数
 
 
 var obj = {m:{n:{p:{value:123}}}}
@@ -6864,7 +6768,7 @@ const setTimeout = (fn,timeout,...args)=>{
     timer = window.requestAnimationFrame(loop)
     now = +new Date()
     if(now-start>=timeout){
-      fn.apply(this,args)
+      fn.apply(self,args)
       window.cancelAnimationFrame(timer)
     }
   }
@@ -7434,6 +7338,13 @@ rgbToHex(0, 51, 255);
 3.复制到剪贴板
 const copyToClipboard = (text) => navigator.clipboard.writeText(text);
 copyToClipboard("Hello World");
+写入剪贴板
+navigator.clipboard.writeText(text).then(() => alert("复制成功！"));
+需要注意的是，调用 clipboard 中的方法需要获得用户的授权，浏览器会有提示，如果用户点击拒绝，那么 writeText() 返回的 Promise 会抛出异常
+读取剪贴板
+navigator.clipboard.readText().then((text) => {
+  // text 就是剪贴板的内容
+});
 
 4.检查日期是否合法
 const isDateValid = (...val) => !Number.isNaN(new Date(...val).valueOf());
@@ -8258,11 +8169,11 @@ div {
 }
 
 4.css将字符串转换为驼峰等方式
-const str = 'this junjin'
+const str = 'self junjin'
 .toCapital{
-    text-transform: capitalize; // This Junjin
-    text-transform: uppercase; // THIS JUNJIN
-    text-transform: lowercase; // this junjin
+    text-transform: capitalize; // self Junjin
+    text-transform: uppercase; // self JUNJIN
+    text-transform: lowercase; // self junjin
 }
 
 5.resize属性，让普通元素可以像textarea那样伸缩
@@ -8400,16 +8311,16 @@ const c = function CC() {
 typeof c()// Function
 当然，如果设置 var CC = 123 ，加声明关键词是可以覆盖的
 
-6.严格模式下，函数的 this 是 undefined 而不是 Window
+6.严格模式下，函数的 self 是 undefined 而不是 Window
 // 非严格
 function fn1() {
-  return this;
+  return self;
 }
 fn1(); // Window
 // 严格
 function fn2() {
   'use strict';
-  return this;
+  return self;
 }
 fn2(); // undefined
 对于模块化的经过webpack打包的代码，基本都是严格模式的代码。
@@ -8619,7 +8530,7 @@ grid-template-columns: minmax(<min>, <max>) ...
   <div class="card blue">
     <h1>Video Title</h1>
     <div class="visual green"></div>
-    <p>Descriptive Text. This demo works in Chromium 84+.</p>
+    <p>Descriptive Text. self demo works in Chromium 84+.</p>
   </div>
 </div>
 .ex10 .parent {
@@ -8784,3 +8695,2326 @@ import { Button, Select } from 'element-ui';
 
 Node 环境的判断
 typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]'
+
+CSS Grid 网格布局教程
+2.1容器和项目
+采用网格布局的区域，称为"容器"（container）。容器内部采用网格定位的子元素，称为"项目"（item）。
+<div>
+  <div><p>1</p></div>
+  <div><p>2</p></div>
+  <div><p>3</p></div>
+</div>
+上面代码中，最外层的<div>元素就是容器，内层的三个<div>元素就是项目。
+注意：项目只能是容器的顶层子元素，不包含项目的子元素，比如上面代码的<p>元素就不是项目。Grid 布局只对项目生效。
+2.2行和列
+容器里面的水平区域称为"行"（row），垂直区域称为"列"（column）。
+2.3 单元格
+行和列的交叉区域，称为"单元格"（cell）。
+正常情况下，n行和m列会产生n x m个单元格。比如，3行3列会产生9个单元格。
+2.4 网格线
+划分网格的线，称为"网格线"（grid line）。水平网格线划分出行，垂直网格线划分出列。
+
+正常情况下，n行有n + 1根水平网格线，m列有m + 1根垂直网格线，比如三行就有四根水平网格线。(横向的叫row 1 row 2  纵向的column 1 column 2)
+容器属性
+Grid 布局的属性分成两类。一类定义在容器上面，称为容器属性；另一类定义在项目上面，称为项目属性。这部分先介绍容器属性。
+注意，设为网格布局以后，容器子元素（项目）的float、display: inline-block、display: table-cell、vertical-align和column-*等设置都将失效。
+.container {
+  display: grid;
+  grid-template-columns: 100px 100px 100px;
+  grid-template-rows: 100px 100px 100px;
+}
+指定了一个三行三列的网格，列宽和行高都是100px。
+除了使用绝对单位，也可以使用百分比。
+.container {
+  display: grid;
+  grid-template-columns: 33.33% 33.33% 33.33%;
+  grid-template-rows: 33.33% 33.33% 33.33%;
+}
+1）repeat()
+
+有时候，重复写同样的值非常麻烦，尤其网格很多时。这时，可以使用repeat()函数，简化重复的值。上面的代码用repeat()改写如下。
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 33.33%);
+  grid-template-rows: repeat(3, 33.33%);
+}
+repeat()接受两个参数，第一个参数是重复的次数（上例是3），第二个参数是所要重复的值。
+
+repeat()重复某种模式也是可以的。
+grid-template-columns: repeat(2, 100px 20px 80px);
+第一列和第四列的宽度为100px，第二列和第五列为20px，第三列和第六列为80px
+
+2）auto-fill 关键字
+
+有时，单元格的大小是固定的，但是容器的大小不确定。如果希望每一行（或每一列）容纳尽可能多的单元格，这时可以使用auto-fill关键字表示自动填充。
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 100px);
+}
+表示每列宽度100px，然后自动填充，直到容器不能放置更多的列。
+
+3）fr 关键字
+
+为了方便表示比例关系，网格布局提供了fr关键字（fraction 的缩写，意为"片段"）。如果两列的宽度分别为1fr和2fr，就表示后者是前者的两倍。
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+fr可以与绝对长度的单位结合使用，这时会非常方便。
+.container {
+  display: grid;
+  grid-template-columns: 150px 1fr 2fr;
+}
+上面代码表示，第一列的宽度为150像素，第二列的宽度是第三列的一半
+4）minmax()
+
+minmax()函数产生一个长度范围，表示长度就在这个范围之中。它接受两个参数，分别为最小值和最大值。
+grid-template-columns: 1fr 1fr minmax(100px, 1fr);
+上面代码中，minmax(100px, 1fr)表示列宽不小于100px，不大于1fr。
+5）auto 关键字
+
+auto关键字表示由浏览器自己决定长度。
+grid-template-columns: 100px auto 100px;
+上面代码中，第二列的宽度，基本上等于该列单元格的最大宽度，除非单元格内容设置了min-width，且这个值大于最大宽度。
+6）网格线的名称
+
+grid-template-columns属性和grid-template-rows属性里面，还可以使用方括号，指定每一根网格线的名字，方便以后的引用。
+.container {
+  display: grid;
+  grid-template-columns: [c1] 100px [c2] 100px [c3] auto [c4];
+  grid-template-rows: [r1] 100px [r2] 100px [r3] auto [r4];
+}
+上面代码指定网格布局为3行 x 3列，因此有4根垂直网格线和4根水平网格线。方括号里面依次是这八根线的名字。
+网格布局允许同一根线有多个名字，比如[fifth-line row-5]
+7）布局实例
+
+grid-template-columns属性对于网页布局非常有用。两栏式布局只需要一行代码。
+.wrapper {
+  display: grid;
+  grid-template-columns: 70% 30%;
+}
+上面代码将左边栏设为70%，右边栏设为30%。
+传统的十二网格布局，写起来也很容易。
+grid-template-columns: repeat(12, 1fr);
+
+grid-row-gap属性设置行与行的间隔（行间距），grid-column-gap属性设置列与列的间隔（列间距）。
+.container {
+  grid-row-gap: 20px;
+  grid-column-gap: 20px;
+}
+上面代码中，grid-row-gap用于设置行间距，grid-column-gap用于设置列间距。
+grid-gap属性是grid-column-gap和grid-row-gap的合并简写形式，语法如下。
+grid-gap: <grid-row-gap> <grid-column-gap>;
+因此，上面一段 CSS 代码等同于下面的代码。
+.container {
+  grid-gap: 20px 20px;
+}
+如果grid-gap省略了第二个值，浏览器认为第二个值等于第一个值
+根据最新标准，上面三个属性名的grid-前缀已经删除，grid-column-gap和grid-row-gap写成column-gap和row-gap，grid-gap写成gap。
+
+网格布局允许指定"区域"（area），一个区域由单个或多个单元格组成。grid-template-areas属性用于定义区域。
+.container {
+  display: grid;
+  grid-template-columns: 100px 100px 100px;
+  grid-template-rows: 100px 100px 100px;
+  grid-template-areas: 'a b c'
+                       'd e f'
+                       'g h i';
+}
+上面代码先划分出9个单元格，然后将其定名为a到i的九个区域，分别对应这九个单元格。
+
+多个单元格合并成一个区域的写法如下。
+grid-template-areas: 'a a a'
+                     'b b b'
+                     'c c c';
+
+grid-auto-flow 属性        
+划分网格以后，容器的子元素会按照顺序，自动放置在每一个网格。默认的放置顺序是"先行后列"，即先填满第一行，再开始放入第二行           
+这个顺序由grid-auto-flow属性决定，默认值是row，即"先行后列"。也可以将它设成column，变成"先列后行"。
+grid-auto-flow: column;
+grid-auto-flow属性除了设置成row和column，还可以设成row dense和column dense。这两个值主要用于，某些项目指定位置以后，剩下的项目怎么自动放置
+
+justify-items 属性，
+align-items 属性，
+place-items 属性
+justify-items属性设置单元格内容的水平位置（左中右），align-items属性设置单元格内容的垂直位置（上中下）。
+.container {
+  justify-items: start | end | center | stretch;
+  align-items: start | end | center | stretch;
+}
+这两个属性的写法完全相同，都可以取下面这些值。
+
+start：对齐单元格的起始边缘。
+end：对齐单元格的结束边缘。
+center：单元格内部居中。
+stretch：拉伸，占满单元格的整个宽度（默认值）。
+
+.container {
+  justify-items: start;
+}
+上面代码表示，单元格的内容左对齐
+
+place-items属性是align-items属性和justify-items属性的合并简写形式。
+place-items: <align-items> <justify-items>;
+下面是一个例子。
+place-items: start end;
+如果省略第二个值，则浏览器认为与第一个值相等
+
+justify-content 属性，
+align-content 属性，
+place-content 属性
+justify-content属性是整个内容区域在容器里面的水平位置（左中右），align-content属性是整个内容区域的垂直位置（上中下）。
+.container {
+  justify-content: start | end | center | stretch | space-around | space-between | space-evenly;
+  align-content: start | end | center | stretch | space-around | space-between | space-evenly;  
+}
+这两个属性的写法完全相同，都可以取下面这些值。（下面的图都以justify-content属性为例，align-content属性的图完全一样，只是将水平方向改成垂直方向。）
+place-content属性是align-content属性和justify-content属性的合并简写形式。
+place-content: <align-content> <justify-content>
+下面是一个例子。
+place-content: space-around space-evenly;
+如果省略第二个值，浏览器就会假定第二个值等于第一个值
+
+grid-column-start 属性，
+grid-column-end 属性，
+grid-row-start 属性，
+grid-row-end 属性
+项目的位置是可以指定的，具体方法就是指定项目的四个边框，分别定位在哪根网格线
+.item-1 {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 2;
+  grid-row-end: 4;
+}
+
+这四个属性的值还可以使用span关键字，表示"跨越"，即左右边框（上下边框）之间跨越多少个网格。
+.item-1 {
+  grid-column-start: span 2;
+}
+***1号项目的左边框距离右边框跨越2个网格。
+这与下面的代码效果完全一样。
+.item-1 {
+  grid-column-end: span 2;
+}
+使用这四个属性，如果产生了项目的重叠，则使用z-index属性指定项目的重叠顺序
+
+grid-column 属性，
+grid-row 属性
+grid-column属性是grid-column-start和grid-column-end的合并简写形式，grid-row属性是grid-row-start属性和grid-row-end的合并简写形式。
+.item {
+  grid-column: <start-line> / <end-line>;
+  grid-row: <start-line> / <end-line>;
+}
+.item-1 {
+  grid-column: 1 / 3;
+  grid-row: 1 / 2;
+}
+/* 等同于 */
+.item-1 {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+
+grid-area属性指定项目放在哪一个区域。
+.item-1 {
+  grid-area: e;
+}
+
+grid-area属性还可用作grid-row-start、grid-column-start、grid-row-end、grid-column-end的合并简写形式，直接指定项目的位置。
+.item {
+  grid-area: <row-start> / <column-start> / <row-end> / <column-end>;
+}
+下面是一个例子。
+.item-1 {
+  grid-area: 1 / 1 / 3 / 3;
+}
+
+项目属性
+justify-self 属性，
+align-self 属性，
+place-self 属性
+justify-self属性设置单元格内容的水平位置（左中右），跟justify-items属性的用法完全一致，但只作用于单个项目。
+
+align-self属性设置单元格内容的垂直位置（上中下），跟align-items属性的用法完全一致，也是只作用于单个项目。
+.item {
+  justify-self: start | end | center | stretch;
+  align-self: start | end | center | stretch;
+}
+这两个属性都可以取下面四个值。
+
+start：对齐单元格的起始边缘。
+end：对齐单元格的结束边缘。
+center：单元格内部居中。
+stretch：拉伸，占满单元格的整个宽度（默认值）。
+下面是justify-self: start的例子。
+.item-1  {
+  justify-self: start;
+}
+
+place-self属性是align-self属性和justify-self属性的合并简写形式。
+place-self: <align-self> <justify-self>;
+下面是一个例子。
+place-self: center center;
+如果省略第二个值，place-self属性会认为这两个值相等
+
+css多列布局
+column-count	指定元素应该分为几列 (column-count: 3;)
+  number	使用具体数值将元素划分为指定的列数
+  auto	默认值，由其他属性决定具体的列数，比如 column-width
+column-fill	指定如何填充每个列 (column-fill: balance;)
+  balance	默认值，根据其他列属性值使列的高度尽可能平衡
+  auto	按顺序对每个列进行填充，列的高度会各有不同
+column-gap	指定列与列之间的间隙 (column-gap: 10px;)
+  length	将列与列之间的间隔设置为指定的宽度
+  normal	将列与列之间的间隔设置为与 font-size 属性相同的大小，即 1em
+column-rule	所有 column-rule-* 属性的简写形式
+  column-rule 属性是一个简写属性，它与 border 属性非常相似，用来设置列与列之间边框的宽度、样式和颜色。 column-rule 属性的语法格式如下：
+  column-rule: column-rule-width column-rule-style column-rule-color;
+  其中 column-rule-width 表示边框的宽度；column-rule-style 表示边框的样式，下表中列举了一些样式的可选值；column-rule-color 表示边框的颜色
+  column-rule: 5px solid #090;
+column-rule-color	指定列与列之间边框的颜色
+column-rule-style	指定列与列之间边框的样式
+column-rule-width	指定列与列之间边框的宽度
+column-span	指定元素应该横跨多少列 (column-span: all;)
+  none	默认值，表示元素不跨越列
+  all	表示元素横跨所有列
+column-width	指定列的宽度 (column-width: 200px;)
+  auto	由浏览器决定列的宽度
+  length	为每个列指定具体的宽度
+columns	column-width 与 column-count 属性的简写属性(columns: 100px 4;)
+  columns 属性是一个简写属性，用来同时设置列的宽度和列的数量，语法格式如下：
+  columns: column-width column-count;
+
+git相关
+显示(本地)git所知道的所有本地和远程分支。
+git branch -a
+
+若要更新远程分支的本地列表，请执行以下操作：
+git remote update origin --prune
+
+git checkout develop_liuxingxing创建本地分支   并且关联到远程的develop_liuxingxing
+
+对于复杂的系统，我们可能要开好几个分支来开发，那么怎样使用git合并分支呢？
+
+合并步骤：
+1、进入要合并的分支（如开发分支合并到master，则进入master目录）
+
+git pull
+
+2、查看所有分支是否都pull下来了
+
+git branch -a
+
+3、使用merge合并开发分支
+
+git merge 分支名
+
+4、查看合并之后的状态
+
+git status 
+
+5、有冲突的话，通过IDE解决冲突；
+
+6、解决冲突之后，将冲突文件提交暂存区
+
+git add 冲突文件
+
+7、提交merge之后的结果
+
+git commit 
+
+如果不是使用git commit -m "备注" ，那么git会自动将合并的结果作为备注，提交本地仓库；
+
+8、本地仓库代码提交远程仓库
+
+git push
+
+git将分支合并到分支，将master合并到分支的操作步骤是一样的；
+
+使用git stash命令保存和恢复进度
+git stash
+保存当前工作进度，会把暂存区和工作区的改动保存起来。执行完这个命令后，在运行git status命令，就会发现当前是一个干净的工作区，没有任何改动。使用git stash save 'message...'可以添加一些注释
+
+git stash list
+显示保存进度的列表。也就意味着，git stash命令可以多次执行。
+
+git stash pop [–index] [stash_id]
+git stash pop 恢复最新的进度到工作区。git默认会把工作区和暂存区的改动都恢复到工作区。
+git stash pop --index 恢复最新的进度到工作区和暂存区。（尝试将原来暂存区的改动还恢复到暂存区）
+git stash pop stash@{1}恢复指定的进度到工作区。stash_id是通过git stash list命令得到的 
+通过git stash pop命令恢复进度后，会删除当前进度。
+git stash apply [–index] [stash_id]
+除了不删除恢复的进度之外，其余和git stash pop 命令一样。
+
+git stash drop [stash_id]
+删除一个存储的进度。如果不指定stash_id，则默认删除最新的存储进度。
+
+git stash clear
+删除所有存储的进度。
+
+Git Bash:
+
+切换到要操作的项目文件夹 
+命令行 : $ cd <ProjectPath>
+
+查看项目的分支们(包括本地和远程) 
+命令行 : $ git branch -a
+
+删除本地分支 
+命令行 : $ git branch -d <BranchName>
+ 
+删除远程分支 
+命令行 : $ git push origin --delete <BranchName>
+
+查看删除后分支们 
+命令行 : $ git branch -a
+
+git怎么回退到某个历史版本
+
+首先在 code.aliyun.com 的找到你所要回滚的分支提交记录，点击右侧红框中的连接即可得到 提交记录编号，截图如下：
+
+2. 在Terminal 或者git控制条 执行 回退到某个版本命令
+
+git reset --hard 139dcfaa558e3276b30b6b2e5cbbb9c00bbdca96 
+
+3. 强制提交到master_ptu分支（具体需要提交到哪个分支请酌情修改，此例为提交到master_ptu分支）
+
+git push -f -u origin master_ptu
+
+跳过认证强制推送
+git commit -m "xxx" --no-verify 绕过验证，强制提交
+
+同一工程中，合并两个git项目内容
+背景
+有两个仓库地址，想要把其中的一个地址项目信息作为另外一个地址的一个子分支进行合并，合并所有历史提交消息。
+
+假设
+两个不同地址的库
+192.xx.101.a.git，分支branch1
+192.xx.102.b.git，分支branch2
+
+操作过程
+场景：将branch2合并到branch1
+克隆a到本地：git clone a.git
+切换到branch1分支：git checkout branch1
+设置b为a的远程地址，并且定义一个别名为base-102：git remote add base-102 git@192.xx.102.b.git 一般本地branch1默认了origin远程名称，所以起个别名
+切换到b的branch2分支：git checkout branch2
+拉最新的代码到本地的branch2分支：git pull base-102 branch2
+切加branch1分支：git checkout branch1
+将本地的branch2分支合并到branch1分支：git merge branch2
+此时，如果报错：fatal: refusing to merge unrelated histories … 则使用加上一个参数： git merge develop --allow-unrelated-histories
+推送branch1到远程origin：git push origin branch1
+
+自定义Promise
+(function(window){
+  CONST PENDING = 'pending'
+  CONST RESOLVED = 'resolveD'
+  CONST REJECTED = 'rejected'
+  function Promise(executer){
+    const self = this
+    self.status = PENDING
+    self.data = null
+    self.callbacks = []
+    
+    function resolve(value){
+      if(self.status !== PENDING){
+        return;
+      }
+      self.status = RESOLVED
+      self.data = value
+      if(self.callbacks.length){
+        setTimeout(()=>{
+          self.callbacks.forEach(callbackObj=>{
+            callbackObj.onResolved(value)
+          })
+        })
+      }
+    }
+
+    function reject(reason){
+      if(self.status !== PENDING){
+        return;
+      }
+      self.status = REJECTED
+      self.data = reason
+      if(self.callbacks.length){
+        setTimeout(()=>{
+          self.callbacks.forEach(callbackObj=>{
+            callbackObj.onRejected(reason)
+          })
+        })
+      }
+    }
+    try{
+      executer(resolve,reject)
+    } catch (error){
+      reject(error)
+    }
+  }
+
+  Promise.prototype.then = function(onResolved,onRejected){
+    const self = this
+    // 指定回调函数的默认值(必须是函数)
+    onResolved = typeof onResolved==='function' ? onResolved : value => value
+    onRejected = typeof onRejected==='function' ? onRejected : reason => {throw reason}
+
+    // 返回一个新的promise
+    return new Promise((resolve, reject) => {
+      function handle(callback){
+        try{
+          const result = callback(self.data)
+          if(result instanceof Promise){
+            result.then(resolve,reject)
+          }else{
+            resolve(result)
+          }
+        }catch(error){
+          reject(error)
+        }
+      }
+
+      if(self.status === PENDING){
+        this.callbacks.push({
+          onResolved(){
+            handle(onResolved)
+          },
+          onRejected(){
+            handle(onRejected)
+          },
+        })
+      }else if(self.status === RESOLVED){
+        setTimeout(()=>{
+          handle(onResolved)
+        })
+      }else{
+        setTimeout(()=>{
+          handle(onRejected)
+        })
+      }
+    })
+  }
+
+  Promise.prototype.catch = function(onRejected){
+    return this.then(undefined,onRejected)
+  }
+
+  Promise.resolve = function(value){
+    return new Promise((resolve,reject)=>{
+      if(value instanceof Promise){
+        value.then(resolve,reject)
+      }else{
+        resolve(value)
+      }
+    })
+  }
+
+  Promise.reject = function(reason){
+    return new Promise((resolve,reject)=>{
+      reject(reason)
+    })
+  }
+
+  Promise.all = function(promises){
+    const values = new Array(promises.length)
+    let resolveCount = 0
+    return new Promise((resolve,reject)=>{
+      promises.forEach((p,idx)=>{
+        Promise.resolve(p).then(
+          value=>{
+            resolveCount++
+            values[idx] = value
+            if(resolveCount === promises.length){
+              resolve(values)
+            }
+          },
+          reason=>{
+            reject(reason)
+          }
+        )
+      })
+    })
+  }
+
+  Promise.race = function(resolve,reject){
+    return new Promise((resolve,reject)=>{
+      promises.forEach(p =>{
+        Promise.resolve(p).then(
+          value=>{
+            resolve(value)
+          },
+          reason=>{
+            reject(reason)
+          }
+        )
+      })
+    })
+  }
+
+  window.Promise = Promise
+})(window)
+
+fetch、ajax、axios的区别
+## 1、ajax
+
+>本身是针对MVC的编程,不符合现在前端MVVM的浪潮
+>
+>基于原生的XHR开发,XHR本身的架构不够清晰,已经有了fetch的替代方案
+
+## 2、fetch
+
+>fetch号称是AJAX的替代品,是在ES6出现的,使用了ES6中Promise对象
+>
+>fetch的代码结构笔记ajax简单多了,但`fetch不是ajax的进一步封装,而是原生js,没有使用XMLHttpRequest对象`
+>
+>###### 优点:
+>
+>>* 符合关注分离: 没有将输入、输出和用事件来跟踪的状态混杂在一个对象里
+>>* 更加底层,提供的API丰富,是更好更方便的写法
+>>* 脱离了XHR,是ES规范里新的实现方式
+>
+>###### 缺点
+>
+>>* fetch只对网络请求报错,对400、500都当成成功的请求,需要封装去处理
+>>* fetch默认不会带cookie,需要添加配置项
+>>* fetch不支持 abort(中止) 、不支持超时控制,使用`setTimeout`及`Promise.reject`实现的超时控制并不能阻止请求过程继续在后台运行,造成了量的浪费
+>>* fetch不能原生检测请求的进度,而XHR可以
+
+## 3、axios
+
+>Axios是一个基于promise的HTTP库,可以在浏览器和Nodejs中使用
+>
+>###### 特性
+>
+>>* 从浏览器中创建`XMLHttpRequests`
+>>* 从Node.js中创建http请求
+>>* 支持Promise API
+>>* 拦截请求和响应
+>>* 转换请求数据和响应数据
+>>* 取消请求
+>>* 自动转换JSON数据
+>>* 客户端支持防御XSRF
+>
+>`XSRF`: 跨站请求攻击，简单地说，是攻击者通过一些技术手段欺骗用户的浏览器去访问一个自己曾经认证过的网站并运行一些操作（如发邮件，发消息，甚至财产操作如转账和购买商品）。由于浏览器曾经认证过，所以被访问的网站会认为是真正的用户操作而去运行。这利用了web中用户身份验证的一个漏洞：**简单的身份验证只能保证请求是发自某个用户的浏览器，却不能保证请求本身是用户自愿发出的**。
+
+### 优缺点
+
+>* 从Nodejs创建http请求
+>* 支持Promise API
+>* 客户端支持防止CSRF
+>* 提供了一些并发请求的接口
+
+## 4、为什么比起 fetch 更倾向于选择 Axios
+
+>实际上具体内容可以看这篇文章  -->  [Axios 或 fetch()：你应该使用哪个？](https://blog.logrocket.com/axios-or-fetch-api/)
+>
+>这里主要是对前辈的说的知识点进行一次梳理摘录
+
+### `Ⅰ` - 浏览器兼容方面
+
+> * Axios支持IE11及以上
+> * Fetch默认不支持IE,加补丁后支持IE10及以上 
+
+### Ⅱ - 请求超时
+
+>* Axios配置 timeout 选项即可
+>* Fetch可以做但是有些麻烦,传 `AbortController` 到 `signal` 选项，然后调 `.abort()` 实现 Promise 报错
+>
+>```js
+>const controller = new AbortController();
+>const options = {
+>  method: 'POST',
+>  signal: controller.signal,
+>  body: JSON.stringify({
+>    firstName: 'hong',
+>    lastName: '努力学习的汪'
+>  })
+>};  
+>const promise = fetch('/login', options);
+>const timeoutId = setTimeout(() => controller.abort(), 5000);
+>
+>promise
+>  .then(response => {/*  处理响应 */})
+>  .catch(error => console.error('timeout exceeded'));
+>```
+>
+>在上面代码中
+>
+>* 我们使用`AbortController.AbortController()`构造函数创建一个`AbortController`对象，
+>* 该构造函数允许我们稍后中止请求。 
+>* `signal`是`AbortController`的只读属性，提供了与请求通信或中止请求的方法。
+>*  如果服务器在四秒内没有响应，就会调用`controller.abort()`，并终止操作。  
+
+### Ⅲ - 请求取消
+
+>比如用户离开屏幕或者组件时会需要取消请求
+>
+>* Axios 支持,但是是基于已经撤回的提案 --> [tc39/proposal-cancelable-promises](https://github.com/tc39/proposal-cancelable-promises) 实现的
+>* fetch不支持请求取消
+
+### Ⅳ - JSON结果转换
+
+>* Axios自动转换
+>* Fetch需要多一步 :`then(res=>res.json())`
+>
+>```js
+>// axios
+>axios.get('https://gitee.com/hongjilin')
+>  .then(response => {
+>    console.log(response.data);
+>  }, error => {
+>    console.log(error);
+>  });
+>
+>// fetch()
+>fetch('https://gitee.com/hongjilin')
+>  .then(response => response.json())    // 额外多了一步
+>  .then(data => {
+>    console.log(data) 
+>  })
+>  .catch(error => console.error(error));
+>```
+
+### Ⅴ - 拦截器
+
+>* Axios支持request和respone的拦截: 请求拦截可以用于日志和权限等; 响应拦截可以用于格式化等
+>* Fetch不支持,但可以通过复写Fetch函数勉强实现
+
+### Ⅵ - CSRF保护
+
+>* Axios内置支持
+>* Fetch不支持
+
+### Ⅶ - 上传下载的进度条
+
+>都能实现
+>
+>* Axios可以通过 `FileReader`来读 `res.data` 实现,更为简单
+>* Fetch 通过 `ReadableStream` 也能做,但是麻烦些
+
+### Ⅷ - 生态
+
+>* Axios拥有很多拓展:包括测试、日志、缓存等,生态更好
+>* Fetch比较少
+
+### Ⅸ - SSR
+
+>* Axios支持Node直接使用
+>* Fetch需要借助 [matthew-andrews/isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) 或 [node-fetch/node-fetch](https://github.com/node-fetch/node-fetch) 这两个插件库使用
+
+## 1.Vue3简介
+
+- 2020年9月18日，Vue.js发布3.0版本，代号：One Piece（海贼王）
+- 耗时2年多、[2600+次提交](https://github.com/vuejs/vue-next/graphs/commit-activity)、[30+个RFC](https://github.com/vuejs/rfcs/tree/master/active-rfcs)、[600+次PR](https://github.com/vuejs/vue-next/pulls?q=is%3Apr+is%3Amerged+-author%3Aapp%2Fdependabot-preview+)、[99位贡献者](https://github.com/vuejs/vue-next/graphs/contributors) 
+- github上的tags地址：https://github.com/vuejs/vue-next/releases/tag/v3.0.0
+
+## 2.Vue3带来了什么
+
+### 1.性能的提升
+
+- 打包大小减少41%
+
+- 初次渲染快55%, 更新渲染快133%
+
+- 内存减少54%
+
+  ......
+
+### 2.源码的升级
+
+- 使用Proxy代替defineProperty实现响应式
+
+- 重写虚拟DOM的实现和Tree-Shaking
+
+  ......
+
+### 3.拥抱TypeScript
+
+- Vue3可以更好的支持TypeScript
+
+### 4.新的特性
+
+1. Composition API（组合API）
+
+   - setup配置
+   - ref与reactive
+   - watch与watchEffect
+   - provide与inject
+   - ......
+2. 新的内置组件
+   - Fragment 
+   - Teleport
+   - Suspense
+3. 其他改变
+
+   - 新的生命周期钩子
+   - data 选项应始终被声明为一个函数
+   - 移除keyCode支持作为 v-on 的修饰符
+   - ......
+
+# 一、创建Vue3.0工程
+
+## 1.使用 vue-cli 创建
+
+官方文档：https://cli.vuejs.org/zh/guide/creating-a-project.html#vue-create
+
+```bash
+## 查看@vue/cli版本，确保@vue/cli版本在4.5.0以上
+vue --version
+## 安装或者升级你的@vue/cli
+npm install -g @vue/cli
+## 创建
+vue create vue_test
+## 启动
+cd vue_test
+npm run serve
+```
+
+## 2.使用 vite 创建
+
+官方文档：https://v3.cn.vuejs.org/guide/installation.html#vite
+
+vite官网：https://vitejs.cn
+
+- 什么是vite？—— 新一代前端构建工具。
+- 优势如下：
+  - 开发环境中，无需打包操作，可快速的冷启动。
+  - 轻量快速的热重载（HMR）。
+  - 真正的按需编译，不再等待整个应用编译完成。
+
+```bash
+## 创建工程
+npm init vite-app <project-name>
+## 进入工程目录
+cd <project-name>
+## 安装依赖
+npm install
+## 运行
+npm run dev
+```
+
+# 二、常用 Composition API
+
+官方文档: https://v3.cn.vuejs.org/guide/composition-api-introduction.html
+
+## 1.拉开序幕的setup
+
+1. 理解：Vue3.0中一个新的配置项，值为一个函数。
+2. setup是所有<strong style="color:#DD5145">Composition API（组合API）</strong><i style="color:gray;font-weight:bold">“ 表演的舞台 ”</i>。
+4. 组件中所用到的：数据、方法等等，均要配置在setup中。
+5. setup函数的两种返回值：
+   1. 若返回一个对象，则对象中的属性、方法, 在模板中均可以直接使用。（重点关注！）
+   2. <span style="color:#aad">若返回一个渲染函数：则可以自定义渲染内容。（了解）</span>
+6. 注意点：
+   1. 尽量不要与Vue2.x配置混用
+      - Vue2.x配置（data、methos、computed...）中<strong style="color:#DD5145">可以访问到</strong>setup中的属性、方法。
+      - 但在setup中<strong style="color:#DD5145">不能访问到</strong>Vue2.x配置（data、methos、computed...）。
+      - 如果有重名, setup优先。
+   2. setup不能是一个async函数，因为返回值不再是return的对象, 而是promise, 模板看不到return对象中的属性。（后期也可以返回一个Promise实例，但需要Suspense和异步组件的配合）
+
+##  2.ref函数
+
+- 作用: 定义一个响应式的数据
+- 语法: ```const xxx = ref(initValue)``` 
+  - 创建一个包含响应式数据的<strong style="color:#DD5145">引用对象（reference对象，简称ref对象）</strong>。
+  - JS中操作数据： ```xxx.value```
+  - 模板中读取数据: 不需要.value，直接：```<div>{{xxx}}</div>```
+- 备注：
+  - 接收的数据可以是：基本类型、也可以是对象类型。
+  - 基本类型的数据：响应式依然是靠``Object.defineProperty()``的```get```与```set```完成的。
+  - 对象类型的数据：内部 <i style="color:gray;font-weight:bold">“ 求助 ”</i> 了Vue3.0中的一个新函数—— ```reactive```函数。
+
+## 3.reactive函数
+
+- 作用: 定义一个<strong style="color:#DD5145">对象类型</strong>的响应式数据（基本类型不要用它，要用```ref```函数）
+- 语法：```const 代理对象= reactive(源对象)```接收一个对象（或数组），返回一个<strong style="color:#DD5145">代理对象（Proxy的实例对象，简称proxy对象）</strong>
+- reactive定义的响应式数据是“深层次的”。
+- 内部基于 ES6 的 Proxy 实现，通过代理对象操作源对象内部数据进行操作。
+
+## 4.Vue3.0中的响应式原理
+
+### vue2.x的响应式
+
+- 实现原理：
+  - 对象类型：通过```Object.defineProperty()```对属性的读取、修改进行拦截（数据劫持）。
+  
+  - 数组类型：通过重写更新数组的一系列方法来实现拦截。（对数组的变更方法进行了包裹）。
+  
+    ```js
+    Object.defineProperty(data, 'count', {
+        get () {}, 
+        set () {}
+    })
+    ```
+
+- 存在问题：
+  - 新增属性、删除属性, 界面不会更新。
+  - 直接通过下标修改数组, 界面不会自动更新。
+
+### Vue3.0的响应式
+
+- 实现原理: 
+  - 通过Proxy（代理）:  拦截对象中任意属性的变化, 包括：属性值的读写、属性的添加、属性的删除等。
+  - 通过Reflect（反射）:  对源对象的属性进行操作。
+  - MDN文档中描述的Proxy与Reflect：
+    - Proxy：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+    
+    - Reflect：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Reflect
+    
+      ```js
+      new Proxy(data, {
+      	// 拦截读取属性值
+          get (target, prop) {
+          	return Reflect.get(target, prop)
+          },
+          // 拦截设置属性值或添加新属性
+          set (target, prop, value) {
+          	return Reflect.set(target, prop, value)
+          },
+          // 拦截删除属性
+          deleteProperty (target, prop) {
+          	return Reflect.deleteProperty(target, prop)
+          }
+      })
+      
+      proxy.name = 'tom'   
+      ```
+
+## 5.reactive对比ref
+
+-  从定义数据角度对比：
+   -  ref用来定义：<strong style="color:#DD5145">基本类型数据</strong>。
+   -  reactive用来定义：<strong style="color:#DD5145">对象（或数组）类型数据</strong>。
+   -  备注：ref也可以用来定义<strong style="color:#DD5145">对象（或数组）类型数据</strong>, 它内部会自动通过```reactive```转为<strong style="color:#DD5145">代理对象</strong>。
+-  从原理角度对比：
+   -  ref通过``Object.defineProperty()``的```get```与```set```来实现响应式（数据劫持）。
+   -  reactive通过使用<strong style="color:#DD5145">Proxy</strong>来实现响应式（数据劫持）, 并通过<strong style="color:#DD5145">Reflect</strong>操作<strong style="color:orange">源对象</strong>内部的数据。
+-  从使用角度对比：
+   -  ref定义的数据：操作数据<strong style="color:#DD5145">需要</strong>```.value```，读取数据时模板中直接读取<strong style="color:#DD5145">不需要</strong>```.value```。
+   -  reactive定义的数据：操作数据与读取数据：<strong style="color:#DD5145">均不需要</strong>```.value```。
+
+## 6.setup的两个注意点
+
+- setup执行的时机
+  - 在beforeCreate之前执行一次，this是undefined。
+  
+- setup的参数
+  - props：值为对象，包含：组件外部传递过来，且组件内部声明接收了的属性。
+  - context：上下文对象
+    - attrs: 值为对象，包含：组件外部传递过来，但没有在props配置中声明的属性, 相当于 ```this.$attrs```。
+    - slots: 收到的插槽内容, 相当于 ```this.$slots```。
+    - emit: 分发自定义事件的函数, 相当于 ```this.$emit```。
+
+
+## 7.计算属性与监视
+
+### 1.computed函数
+
+- 与Vue2.x中computed配置功能一致
+
+- 写法
+
+  ```js
+  import {computed} from 'vue'
+  
+  setup(){
+      ...
+  	//计算属性——简写
+      let fullName = computed(()=>{
+          return person.firstName + '-' + person.lastName
+      })
+      //计算属性——完整
+      let fullName = computed({
+          get(){
+              return person.firstName + '-' + person.lastName
+          },
+          set(value){
+              const nameArr = value.split('-')
+              person.firstName = nameArr[0]
+              person.lastName = nameArr[1]
+          }
+      })
+  }
+  ```
+
+### 2.watch函数
+
+- 与Vue2.x中watch配置功能一致
+
+- 两个小“坑”：
+
+  - 监视reactive定义的响应式数据时：oldValue无法正确获取、强制开启了深度监视（deep配置失效）。
+  - 监视reactive定义的响应式数据中某个属性时：deep配置有效。
+  
+  ```js
+  //情况一：监视ref定义的响应式数据
+  watch(sum,(newValue,oldValue)=>{
+  	console.log('sum变化了',newValue,oldValue)
+  },{immediate:true})
+  
+  //情况二：监视多个ref定义的响应式数据
+  watch([sum,msg],(newValue,oldValue)=>{
+  	console.log('sum或msg变化了',newValue,oldValue)
+  }) 
+  
+  /* 情况三：监视reactive定义的响应式数据
+  			若watch监视的是reactive定义的响应式数据，则无法正确获得oldValue！！
+  			若watch监视的是reactive定义的响应式数据，则强制开启了深度监视 
+  */
+  watch(person,(newValue,oldValue)=>{
+  	console.log('person变化了',newValue,oldValue)
+  },{immediate:true,deep:false}) //此处的deep配置不再奏效
+  
+  //情况四：监视reactive定义的响应式数据中的某个属性
+  watch(()=>person.job,(newValue,oldValue)=>{
+  	console.log('person的job变化了',newValue,oldValue)
+  },{immediate:true,deep:true}) 
+  
+  //情况五：监视reactive定义的响应式数据中的某些属性
+  watch([()=>person.job,()=>person.name],(newValue,oldValue)=>{
+  	console.log('person的job变化了',newValue,oldValue)
+  },{immediate:true,deep:true})
+  
+  //特殊情况
+  watch(()=>person.job,(newValue,oldValue)=>{
+      console.log('person的job变化了',newValue,oldValue)
+  },{deep:true}) //此处由于监视的是reactive素定义的对象中的某个属性，所以deep配置有效
+  ```
+
+### 3.watchEffect函数
+
+- watch的套路是：既要指明监视的属性，也要指明监视的回调。
+
+- watchEffect的套路是：不用指明监视哪个属性，监视的回调中用到哪个属性，那就监视哪个属性。
+
+- watchEffect有点像computed：
+
+  - 但computed注重的计算出来的值（回调函数的返回值），所以必须要写返回值。
+  - 而watchEffect更注重的是过程（回调函数的函数体），所以不用写返回值。
+
+  ```js
+  //watchEffect所指定的回调中用到的数据只要发生变化，则直接重新执行回调。
+  watchEffect(()=>{
+      const x1 = sum.value
+      const x2 = person.age
+      console.log('watchEffect配置的回调执行了')
+  })
+  ```
+
+## 8.生命周期
+- Vue3.0中可以继续使用Vue2.x中的生命周期钩子，但有有两个被更名：
+  - ```beforeDestroy```改名为 ```beforeUnmount```
+  - ```destroyed```改名为 ```unmounted```
+- Vue3.0也提供了 Composition API 形式的生命周期钩子，与Vue2.x中钩子对应关系如下：
+  - `beforeCreate`===>`setup()`
+  - `created`=======>`setup()`
+  - `beforeMount` ===>`onBeforeMount`
+  - `mounted`=======>`onMounted`
+  - `beforeUpdate`===>`onBeforeUpdate`
+  - `updated` =======>`onUpdated`
+  - `beforeUnmount` ==>`onBeforeUnmount`
+  - `unmounted` =====>`onUnmounted`
+
+## 9.自定义hook函数
+
+- 什么是hook？—— 本质是一个函数，把setup函数中使用的Composition API进行了封装。
+
+- 类似于vue2.x中的mixin。
+
+- 自定义hook的优势: 复用代码, 让setup中的逻辑更清楚易懂。
+
+## 10.toRef
+
+- 作用：创建一个 ref 对象，其value值指向另一个对象中的某个属性。
+- 语法：```const name = toRef(person,'name')```
+- 应用:   要将响应式对象中的某个属性单独提供给外部使用时。
+
+
+- 扩展：```toRefs``` 与```toRef```功能一致，但可以批量创建多个 ref 对象，语法：```toRefs(person)```
+
+
+# 三、其它 Composition API
+
+## 1.shallowReactive 与 shallowRef
+
+- shallowReactive：只处理对象最外层属性的响应式（浅响应式）。
+- shallowRef：只处理基本数据类型的响应式, 不进行对象的响应式处理。
+
+- 什么时候使用?
+  -  如果有一个对象数据，结构比较深, 但变化时只是外层属性变化 ===> shallowReactive。
+  -  如果有一个对象数据，后续功能不会修改该对象中的属性，而是生新的对象来替换 ===> shallowRef。
+
+## 2.readonly 与 shallowReadonly
+
+- readonly: 让一个响应式数据变为只读的（深只读）。
+- shallowReadonly：让一个响应式数据变为只读的（浅只读）。
+- 应用场景: 不希望数据被修改时。
+
+## 3.toRaw 与 markRaw
+
+- toRaw：
+  - 作用：将一个由```reactive```生成的<strong style="color:orange">响应式对象</strong>转为<strong style="color:orange">普通对象</strong>。
+  - 使用场景：用于读取响应式对象对应的普通对象，对这个普通对象的所有操作，不会引起页面更新。
+- markRaw：
+  - 作用：标记一个对象，使其永远不会再成为响应式对象。
+  - 应用场景:
+    1. 有些值不应被设置为响应式的，例如复杂的第三方类库等。
+    2. 当渲染具有不可变数据源的大列表时，跳过响应式转换可以提高性能。
+
+## 4.customRef
+
+- 作用：创建一个自定义的 ref，并对其依赖项跟踪和更新触发进行显式控制。
+
+- 实现防抖效果：
+
+  ```vue
+  <template>
+  	<input type="text" v-model="keyword">
+  	<h3>{{keyword}}</h3>
+  </template>
+  
+  <script>
+  	import {ref,customRef} from 'vue'
+  	export default {
+  		name:'Demo',
+  		setup(){
+  			// let keyword = ref('hello') //使用Vue准备好的内置ref
+  			//自定义一个myRef
+  			function myRef(value,delay){
+  				let timer
+  				//通过customRef去实现自定义
+  				return customRef((track,trigger)=>{
+  					return{
+  						get(){
+  							track() //告诉Vue这个value值是需要被“追踪”的
+  							return value
+  						},
+  						set(newValue){
+  							clearTimeout(timer)
+  							timer = setTimeout(()=>{
+  								value = newValue
+  								trigger() //告诉Vue去更新界面
+  							},delay)
+  						}
+  					}
+  				})
+  			}
+  			let keyword = myRef('hello',500) //使用程序员自定义的ref
+  			return {
+  				keyword
+  			}
+  		}
+  	}
+  </script>
+  ```
+## 5.provide 与 inject
+
+<img src="https://v3.cn.vuejs.org/images/components_provide.png" style="width:300px" />
+
+- 作用：实现<strong style="color:#DD5145">祖与后代组件间</strong>通信
+
+- 套路：父组件有一个 `provide` 选项来提供数据，后代组件有一个 `inject` 选项来开始使用这些数据
+
+- 具体写法：
+
+  1. 祖组件中：
+
+     ```js
+     setup(){
+     	......
+         let car = reactive({name:'奔驰',price:'40万'})
+         provide('car',car)
+         ......
+     }
+     ```
+
+  2. 后代组件中：
+
+     ```js
+     setup(props,context){
+     	......
+         const car = inject('car')
+         return {car}
+     	......
+     }
+     ```
+
+## 6.响应式数据的判断
+
+- isRef: 检查一个值是否为一个 ref 对象
+- isReactive: 检查一个对象是否是由 `reactive` 创建的响应式代理
+- isReadonly: 检查一个对象是否是由 `readonly` 创建的只读代理
+- isProxy: 检查一个对象是否是由 `reactive` 或者 `readonly` 方法创建的代理
+
+# 四、Composition API 的优势
+
+## 1.Options API 存在的问题
+使用传统OptionsAPI中，新增或者修改一个需求，就需要分别在data，methods，computed里修改 。
+
+## 2.Composition API 的优势
+我们可以更加优雅的组织我们的代码，函数。让相关功能的代码更加有序的组织在一起。
+
+# 五、新的组件
+
+## 1.Fragment
+
+- 在Vue2中: 组件必须有一个根标签
+- 在Vue3中: 组件可以没有根标签, 内部会将多个标签包含在一个Fragment虚拟元素中
+- 好处: 减少标签层级, 减小内存占用
+
+## 2.Teleport
+
+- 什么是Teleport？—— `Teleport` 是一种能够将我们的<strong style="color:#DD5145">组件html结构</strong>移动到指定位置的技术。
+
+  ```vue
+  <teleport to="移动位置">
+  	<div v-if="isShow" class="mask">
+  		<div class="dialog">
+  			<h3>我是一个弹窗</h3>
+  			<button @click="isShow = false">关闭弹窗</button>
+  		</div>
+  	</div>
+  </teleport>
+  ```
+
+## 3.Suspense
+
+- 等待异步组件时渲染一些额外内容，让应用有更好的用户体验
+
+- 使用步骤：
+
+  - 异步引入组件
+
+    ```js
+    import {defineAsyncComponent} from 'vue'
+    const Child = defineAsyncComponent(()=>import('./components/Child.vue'))
+    ```
+
+  - 使用```Suspense```包裹组件，并配置好```default``` 与 ```fallback```
+
+    ```vue
+    <template>
+    	<div class="app">
+    		<h3>我是App组件</h3>
+    		<Suspense>
+    			<template v-slot:default>
+    				<Child/>
+    			</template>
+    			<template v-slot:fallback>
+    				<h3>加载中.....</h3>
+    			</template>
+    		</Suspense>
+    	</div>
+    </template>
+    ```
+
+# 六、其他
+
+## 1.全局API的转移
+
+- Vue 2.x 有许多全局 API 和配置。
+  - 例如：注册全局组件、注册全局指令等。
+
+    ```js
+    //注册全局组件
+    Vue.component('MyButton', {
+      data: () => ({
+        count: 0
+      }),
+      template: '<button @click="count++">Clicked {{ count }} times.</button>'
+    })
+    
+    //注册全局指令
+    Vue.directive('focus', {
+      inserted: el => el.focus()
+    }
+    ```
+
+- Vue3.0中对这些API做出了调整：
+
+  - 将全局的API，即：```Vue.xxx```调整到应用实例（```app```）上
+
+    | 2.x 全局 API（```Vue```） | 3.x 实例 API (`app`)                        |
+    | ------------------------- | ------------------------------------------- |
+    | Vue.config.xxxx           | app.config.xxxx                             |
+    | Vue.config.productionTip  | <strong style="color:#DD5145">移除</strong> |
+    | Vue.component             | app.component                               |
+    | Vue.directive             | app.directive                               |
+    | Vue.mixin                 | app.mixin                                   |
+    | Vue.use                   | app.use                                     |
+    | Vue.prototype             | app.config.globalProperties                 |
+  
+## 2.其他改变
+
+- data选项应始终被声明为一个函数。
+
+- 过度类名的更改：
+
+  - Vue2.x写法
+
+    ```css
+    .v-enter,
+    .v-leave-to {
+      opacity: 0;
+    }
+    .v-leave,
+    .v-enter-to {
+      opacity: 1;
+    }
+    ```
+
+  - Vue3.x写法
+
+    ```css
+    .v-enter-from,
+    .v-leave-to {
+      opacity: 0;
+    }
+    
+    .v-leave-from,
+    .v-enter-to {
+      opacity: 1;
+    }
+    ```
+
+- <strong style="color:#DD5145">移除</strong>keyCode作为 v-on 的修饰符，同时也不再支持```config.keyCodes```
+
+- <strong style="color:#DD5145">移除</strong>```v-on.native```修饰符
+
+  - 父组件中绑定事件
+
+    ```vue
+    <my-component
+      v-on:close="handleComponentEvent"
+      v-on:click="handleNativeClickEvent"
+    />
+    ```
+
+  - 子组件中声明自定义事件
+
+    ```vue
+    <script>
+      export default {
+        emits: ['close']
+      }
+    </script>
+    ```
+
+- <strong style="color:#DD5145">移除</strong>过滤器（filter）
+
+  > 过滤器虽然这看起来很方便，但它需要一个自定义语法，打破大括号内表达式是 “只是 JavaScript” 的假设，这不仅有学习成本，而且有实现成本！建议用方法调用或计算属性去替换过滤器。
+
+- ......
+
+## 1. setState
+
+### setState更新状态的2种写法
+
+```
+	(1). setState(stateChange, [callback])------对象式的setState
+            1.stateChange为状态改变对象(该对象可以体现出状态的更改)
+            2.callback是可选的回调函数, 它在状态更新完毕、界面也更新后(render调用后)才被调用
+					
+	(2). setState(updater, [callback])------函数式的setState
+            1.updater为返回stateChange对象的函数。
+            2.updater可以接收到state和props。
+            4.callback是可选的回调函数, 它在状态更新、界面也更新后(render调用后)才被调用。
+总结:
+		1.对象式的setState是函数式的setState的简写方式(语法糖)
+		2.使用原则：
+				(1).如果新状态不依赖于原状态 ===> 使用对象方式
+				(2).如果新状态依赖于原状态 ===> 使用函数方式
+				(3).如果需要在setState()执行后获取最新的状态数据, 
+					要在第二个callback函数中读取
+```
+## 2. lazyLoad
+
+### 路由组件的lazyLoad
+
+```js
+	//1.通过React的lazy函数配合import()函数动态加载路由组件 ===> 路由组件代码会被分开打包
+	const Login = lazy(()=>import('@/pages/Login'))
+	
+	//2.通过<Suspense>指定在加载得到路由打包文件前显示一个自定义loading界面
+	<Suspense fallback={<h1>loading.....</h1>}>
+        <Switch>
+            <Route path="/xxx" component={Xxxx}/>
+            <Redirect to="/login"/>
+        </Switch>
+    </Suspense>
+```
+## 3. Hooks
+
+#### 1. React Hook/Hooks是什么?
+
+```
+(1). Hook是React 16.8.0版本增加的新特性/新语法
+(2). 可以让你在函数组件中使用 state 以及其他的 React 特性
+```
+
+#### 2. 三个常用的Hook
+
+```
+(1). State Hook: React.useState()
+(2). Effect Hook: React.useEffect()
+(3). Ref Hook: React.useRef()
+```
+
+#### 3. State Hook
+
+```
+(1). State Hook让函数组件也可以有state状态, 并进行状态数据的读写操作
+(2). 语法: const [xxx, setXxx] = React.useState(initValue)  
+(3). useState()说明:
+        参数: 第一次初始化指定的值在内部作缓存
+        返回值: 包含2个元素的数组, 第1个为内部当前状态值, 第2个为更新状态值的函数
+(4). setXxx()2种写法:
+        setXxx(newValue): 参数为非函数值, 直接指定新的状态值, 内部用其覆盖原来的状态值
+        setXxx(value => newValue): 参数为函数, 接收原本的状态值, 返回新的状态值, 内部用其覆盖原来的状态值
+```
+
+#### 4. Effect Hook
+
+```
+(1). Effect Hook 可以让你在函数组件中执行副作用操作(用于模拟类组件中的生命周期钩子)
+(2). React中的副作用操作:
+        发ajax请求数据获取
+        设置订阅 / 启动定时器
+        手动更改真实DOM
+(3). 语法和说明: 
+        useEffect(() => { 
+          // 在此可以执行任何带副作用操作
+          return () => { // 在组件卸载前执行
+            // 在此做一些收尾工作, 比如清除定时器/取消订阅等
+          }
+        }, [stateValue]) // 如果指定的是[], 回调函数只会在第一次render()后执行
+    
+(4). 可以把 useEffect Hook 看做如下三个函数的组合
+        componentDidMount()
+        componentDidUpdate()
+    	componentWillUnmount() 
+```
+
+#### 5. Ref Hook
+
+```
+(1). Ref Hook可以在函数组件中存储/查找组件内的标签或任意其它数据
+(2). 语法: const refContainer = useRef()
+(3). 作用:保存标签对象,功能与React.createRef()一样
+```
+
+## 4. Fragment
+
+### 使用
+
+	<Fragment><Fragment>
+	<></>
+
+### 作用
+
+> 可以不用必须有一个真实的DOM根标签了
+
+## 5. Context
+
+### 理解
+
+> 一种组件间通信方式, 常用于【祖组件】与【后代组件】间通信
+
+### 使用
+
+```js
+1) 创建Context容器对象：
+	const XxxContext = React.createContext()  
+	
+2) 渲染子组时，外面包裹xxxContext.Provider, 通过value属性给后代组件传递数据：
+	<xxxContext.Provider value={数据}>
+		子组件
+    </xxxContext.Provider>
+    
+3) 后代组件读取数据：
+
+	//第一种方式:仅适用于类组件 
+	  static contextType = xxxContext  // 声明接收context
+	  this.context // 读取context中的value数据
+	  
+	//第二种方式: 函数组件与类组件都可以
+	  <xxxContext.Consumer>
+	    {
+	      value => ( // value就是context中的value数据
+	        要显示的内容
+	      )
+	    }
+	  </xxxContext.Consumer>
+```
+
+### 注意
+
+	在应用开发中一般不用context, 一般都用它的封装react插件
+
+## 6. 组件优化
+
+### Component的2个问题 
+
+> 1. 只要执行setState(),即使不改变状态数据, 组件也会重新render() ==> 效率低
+>
+> 2. 只当前组件重新render(), 就会自动重新render子组件，纵使子组件没有用到父组件的任何数据 ==> 效率低
+
+### 效率高的做法
+
+>  只有当组件的state或props数据发生改变时才重新render()
+
+### 原因
+
+>  Component中的shouldComponentUpdate()总是返回true
+
+### 解决
+
+	办法1: 
+		重写shouldComponentUpdate()方法
+		比较新旧state或props数据, 如果有变化才返回true, 如果没有返回false
+	办法2:  
+		使用PureComponent
+		PureComponent重写了shouldComponentUpdate(), 只有state或props数据有变化才返回true
+		注意: 
+			只是进行state和props数据的浅比较, 如果只是数据对象内部数据变了, 返回false  
+			不要直接修改state数据, 而是要产生新数据
+	项目中一般使用PureComponent来优化
+## 7. render props
+
+### 如何向组件内部动态传入带内容的结构(标签)?
+
+	Vue中: 
+		使用slot技术, 也就是通过组件标签体传入结构  <A><B/></A>
+	React中:
+		使用children props: 通过组件标签体传入结构
+		使用render props: 通过组件标签属性传入结构,而且可以携带数据，一般用render函数属性
+
+### children props
+
+	<A>
+	  <B>xxxx</B>
+	</A>
+	{this.props.children}
+	问题: 如果B组件需要A组件内的数据, ==> 做不到 
+
+### render props
+
+	<A render={(data) => <C data={data}></C>}></A>
+	A组件: {this.props.render(内部state数据)}
+	C组件: 读取A组件传入的数据显示 {this.props.data} 
+
+## 8. 错误边界
+
+#### 理解：
+
+错误边界(Error boundary)：用来捕获后代组件错误，渲染出备用页面
+
+#### 特点：
+
+只能捕获后代组件生命周期产生的错误，不能捕获自己组件产生的错误和其他组件在合成事件、定时器中产生的错误
+
+##### 使用方式：
+
+getDerivedStateFromError配合componentDidCatch
+
+```js
+// 生命周期函数，一旦后台组件报错，就会触发
+static getDerivedStateFromError(error) {
+    console.log(error);
+    // 在render之前触发
+    // 返回新的state
+    return {
+        hasError: true,
+    };
+}
+
+componentDidCatch(error, info) {
+    // 统计页面的错误。发送请求发送到后台去
+    console.log(error, info);
+}
+```
+## 9. 组件通信方式总结
+
+#### 组件间的关系：
+
+- 父子组件
+- 兄弟组件（非嵌套组件）
+- 祖孙组件（跨级组件）
+
+#### 几种通信方式：
+
+		1.props：
+			(1).children props
+			(2).render props
+		2.消息订阅-发布：
+			pubs-sub、event等等
+		3.集中式管理：
+			redux、dva等等
+		4.conText:
+			生产者-消费者模式
+    5.$dispatch $broadcast
+    Vue.prototype.$dispatch = function $dispatch(eventName, data) {
+      let parent = this.$parent;
+      while (parent) {
+        parent.$emit(eventName, data);
+        parent = parent.$parent;
+      }
+    };
+    Vue.prototype.$broadcast = function $broadcast(eventName, data) {
+      const broadcast = function () {
+        this.$children.forEach((child) => {
+          child.$emit(eventName, data);
+          if (child.$children) {
+            $broadcast.call(child, eventName, data);
+          }
+        });
+      };
+      broadcast.call(this, eventName, data);
+    };
+#### 比较好的搭配方式：
+		父子组件：props
+		兄弟组件：消息订阅-发布、集中式管理
+		祖孙组件(跨级组件)：消息订阅-发布、集中式管理、conText(开发用的少，封装插件用的多)
+
+Vue3 - 使用 - Composition API - 响应式原理 - 新特性
+1.性能的提升
+打包大小减少41%
+初次渲染快55%, 更新渲染快133%
+内存减少54%
+
+2.源码的升级
+使用Proxy代替defineProperty实现响应式
+重写虚拟DOM的实现和Tree-Shaking
+
+3.拥抱TypeScript
+Vue3可以更好的支持TypeScript
+
+4.新的特性
+Composition API（组合API）
+setup配置
+ref与reactive
+watch与watchEffect
+provide与 inject
+
+新的内置组件
+Fragment
+Teleport
+Suspense
+
+其他改变
+新的生命周期钩子
+data 选项应始终被声明为一个函数
+移除keyCode支持作为 v-on 的修饰符
+
+## Vite来创建一个Vue3的项目  创建工程
+npm init vite-app yk_vue3
+## 进入工程目录
+cd yk_vue3
+## 安装依赖
+npm install
+## 运行
+npm run dev
+
+四、Composition API
+官方翻译的是组合式 API
+在Vue2中，我们使用的是Options API ，配置项式的API，我们要创建一个Vue实例，然后在里面传入一个配置对象，里面要写data、methods、watch等的东西，而Vue3提出了全新的 Composition API，组合式API，我们不用直接创建Vue实例，而是创建一个app，然后按需引入需要的API，来进行使用.
+1.Options API 存在的问题
+使用传统Options API（配置式API）中，新增或者修改一个需求，就需要分别在data，methods，computed里修改 
+2.Composition API 的优势
+我们可以更加优雅的组织我们的代码，函数。让相关功能的代码更加有序的组织在一起。
+
+3. 常用的Composition API
+拉开序幕的setup
+理解：Vue3.0中一个新的配置项，值为一个函数。
+setup是所有Composition API（组合API）“ 表演的舞台 ”。
+组件中所用到的：数据、方法等等，均要配置在setup中。
+setup函数的两种返回值：
+
+若返回一个对象，则对象中的属性、方法, 在模板中均可以直接使用。（重点关注！）
+若返回一个渲染函数：则可以自定义渲染内容。（了解） (不常用)
+注意点：
+尽量不要与Vue2.x配置混用
+Vue2.x配置（data、methos、computed...）中可以访问到setup中的属性、方法。
+但在setup中不能访问到Vue2.x配置（data、methos、computed...）。
+如果有重名, setup优先。
+setup不能是一个async函数，因为返回值不再是对象, 而是promise, 模板看不到return对象中的属性。（后期也可以返回一个Promise实例，但需要Suspense和异步组件的配合）
+
+ref 函数
+作用: 定义一个响应式的数据
+语法: const xxx = ref(initValue)
+
+创建一个包含响应式数据的引用对象（reference对象，简称ref对象）。
+JS中操作数据： xxx.value
+模板中读取数据: 不需要.value，直接：<div>{{xxx}}</div>
+
+备注：
+接收的数据可以是：基本类型、也可以是对象类型。
+基本类型的数据：响应式依靠的是类上的getter与setter完成的（我们等下看下源码你就知道了）。
+对象类型的数据：内部 “ 求助 ” 了Vue3.0中的一个新函数—— reactive函数。
+
+reactive函数
+
+作用: 定义一个对象类型的响应式数据（基本类型不要用它，要用ref函数）
+语法：const 代理对象= reactive(源对象)接收一个对象（或数组），返回一个代理对象（Proxy的实例对象，简称proxy对象）
+reactive定义的响应式数据是“深层次的”。
+内部基于 ES6 的 Proxy 实现，通过代理对象操作源对象内部数据进行操作。
+
+Vue3.0中的响应式原理
+Vue2.x的响应式
+实现原理
+对象类型：通过Object.defineProperty()对属性的读取、修改进行拦截（数据劫持）。
+数组类型：通过重写更新数组的一系列方法来实现拦截。（对数组的变更方法进行了包裹）
+存在问题
+新增属性、删除属性, 界面不会更新。
+直接通过下标修改数组, 界面不会自动更新。
+解决方案
+使用Vue.set、Vue.delete或者vm.$set、vm.$delete这些API
+
+实现原理
+通过 Proxy（代理）: 拦截对象中任意属性的变化, 包括：属性值的读写、属性的添加、属性的删除等。
+通过Reflect（反射）: 对源对象的属性进行操作。
+
+reactive对比ref
+从定义数据角度对比
+ref用来定义：基本类型数据。
+reactive用来定义：对象（或数组）类型数据。
+备注：ref也可以用来定义对象（或数组）类型数据, 它内部会自动通过reactive转为代理对象。
+
+从原理角度对比
+ref通过类中的的getter与setter来实现响应式（数据劫持）。
+reactive通过使用Proxy来实现响应式（数据劫持）, 并通过Reflect操作源对象内部的数据。
+
+从使用角度对比
+ref定义的数据：操作数据需要.value，读取数据时模板中直接读取不需要.value。
+reactive定义的数据：操作数据与读取数据：均不需要.value。
+
+setup的两个注意点
+setup执行的时机
+在beforeCreate之前执行一次，this是undefined。
+setup的参数
+将setup接收的两个参数(props, context)
+props：值为对象，包含：组件外部传递过来，且组件内部声明接收了的属性。
+context：上下文对象
+attrs: 值为对象，包含：组件外部传递过来，但没有在props配置中声明的属性, 相当于 this.$attrs。
+slots: 收到的插槽内容, 相当于 this.$slots。
+emit: 分发自定义事件的函数, 相当于 this.$emit。
+
+计算属性与监视
+computed函数
+与Vue2.x中computed配置功能一致
+//计算属性 —— 简写
+let fullName = computed(()=>{
+    return person.firstName + '-' + person.lastName
+})
+//计算属性 —— 完整
+let fullName = computed({
+    get(){
+        return person.firstName + '-' + person.lastName
+    },
+    set(value){
+        const nameArr = value.split('-')
+        person.firstName = nameArr[0]
+        person.lastName = nameArr[1]
+    }
+})
+
+watch函数
+与Vue2.x中watch配置功能一致
+两个小“坑”：
+监视reactive定义的响应式数据时：oldValue无法正确获取、强制开启了深度监视（deep配置失效）。
+监视reactive定义的响应式数据中某个属性时：deep配置有效。
+//情况一：监视ref定义的响应式数据
+watch(sum,(newValue,oldValue)=>{
+	console.log('sum变化了',newValue,oldValue)
+},{immediate:true})
+//情况二：监视多个ref定义的响应式数据
+watch([sum,msg],(newValue,oldValue)=>{
+	console.log('sum或msg变化了',newValue,oldValue)
+}) 
+
+情况三：监视reactive定义的响应式数据
+若watch监视的是reactive定义的响应式数据，则无法正确获得oldValue！！
+若watch监视的是reactive定义的响应式数据，则强制开启了深度监视
+watch(person,(newValue,oldValue)=>{
+	console.log('person变化了',newValue,oldValue)
+},{immediate:true,deep:false}) //此处的deep配置不再奏效
+
+情况四：监视reactive定义的响应式数据中的某个属性
+watch(()=>person.job,(newValue,oldValue)=>{
+	console.log('person的job变化了',newValue,oldValue)
+},{immediate:true,deep:true}) 
+
+情况五：监视reactive定义的响应式数据中的某些属性
+watch([()=>person.job,()=>person.name],(newValue,oldValue)=>{
+	console.log('person的job变化了',newValue,oldValue)
+},{immediate:true,deep:true})
+
+watchEffect函数
+watch的套路是：既要指明监视的属性，也要指明监视的回调。
+watchEffect的套路是：不用指明监视哪个属性，监视的回调中用到哪个属性，那就监视哪个属性。
+watchEffect有点像computed：
+但computed注重的计算出来的值（回调函数的返回值），所以必须要写返回值。
+而watchEffect更注重的是过程（回调函数的函数体），所以不用写返回值。
+
+生命周期
+Vue3.0中可以继续使用Vue2.x中的生命周期钩子，但有有两个被更名：
+beforeDestroy改名为 beforeUnmount
+destroyed改名为 unmounted
+可以直接已配置项的形式使用生命周期钩子，也可以使用组合式API的形式使用，尽量统一
+一般来说，组合式API里的钩子会比配置项的钩子先执行，组合式API的钩子名字有变化
+
+Vue3.0也提供了 Composition API 形式的生命周期钩子，与Vue2.x中钩子对应关系如下：
+beforeCreate===>setup()
+created=======>setup()
+beforeMount ===>onBeforeMount
+mounted=======>onMounted
+beforeUpdate===>onBeforeUpdate
+updated =======>onUpdated
+beforeUnmount ==>onBeforeUnmount
+unmounted =====>onUnmounted
+自定义hook函数（重点）
+什么是hook？—— 本质是一个函数，把setup函数中使用的Composition API进行了封装。
+类似于vue2.x中的mixin。
+自定义hook的优势: 复用代码, 让setup中的逻辑更清楚易懂。
+创建一个hooks文件夹，里面创建文件usePoint.js
+import { reactive, onMounted, onBeforeUnmount } from "vue";
+export default function() {
+  //实现鼠标“打点”相关的数据
+  let point = reactive({
+    x: 0,
+    y: 0,
+  });
+
+  //实现鼠标“打点”相关的方法
+  function savePoint(event) {
+    point.x = event.pageX;
+    point.y = event.pageY;
+    console.log(event.pageX, event.pageY);
+  }
+
+  //实现鼠标“打点”相关的生命周期钩子
+  onMounted(() => {
+    window.addEventListener("click", savePoint);
+  });
+
+  onBeforeUnmount(() => {
+    window.removeEventListener("click", savePoint);
+  });
+
+  return point;
+}
+在组件种使用
+<template>
+	<h2>我是HelloWorld组件</h2>
+	<h2>当前点击时鼠标的坐标为：x：{{point.x}}，y：{{point.y}}</h2>
+</template>
+
+<script>
+	import usePoint from '../hooks/usePoint'
+	export default {
+		name:'HelloWorld',
+		setup(){
+			const point = usePoint()
+			return {point}
+		}
+	}
+</script>
+
+toRef
+作用：创建一个 ref 对象，其value值指向另一个对象中的某个属性。
+语法：const name = toRef(person,'name')
+应用:   要将响应式对象中的某个属性单独提供给外部使用时。
+扩展：toRefs与toRef功能一致，但可以批量创建多个 ref 对象，语法：toRefs(person)
+return {
+    person,
+    // name:toRef(person,'name'),
+    // age:toRef(person,'age'),
+    // salary:toRef(person.job.j1,'salary'),
+    ...toRefs(person)
+  }
+模板中这样使用  相当于做了一层结构
+<h2>姓名：{{name}}</h2>
+<h2>年龄：{{age}}</h2>
+<h2>薪资：{{job.j1.salary}}K</h2>
+
+五、其它 Composition API
+1. shallowReactive 与 shallowRef
+shallowReactive：只处理对象最外层属性的响应式（浅响应式）。
+shallowRef：只处理基本数据类型的响应式, 不进行对象的响应式处理。
+什么时候使用?
+如果有一个对象数据，结构比较深, 但变化时只是外层属性变化 ===> shallowReactive。
+如果有一个对象数据，后续功能不会修改该对象中的属性，而是生新的对象来替换 ===> shallowRef。
+
+2. readonly 与 shallowReadonly
+readonly: 让一个响应式数据变为只读的（深只读）。
+shallowReadonly：让一个响应式数据变为只读的（浅只读）。
+应用场景: 不希望数据被修改时。
+
+3. toRaw 与 markRaw
+toRaw
+作用：将一个由reactive生成的响应式对象转为普通对象。
+使用场景：用于读取响应式对象对应的普通对象，对这个普通对象的所有操作，不会引起页面更新。
+
+markRaw
+作用：标记一个对象，使其永远不会再成为响应式对象。
+应用场景:
+有些值不应被设置为响应式的，例如复杂的第三方类库等。
+当渲染具有不可变数据源的大列表时，跳过响应式转换可以提高性能。
+
+4. customRef
+作用：创建一个自定义的 ref，并对其依赖项跟踪和更新触发进行显式控制。
+实现防抖效果
+<template>
+  <input type="text" v-model="keyWord" />
+  <h3>{{ keyWord }}</h3>
+</template>
+
+<script>
+import { customRef } from "vue";
+export default {
+  name: "App",
+  setup() {
+    //自定义一个ref——名为：myRef
+    function myRef(value, delay) {
+      let timer;
+      return customRef((track, trigger) => {
+        return {
+          get() {
+            console.log(`有人从myRef这个容器中读取数据了，我把${value}给他了`);
+            track(); // 通知Vue追踪value的变化（提前和get商量一下，让他认为这个value是有用的）
+            return value;
+          },
+          set(newValue) {
+            console.log(`有人把myRef这个容器中数据改为了：${newValue}`);
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+              value = newValue;
+              trigger(); // 通知Vue去重新解析模板
+            }, delay);
+          },
+        };
+      });
+    }
+
+    // let keyWord = ref('hello') //使用Vue提供的ref
+    let keyWord = myRef("hello", 500); //使用程序员自定义的ref
+
+    return { keyWord };
+  },
+};
+</script>
+
+5. provide 与 inject
+作用：实现祖与后代组件间通信
+套路：父组件有一个 provide 选项来提供数据，后代组件有一个 inject 选项来开始使用这些数据
+具体写法：
+祖组件中：
+setup(){
+	......
+    let car = reactive({name:'奔驰',price:'40万'})
+    provide('car',car) // 给自己的后代组件传递数据
+    ......
+}
+后代组件中：
+setup(props,context){
+	......
+    const car = inject('car') // 拿到祖先的数据
+    return {car}
+	......
+}
+
+6. 响应式数据的判断
+isRef: 检查一个值是否为一个 ref 对象
+isReactive: 检查一个对象是否是由 reactive 创建的响应式代理
+isReadonly: 检查一个对象是否是由 readonly 创建的只读代理
+isProxy: 检查一个对象是否是由 reactive 或者 readonly 方法创建的代理
+
+六、新的组件
+1. Fragment
+在Vue2中: 组件必须有一个根标签
+在Vue3中: 组件可以没有根标签, 内部会将多个标签包含在一个Fragment虚拟元素中
+好处: 减少标签层级, 减小内存占用
+2. Teleport
+什么是Teleport？—— Teleport 是一种能够将我们的组件html结构移动到指定位置的技术。
+多个嵌套的盒子  我故意给最里面的盒子加了定位，因为相对定位会找他外层最近的定位盒子进行定位，所以效果就是这样了，我们希望这个弹窗是在body下呈现的
+我们在Dialog组件中加一个teleport标签
+<template>
+  <div>
+    <button @click="isShow = true">点我弹个窗</button>
+    <teleport to="body">
+    <div v-if="isShow" class="mask">
+      <div class="dialog">
+        <h3>我是一个弹窗</h3>
+        <h4>一些内容</h4>
+        <h4>一些内容</h4>
+        <h4>一些内容</h4>
+        <button @click="isShow = false">关闭弹窗</button>
+      </div>
+    </div>
+    </teleport>
+  </div>
+</template>
+
+3. Suspense
+等待异步组件时渲染一些额外内容，让应用有更好的用户体验
+使用步骤：
+异步引入组件
+import {defineAsyncComponent} from 'vue'
+const Child = defineAsyncComponent(()=>import('./components/Child.vue'))
+使用Suspense包裹组件，并配置好default与 fallback
+<template>
+	<div class="app">
+		<h3>我是App组件</h3>
+		<Suspense>
+			<template v-slot:default><Child/></template>
+			<template v-slot:fallback><h3>加载中.....</h3></template>
+		</Suspense>
+	</div>
+</template>
+default：就是组件要显示的内容
+fallback：就是组件没加载完全的“备胎”
+
+七、其他
+1.全局API的转移
+Vue 2.x 有许多全局 API 和配置。
+例如：注册全局组件、注册全局指令等。
+Vue3.0中对这些API做出了调整：
+将全局的API，即：Vue.xxx调整到应用实例（app）上
+2.x 全局 API（Vue）3.x 实例 API (app)
+Vue.config.xxxx app.config.xxxx
+Vue.config.productionTip移除
+Vue.component   app.component
+Vue.directive   app.directive
+Vue.mixin       app.mixin
+Vue.use         app.use
+Vue.prototype   app.config.globalProperties
+
+2.其他改变
+① data选项应始终被声明为一个函数
+② 过渡类名的更改
+Vue2.x写法
+.v-enter,
+.v-leave-to {
+  opacity: 0;
+}
+.v-leave,
+.v-enter-to {
+  opacity: 1;
+}
+Vue3.x写法
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+.v-leave-from,
+.v-enter-to {
+  opacity: 1;
+}
+③ 移除keyCode作为 v-on 的修饰符，同时也不再支持config.keyCodes
+④ 移除v-on.native修饰符
+父组件中绑定事件
+<my-component
+  v-on:close="handleComponentEvent"
+  v-on:click="handleNativeClickEvent"
+/>
+子组件中声明自定义事件
+<script>
+  export default {
+    emits: ['close']
+  }
+</script>
+⑤ 移除过滤器（filter）
+
+深拷贝
+const isObject = (obj)=>(typeof obj === 'object' && obj != null)
+function cloneDeep(source, hash = new WeakMap()) {
+    if (!isObject(source)) return source; 
+    if (hash.has(source)) return hash.get(source); 
+
+    let target = Array.isArray(source) ? [...source] : { ...source };
+    hash.set(source, target);
+    Reflect.ownKeys(target).forEach(key => { 
+      if (isObject(source[key])) {
+          target[key] = cloneDeep(source[key], hash); 
+      } else {
+          target[key] = source[key];
+      }  
+    });
+    return target;
+}
+
+webpack
+常⻅的loader
+style-loader
+css-loader
+less-loader
+sass-loader
+ts-loader //将Ts转换成js
+babel-loader//转换ES6、7等js新特性语法
+file-loader//处理图⽚⼦图
+eslint-loader
+
+Plugins
+npm install --save-dev html-webpack-plugin
+plugins: [
+ new htmlWebpackPlugin({
+  title: "My App",
+  filename: "app.html",
+  template: "./src/index.html"
+ })
+]
+npm install --save-dev clean-webpack-plugin
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+plugins: [
+ new CleanWebpackPlugin()
+]
+
+mini-css-extract-plugin
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+{
+ test: /\.css$/,
+ use: [MiniCssExtractPlugin.loader, "css-loader"]
+}
+ new MiniCssExtractPlugin({
+  filename: "[name][chunkhash:8].css"
+ }}
+
+sourceMap
+1.为了开发时，快速的定位问题
+2.线上代码，我们有时候也会开启 前端错误监控，快速的定位问题
+源代码与打包后的代码的映射关系，通过sourceMap定位到源代码。
+在dev模式中，默认开启，关闭的话 可以在配置⽂件⾥
+devtool的介绍：https://webpack.js.org/configuration/devtool#devtool
+eval:速度最快,使⽤eval包裹模块代码,
+source-map： 产⽣ .map ⽂件 外部产⽣ 错误代码的准确信息和位置
+cheap:较快，不包含列信息
+Module：第三⽅模块，包含loader的sourcemap（⽐如jsx to js ，babel的sourcemap）
+inline： 将 .map 作为DataURI嵌⼊，不单独⽣成 .map ⽂件
+配置推荐：
+devtool:"none"
+devtool:"cheap-module-eval-source-map",// 开发环境配置
+//线上不推荐开启
+devtool:"cheap-module-source-map", // 线上⽣成配置
+
+WebpackDevServer
+提升开发效率的利器
+每次改完代码都需要重新打包⼀次，打开浏览器，刷新⼀次，很麻烦,我们可以安装使⽤
+webpackdevserver来改善这块的体验
+
+npm install webpack-dev-server -D
+修改下package.json
+在webpack.config.js配置：
+启动
+启动服务后，会发现dist⽬录没有了，这是因为devServer把打包后的模块不会放在dist⽬录下，⽽是放到内存中，从⽽提升速度
+
+"scripts": {
+ "server": "webpack-dev-server"
+ },
+devServer: {
+ contentBase: "./dist",
+ open: true,
+ port: 8081
+},
+npm run server
+
+如何⾃⼰编写⼀个Plugin
+class CopyrightWebpackPlugin {
+  constructor(options) {
+    //接受参数
+    console.log(options);
+  }
+  //compiler：webpack实例
+  apply(compiler) {
+    //hooks.emit 定义在某个时刻
+    compiler.hooks.emit.tapAsync(
+      "CopyrightWebpackPlugin",
+      (compilation, cb) => {
+        compilation.assets["copyright.txt"] = {
+          source: function() {
+            return "hello copy";
+          },
+          size: function() {
+            return 20;
+          }
+        };
+        cb();
+      });
+  }
+}
+module.exports = CopyrightWebpackPlugin;
+使用
+const CopyrightWebpackPlugin = require("./plugin/copyright-webpack-plugin");
+plugins: [
+  new CopyrightWebpackPlugin({
+    name: "开课吧"
+  })
+]
+
+webpack工作原理
+拿到⽂件中依赖，这⾥我们不推荐使⽤字符串截取，引⼊的模块名越多，就越麻烦，不灵活，这⾥
+我们推荐使⽤@babel/parser，这是babel7的⼯具，来帮助我们分析内部的语法，包括es6，返回
+⼀个ast抽象语法树
+
+接下来我们就可以根据body⾥⾯的分析结果，遍历出所有的引⼊模块，但是⽐较麻烦，这⾥还是推
+荐babel推荐的⼀个模块@babel/traverse，来帮我们处理。
+npm install @babel/traverse --save
+
+接下来我们就可以根据body⾥⾯的分析结果，遍历出所有的引⼊模块，但是⽐较麻烦，这⾥还是推
+荐babel推荐的⼀个模块@babel/traverse，来帮我们处理。
+npm install @babel/traverse --save
+
+webpack核⼼概念
+1、Entry（⼊⼝）：指示 webpack 应该使⽤哪个模块，来作为构建其内部依赖图的开始。进⼊⼊⼝起点后，
+webpack 会找出有哪些模块和库是⼊⼝起点（直接和间接）依赖的。
+2、Output（出⼝）：告诉 webpack 在哪⾥输出它所创建的结果⽂件，以及如何命名这些⽂件，默认值为./dist。
+3、Loader（模块转换器）：将所有类型的⽂件转换为 webpack 能够处理的有效模块，然后你就可以利⽤
+webpack 的打包能⼒，对它们进⾏处理。
+4、Plugins（插件）：在 Webpack 构建流程中的特定时机注⼊扩展逻辑来改变构建结果或做你想要的事情。
+5、Module(模块)：开发者将程序分解成离散功能块，并称之为模块
+
+webpack执⾏流程
+webpack启动后会在entry⾥配置的module开始递归解析entry所依赖的所有module，每找到⼀个module, 就会根据配置的loader去找相应的转换规则，对module进⾏转换后在解析当前module所依赖的module，这些模块会以entry为分组，⼀个entry和所有相依赖的module也就是⼀个chunk，最后webpack会把所有chunk转换成⽂件输出，在整个流程中webpack会在恰当的时机执⾏plugin的逻辑
+1. 读取⼊⼝⽂件；
+2. 基于 AST（抽象语法树） 分析⼊⼝⽂件，并产出依赖列表；
+3. AST （Abstract Syntax Tree）抽象语法树 在计算机科学中，或简称语法树（Syntax tree），是源代码语法结
+构的⼀种抽象表示。它以树状的形式表现编程语⾔的语法结构，树上的每个节点都表示源代码中的⼀种结构。
+4. 使⽤ Babel 将相关模块编译到 ES5；
+5. webpack有⼀个智能解析器（各种babel），⼏乎可以处理任何第三⽅库。⽆论它们的模块形式是
+CommonJS、AMD还是普通的JS⽂件；甚⾄在加载依赖的时候，允许使⽤动态表
+require("、/templates/"+name+"、jade")。
+以下这些⼯具底层依赖了不同的解析器⽣成AST，⽐如eslint使⽤了espree、babel使⽤了acorn
+6. 对每个依赖模块产出⼀个唯⼀的 ID，⽅便后续读取模块相关内容；
+7. 将每个依赖以及经过 Babel 编译过后的内容，存储在⼀个对象中进⾏维护；
+8. 遍历上⼀步中的对象，构建出⼀个依赖图（Dependency Graph）；
+9. 将各模块内容 bundle 产出
+
+const fs = require('fs');
+const path = require('path');
+const parser = require('@babel/parser');
+const traverse = require('@babel/traverse').default;
+const babel = require('@babel/core');
+const moduleAnalyser = (filename) => {
+    const content = fs.readFileSync(filename, 'utf-8');// 读取⽂件
+    const ast = parser.parse(content, { // 转化AST语法树
+                sourceType: 'module'
+    });
+    const dependencies = {}; // 依赖收集
+    traverse(ast, {
+      ImportDeclaration({ node }) {
+        const dirname = path.dirname(filename);
+        const newFile = './' + path.join(dirname, node.source.value);
+        dependencies[node.source.value] = newFile;
+      }
+    });
+    const { code } = babel.transformFromAst(ast, null, { // ES6转成ES5
+        presets: ["@babel/preset-env"]
+    });
+    return {
+      filename,
+      dependencies,
+      code
+    }
+}
+const makeDependenciesGraph = (entry) => {
+  const entryModule = moduleAnalyser(entry);
+  const graphArray = [ entryModule ];
+  for(let i = 0; i < graphArray.length; i++) {
+    const item = graphArray[i];
+    const { dependencies } = item;
+    if(dependencies) {
+      for(let j in dependencies) {
+        graphArray.push(
+          moduleAnalyser(dependencies[j])
+        );
+      }
+    }
+  }
+  const graph = {};
+  graphArray.forEach(item => {
+    graph[item.filename] = {
+      dependencies: item.dependencies,
+      code: item.code
+    }
+  });
+  return graph;
+}
+const generateCode = (entry) => {
+  const graph = JSON.stringify(makeDependenciesGraph(entry));
+  return `
+        (function(graph){
+          function require(module) {
+            function localRequire(relativePath) {
+              return require(graph[module].dependencies[relativePath]);
+            }
+            var exports = {};
+            (function(require, exports, code){
+                eval(code)
+            })(localRequire, exports, graph[module].code);
+            return exports;
+          };
+          require('${entry}')
+        })(${graph});
+        `;
+}
+const code = generateCode('./src/index.js');
+console.log(code);
+
+ JS模块化规范
+(1)AMD(环境：浏览器环境)
+AMD是RequireJS在推⼴过程中对模块定义的规范化产出
+RequireJS：是⼀个AMD框架，可以异步加载JS⽂件，按照模块加载⽅法，通过define()函数定义，第⼀个参数是⼀个数组，⾥⾯定义⼀些需要依赖的包，第⼆个参数是⼀个回调函数，通过变量来引⽤模块⾥⾯的⽅法，最后通过return来输出。是⼀个依赖前置、异步定义的AMD框架（在参数⾥⾯引⼊js⽂件），在定义的同时如果需要⽤到别的模块，在最前⾯定义好即在参数数组⾥⾯进⾏引⼊，在回调⾥⾯加载
+特点：
+1、异步加载
+2、管理模块之间的依赖性，便于代码的编写和维护。
+// a.js
+define(function (){
+　　return {
+　　　a:'hello world'
+　　}
+});
+// b.js
+require(['./a.js'], function (moduleA){
+ console.log(moduleA.a); // 打印出：hello world
+})
+
+(2)CMD(环境：浏览器环境)
+SeaJS在推⼴过程中对模块定义的规范化产出，是⼀个同步模块定义，是SeaJS的⼀个标准，SeaJS是CMD概念的⼀个实现，SeaJS是淘宝团队提供的⼀个模块开发的js框架.
+通过define()定义，没有依赖前置，通过require加载jQuery插件，CMD是依赖就近，在什么地⽅使⽤到插件就在什么地⽅require该插件，即⽤即返，这是⼀个同步的概念
+特点
+1、CMD是在AMD基础上改进的⼀种规范，和AMD不同在于对依赖模块的执⾏时机处理不同，CMD是就近依
+赖，⽽AMD是前置依赖。
+// a.js
+define(function (require, exports, module){
+　　exports.a = 'hello world';
+});
+// b.js
+define(function (require, exports, module){
+ var moduleA = require('./a.js');
+ console.log(moduleA.a); // 打印出：hello world
+})
+
+(3)CommonJS(环境：服务器环境)
+在前端浏览器⾥⾯并不⽀持module.exports,通过node.js后端使⽤的。Nodejs端是使⽤CommonJS规范的，前端浏览器⼀般使⽤AMD、CMD、ES6等定义模块化开发的
+输出⽅式有2种：默认输出---module export 和带有名字的输出---exports.area
+特点：
+1、模块可以多次加载，但是只会在第⼀次加载时运⾏⼀次，然后运⾏结果就被缓存了，以后再加载，就直接读取缓存结果。要想让模块再次运⾏，必须清除缓存。
+2、模块加载会阻塞接下来代码的执⾏，需要等到模块加载完成才能继续执⾏——同步加载。
+// a.js
+// 相当于这⾥还有⼀⾏：var exports = module.exports;代码
+exports.a = 'Hello world'; // 相当于：module.exports.a = 'Hello world';
+// b.js
+var moduleA = require('./a.js');
+console.log(moduleA.a); // 打印出hello world
+
+(4)ESM (ES6Module)
+特点：
+1、按需加载（编译时加载）
+2、import和export命令只能在模块的顶层，不能在代码块之中（如：if语句中）,import()语句可以在代码块中实现异步动态按需动态加载
+环境：浏览器或服务器环境（以后可能⽀持）
+应⽤：ES6的最新语法⽀持规范
+语法：
+1、导⼊：import {模块名A，模块名B...} from '模块路径'
+2、导出：export和export default
+3、import('模块路径').then()⽅法
+注意：export只⽀持对象形式导出，不⽀持值的导出，export default命令⽤于指定模块的默认输出，只⽀持值导出，但是只能指定⼀个，本质上它就是输出⼀个叫做default的变量或⽅法

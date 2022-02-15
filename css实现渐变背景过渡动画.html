@@ -141,6 +141,23 @@
   <input type="url" name="blog" id="blog" value="" required="required"/>
 </p>
   <script>
+    console.log('global begin:' + i)
+	var i = 1;
+	foo(1);
+	function foo(i){
+        if(i==4){
+            return;
+        }
+        debugger
+        console.log('foo() begin:' + i);
+        foo(i + 1);
+        console.log(i)
+        console.log('foo() end:' + i);
+    }
+	console.log('global end :' + i);
+
+
+console.log("----------------------------------------")
     console.log(spanData.getAttribute('data-order-amount'))
     console.log(spanData.dataset.orderAmount)
     var lengthOfLongestSubstring = function(s) {
@@ -224,12 +241,35 @@ Object.defineProperty(window, 'a', {
 });
 // console.log(a == 1 && a == 2 && a == 3); // true
 console.log(a === 1 && a === 2 && a === 3); // false
+let arr = [1,2,3,4,5]
 let newarr=arr.map(i=>{
-  break;
   return i+=1;
 })
 console.log(arr)//1,3,4---不会改变原数组
 console.log(newarr)//[2,4,5]---返回新数组
+
+let customObj = {
+  7:'777777',
+  3:'43333',
+  4:'444',
+  8:'88888',
+  name:'name',
+  2:'222',
+  abc:'yasydya'
+  }
+  const map = new Map(Object.entries(customObj));
+  console.log(map)
+  Reflect.ownKeys(customObj).forEach(function(key){
+console.log(key,customObj[key]);
+});
+  console.log(Object.getOwnPropertyNames(customObj))
+  console.log(Object.keys(customObj))
+  const ll = {}
+  for(const key in customObj){
+    console.log(key)
+    ll['.'+key] = customObj[key]
+  }
+  console.log(ll)
   </script>
 </body>
 </html>
