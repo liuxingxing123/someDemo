@@ -436,21 +436,21 @@ function debounce(fn) {
 每次触发事件时都判断当前是否有等待执行的延时函数
 
 function throttle(fn) {
-      let canRun = true; // 通过闭包保存一个标记
-      return function () {
-        if (!canRun) return; // 在函数开头判断标记是否为true，不为true则return
-        canRun = false; // 立即设置为false
-        setTimeout(() => { // 将外部传入的函数的执行放在setTimeout中
-          fn.apply(self, arguments);
-          // 最后在setTimeout执行完毕后再把标记设置为true(关键)表示可以执行下一次循环了。当定时器没有执行的时候标记永远是false，在开头被return掉
-          canRun = true;
-        }, 500);
-      };
-    }
-    function sayHi(e) {
-      console.log(e.target.innerWidth, e.target.innerHeight);
-    }
-    window.addEventListener('resize', throttle(sayHi));
+  let canRun = true; // 通过闭包保存一个标记
+  return function () {
+    if (!canRun) return; // 在函数开头判断标记是否为true，不为true则return
+    canRun = false; // 立即设置为false
+    setTimeout(() => { // 将外部传入的函数的执行放在setTimeout中
+      fn.apply(self, arguments);
+      // 最后在setTimeout执行完毕后再把标记设置为true(关键)表示可以执行下一次循环了。当定时器没有执行的时候标记永远是false，在开头被return掉
+      canRun = true;
+    }, 500);
+  };
+}
+function sayHi(e) {
+  console.log(e.target.innerWidth, e.target.innerHeight);
+}
+window.addEventListener('resize', throttle(sayHi));
 
 常见异步笔试题，请写出代码的运行结果
 //请写出输出内容
@@ -5891,6 +5891,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
 DOMContentLoaded 事件：当 DOM (HTML document) 完成加载并解析，而不用等 css样式、图片和子 frame 完全加载完成时触发
 
 同步 JS 会使 DOM 的解析暂停，如果希望用户在请求页面后尽快解析DOM，你可以把 JS 使用异步加载，并优化 css 样式加载方式。如果按照惯例加载，样式表和 JS 是并行加载的，会减慢 DOM 解析，窃取主html文档解析速度。下面是 head 中 script 默认加载以及加上 async, defer 参数的对比，一般把 script 放到 body 末尾，基本等价于 header 中 defer 的效果
+async 是和页面html一起解析  不是顺次加载
+defer 等页面的HTML和DOM解析完成才会去解析js  顺次执行js脚本   谁先加载完谁先执行
 
 load事件：window
 
@@ -6813,6 +6815,8 @@ function deepClone(obj){
   }
   return cloneObj
 }
+
+
 
 function instance_of(L,R){
   var prototype = R.prototype
@@ -10728,7 +10732,7 @@ Vue3.x写法
 
 深拷贝
 const isObject = (obj)=>(typeof obj === 'object' && obj != null)
-function cloneDeep(source, hash = new WeakMap()) {
+function deepClone(source, hash = new WeakMap()) {
     if (!isObject(source)) return source; 
     if (hash.has(source)) return hash.get(source); 
 
@@ -10736,12 +10740,26 @@ function cloneDeep(source, hash = new WeakMap()) {
     hash.set(source, target);
     Reflect.ownKeys(target).forEach(key => { 
       if (isObject(source[key])) {
-          target[key] = cloneDeep(source[key], hash); 
+          target[key] = deepClone(source[key], hash); 
       } else {
           target[key] = source[key];
       }  
     });
     return target;
+}
+
+function deepClone(obj){
+  if(obj===null) return null;
+  if(obj instanceof RegExp) return new RegExp(obj);
+  if(obj instanceof Date) return new Date(obj);
+  if(typeof obj!=='function') return new Function(obj);
+  if(typeof obj!=='object') return obj;
+  let newObj = new obj.constructor
+  for(let key in obj){
+    if(obj.hasOwnProperty(key)){
+      newObj[key] = deepClone(obj[key])
+    }
+  }
 }
 
 webpack
@@ -11018,3 +11036,1068 @@ console.log(moduleA.a); // 打印出hello world
 2、导出：export和export default
 3、import('模块路径').then()⽅法
 注意：export只⽀持对象形式导出，不⽀持值的导出，export default命令⽤于指定模块的默认输出，只⽀持值导出，但是只能指定⼀个，本质上它就是输出⼀个叫做default的变量或⽅法
+
+对象是无法进行for of循环的 但是可以通过Symbol.iterator来添加
+Object.prototype[Symbol.iterator] = function(){
+  let index = 0
+  let arr = Object.entries(this)
+  let length = arr.length
+  return {
+    next(){
+      let key = arr[index]&&arr[index][0]
+      let text = arr[index]&&arr[index][1]
+      let value = {[key]:text}
+      let done = index>=length
+      index++
+      return {value,done}
+    }
+  }
+}
+
+Sort()排序原理
+在默认情况下（没有参数），sort()方法会按升序排序，会调用每个数组项的toString()的转型方法，在比较所得的字符串实现排序。（按照字符Unicode码编码排序）V8 引擎 sort 函数只给出了两种排序 InsertionSort 和 QuickSort，数量小于10的数组使用 InsertionSort，比10大的数组则使用 QuickSort。
+
+SPA单页面应用:计算首屏加载时间和首屏内容渲染完成速度慢怎么解决?
+1.什么是首屏加载
+首屏加载时间，指的是浏览器从用户输入相应网址，到首屏内容渲染完成的时间，此时整个网页不一定全部渲染完成，但需要展示当前视窗需要的内容，首屏加载时间是用户体验的重要指标
+计算首屏加载时间times = (performance.timing.domComplete - performance.timing.navigationStart)/1000
+
+2.解决办法
+(1)减少入口文件体积
+常用的是手段是路由懒加载，只有在解析到对应路由的时候才会去加载组件
+const routes = [
+  {
+    path:'Blogs',
+    name:'ShowBlogs',
+    component:()=>import('./components/ShowBlogs.vue')
+  }
+]
+
+(2)静态资源本地缓存
+后端返回资源采用http缓存
+前端合理利用localStorage
+CDN静态资源缓存
+
+(3)UI框架按需加载
+在日常使用的UI框架中，例如element-ui、antd我们需要按需引入相应组件
+import {Button} from 'antd'
+
+(4)避免组件重复打包
+假设A.js文件是一个常用的库，现在有多个路由使用了A.js文件，这样就造成重复下载
+解决方案是在webpack.config.js配置文件中修改CommonsChunkPlugin的配置minChunks:2  该配置会把使用两次及两次以上的包抽离出来，放进公共依赖文件中，避免了重复加载组件
+
+(5)图片资源压缩
+图片资源虽然不在编码过程中，但它却是对页面性能影响最大的因素，对于所有的图片资源，我们可以进行适当的压缩，对于页面使用的icon，可以使用在线字体图标库或者雪碧图，将众多小图标合并到一张图上，用以减轻http请求的压力
+
+(6)开启GZIP压缩
+拆完包之后，我们在用gzip做一下压缩，安装compression-webpack-plugin
+const CompressionWebpackPlugin = require('compression-webpack-plugin')
+const productionGzipExtensions = ['js','css']
+new CompressionWebpackPlugin({
+  algorithm:'gzip',
+  test:new RegExp('\\.('+productionGzipExtensions.join('|')+')$'),
+  threshold:10240,
+  minRatio:0.8
+})
+
+什么是js内存泄露  常见的内存泄露有哪些?
+内存泄露是指一块被分配的内存既不能使用又不能回收，直到浏览器进程结束
+a.意外的全局变量
+b.console.log()
+c.DOM泄露
+d.闭包
+e.被遗忘的定时器
+
+const files = ["foo.txt",".bar","    ","baz.foo"]
+要求输出["~/cool_app/foo.txt","~/cool_app/.bar","    ","~/cool_app/baz.foo"]
+function reduceWay(files){
+  const filePaths = files.reduce((result,file)=>{
+    const fileName = file.trim()
+    if(fileName){
+      const filePath = `~/cool_app/${fileName}`
+      result.push(filePath)
+    }
+    return result
+  },[])
+  return filePaths
+}
+
+function chainWay(files){
+  return files.map(f=>f.trim()).filter(Boolean).map(fileName=>`~/cool_app/${fileName}`)
+}
+
+通过给定选择器来获取对象中的值
+const obj = {
+  selector:{to:{val:'val to select'}},
+  target:[1,2,{a:'test'}]
+}
+get(obj,'selector.to.val','target[0]','target[2].a')
+output:['val to select',1,'test']
+function get(from,...selectors){
+  return selectors.map(s=>{
+    return s.replace(/\[(\w+)\]/g,'.$1').split('.').reduce((prev,curr)=>{
+      return prev && prev[curr]
+    },from)
+  })
+}
+
+从对象或者数组中深度删除所有假值
+const obj = {
+  a:null,
+  b:false,
+  c:true,
+  d:0,
+  e:1,
+  f:"",
+  g:'a',
+  h:[null,false,true,1,'a'],
+  i:{j:0,k:false,l:"a"}
+}
+function compareObject(val){
+  const data = Array.isArray(val)?val.filter(Boolean):val
+  return Object.keys(data).reduce((acc,key)=>{
+    const value = data[key]
+    if(value){
+      acc[key] = typeof value === 'object'?compareObject(value):value
+    }
+    return acc
+  },Array.isArray(data)?[]:{})
+}
+
+//闭包编程题
+var foo = function(...args){
+  if(!Array.isArray(foo.arr)){
+    foo.arr = []
+  }
+  foo.arr.push(...args)
+  return foo
+}
+Function.prototype.getValue = ()=>{
+  return foo.arr.reduce((pre,cur)=>pre+cur,0)
+}
+var f1 = foo(1,2,3);f1.getValue()
+var f2 = foo(1)(2,3);f2.getValue()
+var f3 = foo(1)(2)(3)(4);f3.getValue()
+
+var foo = function(...args){
+  const fn = (...arg1)=>foo(...[...args,...arg1])
+  fn.getValue = ()=>args.reduce((pre,cur)=>pre+cur,0)
+  return fn
+}
+var f1 = foo(1,2,3);f1.getValue()
+var f2 = foo(1)(2,3);f2.getValue()
+var f3 = foo(1)(2)(3)(4);f3.getValue()
+
+//如何正确在forEach里定时输出结果值
+const list = [1,2,3]
+const square = num=>{
+  return new Promise((resolve,reject)=>{
+    setTimeout(()=>{
+      resolve(num*num)
+    },1000)
+  })
+}
+function test(){
+  list.forEach(async x=>{ //一秒之后连续输出1 4 9  想要得到每秒输出1 4 9  需要改写该函数
+    const res = await square(x)
+    console.log(res)
+  })
+}
+test()
+async function test(){
+  for(let i=0;i<list.length;i++){
+    const res = await square(list[i])
+    console.log(res)
+  }
+}
+test()
+
+async function test(){
+  for(let item of list){
+    const res = await square(item)
+    console.log(res)
+  }
+}
+test()
+
+字符串算法  输出特定的树状结构
+'abc'->{value:'abc'}
+'[abc[bcd[def]]]'
+const resultArr = (str)=>str.split(/[\[\]]/g).filter(Boolean)
+const resultArr = (str)=>str.match(/\w+/g);
+const normalize = (arr)=>{
+  let result = {}
+  let obj = result
+  while(key = arr.shift()){
+    obj.value = key
+    if(!arr.length) break;
+    obj.children = {}
+    obj = obj.children
+  }
+  return result;
+}
+
+const normalize1 = (arr)=>{
+  let result = {}
+  arr.reduce((pre,cur,index,self)=>{
+    pre.value = cur
+    if(index!==self.length-1){
+      return (pre.children = {})
+    }
+  },result)  
+  return result;
+}
+
+实现promise失败之后进行重试超过一定次数才认为是真正失败
+function fn(){
+  const n = Math.random()
+  return new Promise((resolve,reject)=>{
+    setTimeout(()=>{
+      if(n>0.7){
+        resolve(n)
+      }else{
+        reject(n)
+      }
+    },1000)
+  })
+}
+Promise.retry = (fn,times=3)=>{
+  new Promise(async (resolve,reject)=>{
+    while(times--){
+      try{
+        const res = await fn()
+        console.log("执行成功,得到的结果是:"+res)
+        resolve(res)
+        break
+      }catch(error){
+        console.log("执行失败,得到的结果是:"+error)
+        if(!times){
+          reject(error)
+        }
+      }
+    }
+  }).catch(()=>{
+    console.log("全部次数尝试完成，依然失败")
+  })
+}
+
+typeof 1/0 输出是？  typeof 1->'number'   'number'/0->NaN/0---->NaN结果是NaN
+
+js对象的不变性的几个方法
+Object.freeze  浅冻结   Objetc.isFrozen()检验对象是否被冻结
+想冻结嵌套对象的话需要自己写递归
+const deepFreeze = obj=>{
+  Object.keys(obj).forEach(prop=>{
+    if(obj[prop] && typeof obj[prop] === 'object'){
+      deepFreeze(obj[prop])
+    }
+  })
+  return Object.freeze(obj)
+}
+
+Object.seal 可以更改属性值但是不能增加和删除
+Object.preventExtensions()  可以更改属性值和删除但是不能增加
+
+css中著名的七阶层叠水平
+层叠上下文background、border
+负的z-index
+block块状水平盒子
+float浮动盒子
+inline/inline-block水平盒子
+z-index:auto或z-index:0
+正的z-index
+
+this是什么  有什么特性?
+1.this是关键字 在js中有特殊的含义 在非严格模式下this和window是同一块内存空间，严格模式下是undefined  ES6+还提供了globalThis  来统一不同环境来获取全局的一个关键字
+2.给元素的事件绑定的函数中的this，指向了当前被点击的那个元素
+box.onclick = function(){
+  console.log(this);
+  this.style.color="red"
+}
+3.看函数指向前的.  如果要是没有  函数中的this指向window 如果要是有.那么.前面是谁函数中的this就指向谁(箭头函数另论)
+var obj = {
+  m:1,
+  fn:function(){
+    console.log(this)
+  }
+}
+obj.fn()-->obj
+var f = obj.fn
+f()-->window
+4.自执行函数中  this永远指向window
+(function(){
+  console.log(this)   -->window
+})()
+var obj = {
+  m:1,
+  fn:(function(){
+    console.log(this)-->window
+    return function(){
+      console.log(this)
+    }
+  })()
+}
+obj.fn()-->obj
+var f = obj.fn
+f()-->window
+5.回调函数中的this一般指向window
+setTimeout(function(){console.log(this)},1000)
+arr.map(function(){console.log(this)})
+6.构造函数中的this指向实例
+7.call、apply、bind可以改变this指向
+this练习题
+(1)
+var num = 1;
+var obj = {
+  num:0,
+  fn:function(){
+    num=1;
+    (function(num){
+      ++this.num;
+      num++;
+      console.log(num)   // 1
+    })(this.num)
+  }
+}
+obj.fn()
+console.log(window.num,obj.num)// 2  0
+(2)
+var a = 1;
+var obj1 = {
+  a:0,
+  fn1:(function(a){
+    this.a =a ;
+    a++;
+    return function(){
+      this.a = a++;
+      console.log(a)  //3 4
+    }
+  })(a)
+}
+obj1.fn1()
+var fn1 = obj1.fn1;
+fn1();
+console.log(a,obj1.a)// 3 2
+(3)
+var num = 1;
+var obj = {
+  num:2,
+  fn:(function(){
+    this.num *= 2;
+    num+=3;
+    var num = 1;
+    return function(){
+      num+=2;
+      this.num+=2;
+      console.log(++num); //4  7
+    }
+  })()
+}
+var f = obj.fn;
+f()
+obj.fn()
+console.log(window.num,obj.num) //4  4
+
+(4)
+function Foo(){
+  getName = function(){console.log(1)}
+  return this;
+}
+Foo.getName = function(){console.log(2)}
+Foo.prototype.getName = function(){console.log(3)}
+var getName = function(){console.log(4)}
+function getName(){console.log(5)}
+//请写出下列的输出结果
+Foo.getName() //2
+getName() // 4
+Foo().getName() // 1 
+getName()  // 1
+new Foo.getName()  //2
+new Foo().getName() // 3
+new new Foo().getName() //  3
+
+(5)
+function fun(n,o) {	// 这是外部函数
+  console.log(o);
+  return {
+      fun:function(m){	// 这是内部函数
+          return fun(m,n);
+      }
+  }
+}
+var a = fun(0); a.fun(1); a.fun(2); a.fun(3);       // undefined 0 0 0
+var b = fun(0).fun(1).fun(2).fun(3);                  // undefined 0 1 2
+var c = fun(0).fun(1); c.fun(2); c.fun(3);  //undefined 0   1 1
+
+(6)实现fibonacci(n)函数要求实现以下功能
+[1,1,2,3,5,8,,13,21,...]
+fibonacci(0)->1
+fibonacci(4)->5
+方法1
+function fibonacci(count){
+  function fn(count,curr=1,next=1){
+    if(count==0){
+      return curr
+    }else{
+      return fn(count-1,next,curr+next)   
+    }
+  }
+  return fn(count);
+}
+方法2
+function fibonacci(n){
+    return [0,1].includes(n)?1:(fibonacci(n-1) + fibonacci(n-2))
+} 
+
+(7)输入一个正整数，输出所有和为N的连续正整数序列
+例如15   
+结果:[[1,2,3,4,5],[4,5,6],[7,8]]
+function fn(count){
+  let result = [];
+  //求出中间值
+  let middle = Math.ceil(count/2)
+  for(let i=1;i<=middle;i++){
+    for(let j=2;;j++){
+      let total = (i+(i+j-1))*(j/2)//等差数列的求和公式
+      if(total>count){
+        break;
+      }else if(total === count){
+        result.push(createArr(i,j));   //i是起始位置  j代表循环多少次
+        break;
+      }
+    }
+  }
+  return result;
+}
+function createArr(startIdx,endIdx){
+  return new Array(endIdx).fill(startIdx).map((i,idx)=>i+idx)
+}
+
+(8)闭包面试题
+var a=0,b=0;
+function A(a){
+  A = function(b){
+    console.log(a+b++)
+  }
+  console.log(a++);
+}
+A(1)  //1  
+A(2)  //4
+有时候字符串的长度看着只有一个 但是.length却是2的问题引发的思考
+UTF-16 的编码逻辑
+UTF-16 编码很简单，对于给定一个 Unicode 码点 cp（CodePoint 也就是这个字符在 Unicode 中的唯一编号）:
+如果码点小于等于 U+FFFF<65535>（也就是基本平面的所有字符），不需要处理，直接使用。
+否则，将拆分为两个部分 ((cp – 65536) / 1024) + 0xD800，((cp – 65536) % 1024) + 0xDC00 来存储。
+Unicode 标准规定 U+D800...U+DFFF 的值不对应于任何字符，所以可以用来做标记。
+举个具体的例子：字符 A 的码点是 U+0041，可以直接用一个码元表示。
+Javascript 中 \u 表示 Unicode 的转义字符，后面跟着一个十六进制数。
+而字符 💩 的码点是 U+1f4a9，处于补充平面的字符，经过 👆 公式计算得到两个码元 55357, 56489 这两个数字用十六进制表示为 d83d, dca9，将这两个编码结果组合成代理对。
+由于 Javascript 字符串使用 utf-16 编码，所以可以正确将代理对 \ud83d\udca9 解码得到码点 U+1f4a9。
+还可以使用 \u + {}，大括号中直接跟码点来表示字符。看起来长得不一样，但他们表示的结果是一样的。
+'💩' === '\ud83d\udca9'  //true
+'\u0041' === '\u{41}'
+// -> true
+'\ud83d\udca9' === '\u{1f4a9}' //true
+像💩 字符实际上占用了两个 UTF-16 的码元，也就是两个元素，所以它的 length 属性就是 2。
+我在 Antd Form 表单使用的 async-validator 包中可以看到下面这段代码[7]
+const spRegexp = /[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]/g;
+if (str) {
+  val = value.replace(spRegexp, '_').length;
+}
+当需要进行字符串长度的判断时，会将码点范围在补充平面的字符全部替换为下划线，这样长度判断就和实际显示的一致了！！！
+ES6 对 Unicode 的支持
+for vs for of
+例如使用 for 循环打印字符串，字符串会按照 JS 理解的每个“元素”遍历，辅助平面的字符将会被识别成两个“元素”，于是出现“乱码”。
+var str = '👻yo𠮷'
+for (var i = 0; i < str.length; i ++) {
+  console.log(str[i])
+}
+// -> �
+// -> �
+// -> y
+// -> o
+// -> �
+// -> �
+而使用 ES6 的 for of 语法就不会。
+var str = '👻yo𠮷'
+for (const char of str) {
+  console.log(char)
+}
+// -> 👻
+// -> y
+// -> o
+// -> 𠮷
+
+展开语法(Spread syntax)
+前面提到了使用正则表达式，将辅助平面的字符替换的方式来统计字符长度。使用展开语法也可以得到同样的效果。
+[...'💩'].length // -> 1
+ES6 中还针对 Unicode 字符增加了 u 描述符。
+/^.$/.test('👻') // -> false
+/^.$/u.test('👻')   // -> true
+String.prototype.normalize()
+由于 JS 中将字符串理解成一串两个字节的码元序列，判断是否相等是根据序列的值来判断的。所以可能存在一些字符串看起来长得一模一样，但是字符串相等判断结果确是 false。
+'café' === 'café'  // -> false
+上面代码中第一个 café 是有 cafe 加上一个缩进的音标字符\u0301组成的，而第二个 café 则是由一个 caf + é 字符组成的。所以两者虽然看上去一样，但码点不一样，所以 JS 相等判断结果为 false。
+'cafe\u0301'  // -> 'café'
+'cafe\u0301'.length   // -> 5
+'café'.length   // -> 4
+为了能正确识别这种码点不一样，但是语意一样的字符串判断，ES6 增加了 String.prototype.normalize 方法。
+'cafe\u0301'.normalize() === 'café'.normalize()   -> true
+'cafe\u0301'.normalize().length    // -> 4
+
+charCodeAt/codePointAt
+对于字符串，我们还常用 charCodeAt 来获取 Code Point，对于 BMP 平面的字符是可以适用的，但是如果字符是辅助平面字符 charCodeAt 返回结果就只会是编码后第一个码元对于的数字。
+'羽'.charCodeAt(0)
+// -> 32701
+'羽'.codePointAt(0)
+// -> 32701
+
+'😸'.charCodeAt(0)
+// -> 55357
+'😸'.codePointAt(0)
+// -> 128568
+而使用 codePointAt 则可以将字符正确识别，并返回正确的码点。
+
+正确的计算方式是 通过字符串的codePointAt(0)获取到码元  
+码点小于等于 U+FFFF（也就是基本平面的所有字符），不需要处理，直接使用。
+否则，将拆分为两个部分 ((cp – 65536) / 1024) + 0xD800<55296>，((cp – 65536) % 1024) + 0xDC00<55296+1024 = 56320>     ((cp – 65536) / 1024)计算结果为小数是向下取整  转换出两个十进制数字之后在转成16进制
+'😸'.codePointAt(0)// -> 128568  推导出   '\ud83d\ude38' === '\u{1f638}'   true    
+
+HTTP/1.1的缺陷
+1.高延迟--带来页面加载速度的降低
+虽然近几年来网络带宽增长非常快，然而我们却并没有看到网络延迟有对应程度的降低。网络延迟问题主要由于队头阻塞(Head-Of-Line Blocking),导致带宽无法被充分利用。 
+队头阻塞是指当顺序发送的请求序列中的一个请求因为某种原因被阻塞时，在后面排队的所有请求也一并被阻塞，会导致客户端迟迟收不到数据。针对队头阻塞,人们尝试过以下办法来解决：
+Spriting合并多张小图为一张大图,再用JavaScript或者CSS将小图重新“切割”出来的技术。
+内联(Inlining)是另外一种防止发送很多小图请求的技巧，将图片的原始数据嵌入在CSS文件里面的URL里，减少网络请求次数。
+拼接(Concatenation)将多个体积较小的JavaScript使用webpack等工具打包成1个体积更大的JavaScript文件,但如果其中1个文件的改动就会导致大量数据被重新下载多个文件。
+将同一页面的资源分散到不同域名下，提升连接上限。 Chrome有个机制，同一个域名同时最多只能建立6个TCP连接，如果在同一个域名下同时有10个请求发生，那么其中4个请求会进入排队等待状态，直至进行中的请求完成
+
+2.无状态特性--带来的巨大HTTP头部
+由于报文Header一般会携带"User Agent""Cookie""Accept""Server"等许多固定的头字段（如下图），多达几百字节甚至上千字节，但Body却经常只有几十字节（比如GET请求、 204/301/304响应），成了不折不扣的“大头儿子”。Header里携带的内容过大，在一定程度上增加了传输的成本。更要命的是，成千上万的请求响应报文里有很多字段值都是重复的，非常浪费。 
+
+3.明文传输--带来的不安全性
+HTTP/1.1在传输数据时，所有传输的内容都是明文，客户端和服务器端都无法验证对方的身份，这在一定程度上无法保证数据的安全性。
+
+4.不支持服务器推送消息
+
+HTTP/2 新特性
+1.二进制传输
+HTTP/2传输数据量的大幅减少,主要有两个原因:以二进制方式传输和Header 压缩。我们先来介绍二进制传输,HTTP/2 采用二进制格式传输数据，而非HTTP/1.x 里纯文本形式的报文 ，二进制协议解析起来更高效。 HTTP/2 将请求和响应数据分割为更小的帧，并且它们采用二进制编码。
+
+它把TCP协议的部分特性挪到了应用层，把原来的"Header+Body"的消息"打散"为数个小片的二进制"帧"(Frame),用"HEADERS"帧存放头数据、"DATA"帧存放实体数据。HTP/2数据分帧后"Header+Body"的报文结构就完全消失了，协议看到的只是一个个的"碎片"。
+HTTP/2 中，同域名下所有通信都在单个连接上完成，该连接可以承载任意数量的双向数据流。每个数据流都以消息的形式发送，而消息又由一个或多个帧组成。多个帧之间可以乱序发送，根据帧首部的流标识可以重新组装
+
+2.Header 压缩
+HTTP/2并没有使用传统的压缩算法，而是开发了专门的"HPACK”算法，在客户端和服务器两端建立“字典”，用索引号表示重复的字符串，还采用哈夫曼编码来压缩整数和字符串，可以达到50%~90%的高压缩率。
+在客户端和服务器端使用“首部表”来跟踪和存储之前发送的键-值对，对于相同的数据，不再通过每次请求和响应发送；
+首部表在HTTP/2的连接存续期内始终存在，由客户端和服务器共同渐进地更新；
+每个新的首部键-值对要么被追加到当前表的末尾，要么替换表中之前的值。
+例如下图中的两个请求， 请求一发送了所有的头部字段，第二个请求则只需要发送差异数据，这样可以减少冗余数据，降低开销。
+
+3.多路复用
+在 HTTP/2 中引入了多路复用的技术。多路复用很好的解决了浏览器限制同一个域名下的请求数量的问题，同时也接更容易实现全速传输，毕竟新开一个 TCP 连接都需要慢慢提升传输速度。
+同域名下所有通信都在单个连接上完成。
+单个连接可以承载任意数量的双向数据流。
+数据流以消息的形式发送，而消息又由一个或多个帧组成，多个帧之间可以乱序发送，因为根据帧首部的流标识可以重新组装。
+同个域名只需要占用一个 TCP 连接，使用一个连接并行发送多个请求和响应,消除了因多个 TCP 连接而带来的延时和内存消耗。
+并行交错地发送多个请求，请求之间互不影响。
+并行交错地发送多个响应，响应之间互不干扰。
+在HTTP/2中，每个请求都可以带一个31bit的优先值，0表示最高优先级， 数值越大优先级越低。有了这个优先值，客户端和服务器就可以在处理不同的流时采取不同的策略，以最优的方式发送流、消息和帧。
+
+4.Server Push
+HTTP2还在一定程度上改变了传统的“请求-应答”工作模式，服务器不再是完全被动地响应请求，也可以新建“流”主动向客户端发送消息。比如，在浏览器刚请求HTML的时候就提前把可能会用到的JS、CSS文件发给客户端，减少等待的延迟，这被称为"服务器推送"（ Server Push，也叫 Cache push）。
+另外需要补充的是,服务端可以主动推送，客户端也有权利选择是否接收。如果服务端推送的资源已经被浏览器缓存过，浏览器可以通过发送RST_STREAM帧来拒收。主动推送也遵守同源策略，换句话说，服务器不能随便将第三方资源推送给客户端，而必须是经过双方确认才行。
+
+Base64是网络上最常见的用于传输8Bit字节码的编码方式之一，Base64就是一种基于64个可打印字符来表示二进制数据的方法。
+将索引转换为对应的二进制数据的话需要至多6个Bit(2^6=64)。然而ASCII码需要8个Bit来表示，那么怎么使用6个Bit来表示8个Bit的数据呢？6个Bit当然不能存储8个Bit的数据，但是4*6个Bit可以存储3*8个Bit的数据啊！
+可以看到“Son”通过Base64编码转换成了“U29u”。这是刚刚好的情况，3个ASCII字符刚好转换成对应的4个Base64字符。但是，当需要转换的字符数不是3的倍数的情况下该怎么办呢？Base64规定，当需要转换的字符不是3的倍数时，一律采用补0的方式凑足3的倍数，
+每6个Bit为一组，第一组转换后为字符“U”，第二组末尾补4个0转换后为字符“w”。剩下的使用“=”替代。即字符“S”通过Base64编码后为“Uw==”。这就是Base64的编码过程。
+
+HTML规范关于base64有哪些API
+好了，原理懂了，那么如果要进行base64编码，我们该怎么做呢？自己撸一个方法？找一个库？都行，但是HTML规范中已经规定了base64转换的API，window对象上可以访问到base64编码和解码的方法，直接调用即可。
+window.atob() // 对base64编码过的字符串进行解码 如果传入字符串的长度不是4的倍数，则抛出DOMException。
+window.btoa() // 对ASCII编码的字符串进行base64编码（不支持汉字，汉字可通过URIencode预处理后再编码） 如果传入字符串的长度不是4的倍数，则抛出DOMException。
+
+前端使用gitlab-runner集成CI/CD CI持续集成 => CD持续部署  (可以参考https://zhuanlan.zhihu.com/p/184936276)
+首先安装gitlab runner
+gitlab runner 提供一个docker 镜像，我试了下有个坑， 工程打包的时候有个node-sass一直报错，然
+后我使用node镜像起了个服务试了下打包没有问题，
+docker pull node
+docker run-itd node:latest
+然后在启动的容器里安装gitlab-runner，安装文档在这里，我使用的二进制文件安装的，直接安装就
+行，安装完成之后之后执行
+gitlab-runner start
+没有报错说明安装成功，就可以配置runner了
+注册runner
+执行注册命令
+gitlab-runner register
+要求输入的Runner绑定的token和url， 获取方式如下（这里需要有项目的管理员权限）：
+Gitlab项目首页=>setting=>CI/CD=>Runners=>SpecificRunners
+这里的要求输入的tags参数需要注意，配置文件里需要使用，这里因为我们只需要工程打包，所以选
+Executor的时候只选了shell，如果有有其他需要比如生产docker镜像等操作请自己尝试，还要注意的
+是gitlab-runner工作目录加下权限，否则打包的时候有可能创建文件夹之类的操作没有权限
+编写.gitlab-ci.yml配置文件
+具体语法可以参考http://58.210.154.140:8888/help/ci/yaml/README.md#onlyexcept-advanced
+我们主要是使用的install和build两部分，这里的artifacts就是打完包之后的文件作为pipeline运行成功的
+附件上传，并在gitlab交互界面上提供下载 
+stages: # 分段
+  - install
+ 
+cache: # 缓存
+  paths:
+    - node_modules/
+    - stagetreeMicro/
+
+install-job:
+  tags:
+    - BOC3.3-stage  //runner注册时填写的tag
+  only:
+    - BOC3.3-stage
+  stage: install
+  script:
+    - npm install --registry=http://10.10.5.36:4873/
+    - npm run build
+    - rm -rf stagetreeMicro
+    - mv dist stagetreeMicro
+    - sshpass -f /root/paasword.txt scp -r stagetreeMicro root@10.50.4.57:/tmp
+    - sshpass -f /root/paasword.txt ssh root@10.50.4.57 "docker cp /tmp/stagetreeMicro stage-web:/paas-web-micro"
+
+容器环境下进入容器  docker ps 
+docker exec -it 容器id sh 
+cd etc/gitlab-runner/config.toml  支持在这个文件中去修改配置  
+之后在重启 gitlab-runner restart
+如果jobs一直挂起(pending)状态 首先考虑是否runner并没有激活
+gitlab-runner verify   然后在重启
+
+base64的编码原理
+什么是base64编码
+Base64编码是将字符串以每3个8比特(bit)的字节子序列拆分成4个6比特(bit)的字节(6比特有效字节，最左边两个永远为0，其实也是8比特的字节)子序列，再将得到的子序列查找Base64的编码索引表，得到对应的字符拼接成新的字符串的一种编码方式。
+为什么命名为base64呢？
+因为6位(bit)的二进制数有2的6次方个,也就是二进制数(00000000-00111111)之间的代表0-63的64个二进制数。
+Base64字符是哪64个？
+Base64的编码索引表，字符选用了"A-Z、a-z、0-9、+、/" 64个可打印字符来代表(00000000-00111111)这64个二进制数。
+代码实现:
+function toBase64(str){
+  function strAtoZ(baseNum){
+    return new Array(26).fill(baseNum).map((item,idx)=>String.fromCharCode(item+idx)).join('');
+  }
+  const strAZ = strAtoZ(65) //'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const straz = strAtoZ(97) //'abcdefghijklmnopqrstuvwxyz'
+  const base64Code = strAZ+straz+'0123456789+/';
+  let item = '',
+      res = '',
+      enCode='',
+      code = str.split('').reduce((prev,cur)=>prev+cur.charCodeAt().toString(2).padStart(8,'0'),'')
+  if(code.length%24===8){
+    code +='0000'  //12-8   12=2*6
+    res = '=='
+  }
+  if(code.length%24===16){
+    code +='00' //18-16   18=3*6
+    res = '='
+  }
+  for(let i=0;i<code.length;i+=6){
+    item = code.slice(i,i+6)
+    enCode += base64Code[parseInt(item,2)]
+  }
+  return enCode+res
+}
+console.log(toBase64("js++"))
+
+常见 Web 安全攻防总结
+XSS
+首先说下最常见的 XSS 漏洞，XSS (Cross Site Script)，跨站脚本攻击，因为缩写和 CSS (Cascading Style Sheets) 重叠，所以只能叫 XSS。
+XSS 的原理是恶意攻击者往 Web 页面里插入恶意可执行网页脚本代码，当用户浏览该页之时，嵌入其中 Web 里面的脚本代码会被执行，从而可以达到攻击者盗取用户信息或其他侵犯用户安全隐私的目的。XSS 的攻击方式千变万化，但还是可以大致细分为几种类型
+非持久型 XSS
+非持久型 XSS 漏洞，也叫反射型 XSS 漏洞，一般是通过给别人发送带有恶意脚本代码参数的 URL，当 URL 地址被打开时，特有的恶意代码参数被 HTML 解析、执行。
+为了防止出现非持久型 XSS 漏洞，需要确保这么几件事情：
+Web 页面渲染的所有内容或者渲染的数据都必须来自于服务端。
+尽量不要从 URL，document.referrer，document.forms 等这种 DOM API 中获取数据直接渲染。
+尽量不要使用 eval, new Function()，document.write()，document.writeln()，window.setInterval()，window.setTimeout()，innerHTML，document.creteElement() 等可执行字符串的方法。
+如果做不到以上几点，也必须对涉及 DOM 渲染的方法传入的字符串参数做 escape 转义。
+前端渲染的时候对任何的字段都需要做 escape 转义编码。
+
+持久型 XSS
+持久型 XSS 漏洞，也被称为存储型 XSS 漏洞，一般存在于 Form 表单提交等交互功能，如发帖留言，提交文本信息等，黑客利用的 XSS 漏洞，将内容经正常功能提交进入数据库持久保存，当前端页面获得后端从数据库中读出的注入代码时，恰好将其渲染执行。
+主要注入页面方式和非持久型 XSS 漏洞类似，只不过持久型的不是来源于 URL，refferer，forms 等，而是来源于后端从数据库中读出来的数据。持久型 XSS 攻击不需要诱骗点击，黑客只需要在提交表单的地方完成注入即可，但是这种 XSS 攻击的成本相对还是很高。攻击成功需要同时满足以下几个条件：
+POST 请求提交表单后端没做转义直接入库。
+后端从数据库中取出数据没做转义直接输出给前端。
+前端拿到后端数据没做转义直接渲染成 DOM。
+为了防止出现持久型 XSS 漏洞，需要确保这么几件事情：
+后端在入库前应该选择不相信任何前端数据，将所有的字段统一进行转义处理。
+后端在输出给前端数据统一进行转义处理。
+前端在渲染页面 DOM 的时候应该选择不相信任何后端数据，任何字段都需要做转义处理。
+
+CSRF
+CSRF（Cross-Site Request Forgery），中文名称：跨站请求伪造攻击
+用户已经登录了站点 A，并在本地记录了 cookie
+在用户没有登出站点 A 的情况下（也就是 cookie 生效的情况下），访问了恶意攻击者提供的引诱危险站点 B (B 站点要求访问站点A)。
+站点 A 没有做任何 CSRF 防御
+预防 CSRF
+CSRF 的防御可以从服务端和客户端两方面着手，防御效果是从服务端着手效果比较好，现在一般的 CSRF 防御也都在服务端进行。服务端的预防 CSRF 攻击的方式方法有多种，但思路上都是差不多的，主要从以下两个方面入手：
+正确使用 GET，POST 请求和 cookie
+在非 GET 请求中增加 token
+
+SQL 注入
+SQL 注入漏洞（SQL Injection）是 Web 开发中最常见的一种安全漏洞。可以用它来从数据库获取敏感信息，或者利用数据库的特性执行添加用户，导出文件等一系列恶意操作，甚至有可能获取数据库乃至系统用户最高权限。
+而造成 SQL 注入的原因是因为程序没有有效的转义过滤用户的输入，使攻击者成功的向服务器提交恶意的 SQL 查询代码，程序在接收后错误的将攻击者的输入作为查询语句的一部分执行，导致原始的查询逻辑被改变，额外的执行了攻击者精心构造的恶意代码
+如何预防 SQL 注入
+防止 SQL 注入主要是不能允许用户输入的内容影响正常的 SQL 语句的逻辑，当用户的输入的信息将要用来拼接 SQL 语句的话，我们应该永远选择不相信，任何内容都必须进行转义过滤
+严格限制Web应用的数据库的操作权限
+后端代码检查输入的数据是否符合预期
+对进入数据库的特殊字符
+所有的查询语句建议使用数据库提供的参数化查询接口，参数化的语句使用参数而不是将用户输入变量嵌入到 SQL 语句中，即不要直接拼接 SQL 语句。例如 Node.js 中的 mysqljs 库的 query 方法中的 ? 占位参数。
+在应用发布之前建议使用专业的 SQL 注入检测工具进行检测
+
+缓存策略：强缓存&协商缓存
+强缓存：
+强缓存是利用http头中的Expires和Cache-Control两个字段来控制的，用来表示资源的缓存时间
+
+Expires：是http1.0的规范，它的值是一个绝对时间的GMT格式的时间字符串。比如网页的Expires值是：
+expires:Mar, 06 Apr 2020 10:47:02 GMT。
+这个时间代表这这个资源的失效时间，只要发送请求时间是在Expires之前，那么本地缓存始终有效，则在缓存中读取数据。所以这种方式有一个明显的缺点，由于失效的时间是一个绝对时间，所以当服务器与客户端时间偏差较大时，就会导致缓存混乱。
+
+2. Cache-Control: 是http1.1中出现的，一般利用该字段的max-age来判断，这个值是一个相 对时间。例如：
+Cache-Control:max-age=3600 // 代表着资源的有效期是3600秒
+除了该字段还有其他的几个常用的值。
+
+no-cache：不使用本地缓存。需要使用缓存协商，先与服务器确认返回的响应是否被更改，如果之前的响应中存在ETag，那么请求的时候会与服务端验证，如果资源未被更改，则可以避免重新下载。
+no-store：直接禁止游览器缓存数据，每次用户请求该资源，都会向服务器发送一个请求，每次都会下载完整的资源。
+public：可以被所有的用户缓存，包括终端用户和CDN等中间代理服务器。
+private：只能被终端用户的浏览器缓存，不允许CDN等中继缓存服务器对其缓存。
+
+Cache-Control与Expires的优先级
+Cache-Control与Expires可以在服务端配置同时启用，同时启用的时候Cache-Control优先级高。比如：
+cache-control:max-age=691200
+expires:Fri, 06 Mar 2020 10:47:02 GMT
+那么表示资源可以被缓存的最长时间为691200秒，会优先考虑max-age。
+
+协商缓存
+协商缓存是浏览器判断资源是否可用，所以需要两个标识，第一个是第一次请求的响应头带上某个字段（Last-Modified或者Etag），第二个则是后续请求带上的对应请求字段（If-Modified-Since或者If-None-Match），两个标识一起出现才有意义，单独则没有什么效果。
+Etag和If-None-Match
+Last-Modified和If-Modified-Since
+Last-Modify/If-Modify-Since
+浏览器第一次请求一个资源的时候，服务器返回的header中会加上Last-Modify，Last-modify是一个时间标识该资源的最后修改时间，例如Last-Modify: Thu,31 Dec 2037 23:59:59 GMT。
+当浏览器再次请求该资源时，request的请求头中会包含If-Modify-Since，该值为缓存之前返回的Last-Modify。服务器收到If-Modify-Since后，根据资源的最后修改时间判断是否命中缓存。如果命中缓存，则返回304，并且不会返回资源内容，并且不会返回Last-Modify。
+
+Etag/If-None-Match
+从上面看可能会觉得使用Last-Modified已经足以让浏览器知道本地的缓存副本是否足够新，为什么还需要Etag呢？
+首先，Etag/If-None-Match 是“实体标签”（Entity Tag）的缩写，是资源的一个唯一标识，资源变化都会导致ETag变化。服务器根据浏览器上送的If-None-Match值来判断是否命中缓存。
+
+因此，Etag的出现主要是为了解决几个Last-Modified比较难解决的问题：
+一些文件也许会周期性的更改，但是他的内容并不改变(仅仅改变的修改时间)，这个时候我们并不希望客户端认为这个文件被修改了，而重新GET；
+某些文件修改非常频繁，比如在秒以下的时间内进行修改，(比方说1s内修改了N次)，If-Modified-Since能检查到的粒度是s级的，这种修改无法判断(或者说UNIX记录MTIME只能精确到秒)；
+某些服务器不能精确的得到文件的最后修改时间。
+Last-Modified与ETag是可以一起使用的，服务器会优先验证ETag，一致的情况下，才会继续比对Last-Modified，最后才决定是否返回304。
+
+浏览器刷新问题
+当你点“刷新”按钮的时候，浏览器会在请求头里加一个“Cache-Control: maxage=0”。因为 max-age 是“生存时间”，而本地缓存里的数据至少保存了几秒钟，所以浏览器就不会使用缓存，而是向服务器发请求。服务器看到 max-age=0，也就会用一个最新生成的报文回应浏览器。
+Ctrl+F5 的“强制刷新”又是什么样的呢？
+它其实是发了一个“Cache-Control: no-cache”，含义和“max-age=0”基本一样，就看后台的服务器怎么理解，通常两者的效果是相同的
+
+懒加载和预加载
+1.什么是懒加载？
+懒加载也就是延迟加载。
+当访问一个页面的时候，先把img元素或是其他元素的背景图片路径替换成一张大小为1*1px图片的路径（这样就只需请求一次，俗称占位图），只有当图片出现在浏览器的可视区域内时，才设置图片正真的路径，让图片显示出来。这就是图片懒加载。
+2.为什么要使用懒加载？
+很多页面，内容很丰富，页面很长，图片较多。比如说各种商城页面。这些页面图片数量多，而且比较大，少说百来K，多则上兆。要是页面载入就一次性加载完毕。估计大家都会等到黄花变成黄花菜了。
+3.懒加载的原理是什么？
+页面中的img元素，如果没有src属性，浏览器就不会发出请求去下载图片，只有通过javascript设置了图片路径，浏览器才会发送请求。
+懒加载的原理就是先在页面中把所有的图片统一使用一张占位图进行占位，把正真的路径存在元素的“data-url”（这个名字起个自己认识好记的就行）属性里，要用的时候就取出来，再设置；
+4.懒加载的实现步骤？
+1)首先，不要将图片地址放到src属性中，而是放到其它属性(data-original)中。
+2)页面加载完成后，根据scrollTop判断图片是否在用户的视野内，如果在，则将data-original属性中的值取出存放到src属性中。
+3)在滚动事件中重复判断图片是否进入视野，如果进入，则将data-original属性中的值取出存放到src属性中。
+5.懒加载的优点是什么？
+页面加载速度快、可以减轻服务器的压力、节约了流量,用户体验好
+<body>
+  <div class="wrap">
+    <ul class="img-list J_imgList"></ul>
+  </div>
+  <div style="display:none;" id="J_data">
+    [{"img":"img/1.jpg","name":"图片1"}, 重复多个]
+  </div>
+  <script type="text/html" id="J_imgTpl">
+    <li class="img-item">
+      <div class="img-wrap">
+        <img src="img/load.jpg" class="list-img" data-src="{{img}}" alt="">
+      </div>
+      <div class="img-tt">
+        <h2>{{name}}</h2>
+      </div>
+    </li>
+  </script>
+  <script>
+    (function(win,doc){
+      var oImgList= doc.getElementsByClassName('J_imgList')[0],
+          data = JSON.parse(doc.getElementById('J_data').innerHTML),
+          imgTpl = doc.getElementById('J_imgTpl').innerHTML,
+          oImgs = doc.getElementsByClassName('list-img')
+      function init(){
+        renderList(data)
+        bindEvent()
+        setTimeout(()=>{
+          win.scrollTo(0,0)
+        },150)
+      }
+      init()
+      function imgLazyLoad(images){
+        var imgItem,
+            cHeight = win.innerHeight ||doc.documentElement.clientHeight,
+            sTop = doc.documentElement.scrollTop||doc.body.scrollTop,
+            n=0;
+            for(var i=n;i<images.length;i++){
+              imgItem = images[i]
+              if(imgItem.offsetTop < cHeight+sTop){
+                if(imgItem.getAttribute('data-src')){
+                  imgItem.src = imgItem.getAttribute('data-src')
+                  imgItem.removeAttribute('data-src');
+                }
+                n++
+              }
+            }
+      }
+      
+      function throttle(fn,times) {
+        let canRun = true; // 通过闭包保存一个标记
+        return function () {
+          if (!canRun) return; // 在函数开头判断标记是否为true，不为true则return
+          canRun = false; // 立即设置为false
+          setTimeout(() => { // 将外部传入的函数的执行放在setTimeout中
+            fn.apply(self, arguments);
+            canRun = true;
+          }, times);
+        };
+      }
+      function bindEvent(){
+        win.onload=win.onscroll = throttle(imgLazyLoad(oImgs),800)
+      }
+      function tplReplace(template,replaceObject){
+        return template.replace(/{{(.*?)}}/g,function(node,key){
+          return replaceObject[key]
+        })
+      }
+      function renderList(data){
+        oImgList.innerHTML = data.reduce((pre,cur)=>{
+          return pre+tplReplace(imgTpl,{
+            img:cur.img,
+            name:cur.name
+          })
+        },'')
+      }
+    })(window,document)
+  </script>
+</body>
+
+2、预加载
+1.什么是预加载？
+提前加载图片，当用户需要查看时可直接从本地缓存中渲染
+2.为什么要使用预加载？
+图片预先加载到浏览器中，访问者便可顺利地在你的网站上冲浪，并享受到极快的加载速度。这对图片画廊及图片占据很大比例的网站来说十分有利，它保证了图片快速、无缝地发布，也可帮助用户在浏览你网站内容时获得更好的用户体验。
+3.实现预加载的方法有哪些？
+方法一：用CSS和JavaScript实现预加载
+#preload-01 { background: url(image-01.png) no-repeat -9999px -9999px; }
+#preload-02 { background: url(image-02.png) no-repeat -9999px -9999px; }
+#preload-03 { background: url(image-03.png) no-repeat -9999px -9999px; }
+将这三个ID选择器应用到(X)HTML元素中，我们便可通过CSS的background属性将图片预加载到屏幕外的背景上。只要这些图片的路径保持不变，当它们在Web页面的其他地方被调用时，浏览器就会在渲染过程中使用预加载（缓存）的图片。简单、高效，不需要任何JavaScript。该方法虽然高效，但仍有改进余地。使用该法加载的图片会同页面的其他内容一起加载，增加了页面的整体加载时间。为了解决这个问题，我们增加了一些JavaScript代码，来推迟预加载的时间，直到页面加载完毕。
+方法二：仅使用JavaScript实现预加载
+var images = new Array()
+function preload() {
+        for (i = 0; i < preload.arguments.length; i++) {
+                images[i] = new Image()
+                images[i].src = preload.arguments[i]                         
+        }
+}
+preload(
+        "http://domain.tld/gallery/image-001.jpg",
+        "http://domain.tld/gallery/image-002.jpg",
+        "http://domain.tld/gallery/image-003.jpg"
+)
+方法三：使用Ajax实现预加载
+window.onload = function() {
+        setTimeout(function() {
+                // XHR to request a JS and a CSS
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'http://domain.tld/preload.js');
+                xhr.send('');
+                xhr = new XMLHttpRequest();
+                xhr.open('GET', 'http://domain.tld/preload.css');
+                xhr.send('');
+                // preload image
+                new Image().src = "http://domain.tld/preload.png";
+        }, 1000);
+};
+上面代码预加载了“preload.js”、“preload.css”和“preload.png”。1000毫秒的超时是为了防止脚本挂起，而导致正常页面出现功能问题。
+常用的是new Image();设置其src来实现预载，再使用onload方法回调预载完成事件。只要浏览器把图片下载到本地，同样的src就会使用缓存，这是最基本也是最实用的预载方法。当Image下载完图片头后，会得到宽和高，因此可以在预载前得到图片的大小(方法是用记时器轮循宽高变化)。
+4、补充知识
+屏幕可视窗口大小
+        **原生方法**：
+            window.innerHeight 标准浏览器及IE9+ ||
+            document.documentElement.clientHeight 标准浏览器及低版本IE标准模式 ||
+            document.body.clientHeight  低版本混杂模式
+        **jQuery方法**： 
+            $(window).height();
+浏览器窗口顶部与文档顶部之间的距离，也就是滚动条滚动的距离：
+        **原生方法**：
+              window.pagYoffset 标准浏览器及IE9+ ||
+              document.documentElement.scrollTop 兼容ie低版本的标准模式 ||
+              document.body.scrollTop 兼容混杂模式；
+        **jQuery方法**：
+              $(document).scrollTop();
+
+从输入URL到页面加载全过程
+简单来说就是1.浏览器下载资源；2.浏览器渲染页面。
+1.浏览器分析URL
+浏览器会对我们输入的url进行解析，主要将其分为下部分：协议、网络地址、资源路径。其中网络地址指示该连接网络上哪一台计算机，可以是域名或者IP地址，可以包括端口号；协议是从该计算机获取资源的方式，常见的是HTTP，HTTPS，FTP、FILE等。不同协议有不同的通讯内容格式；资源路径指示从服务器上需要获取资源的具体路径。
+URL:统一资源定位符。通过路径确定资源。
+URI:统一资源标识符。唯一标识一个资源。
+2、DNS域名解析
+客户端收到你输入的域名地址后，它首先去找本地的hosts文件，检查在该文件中是否有相应的域名、IP对应关系，如果有，则向其IP地址发送请求，如果没有，再去找DNS服务器。一般用户很少去编辑修改hosts文件。
+DNS查询的具体步骤如下：
+a、从浏览器缓存中查询。浏览器会存储一定时间的DNS记录，操作系统不会告诉浏览器每个DNS记录的保存时限，不同浏览器设置保存时限为一个固定值（不同浏览器情况不同，一般在2-30分钟）。
+b、从操作系统缓存中查询。如果浏览器中没有包含想要的缓存记录，那浏览器就会发起操作系统请求，继续查询操作系统缓存
+c、从路由器中查询DNS缓存。请求持续发送到你的路由，它通常会有自己的DNS缓存。
+d、从ISP中查询DNS缓存。下一个被查询地方是ISP缓存DNS的服务器。
+e、域名服务器迭代查询，根据返回的地址逐级向上查询。首先从root域名服务器中查询如.com域名服务器，然后逐步向前查询，.com顶级域名服务器到ruanyifeng的域名服务器。一般来说，.com级别的都已经在缓存中了，所以一般不会进行对root域名服务器的查询
+浏览器客户端向本地DNS服务器发送一个含有域名https://www.jianshu.com的DNS查询报文。
+本地DNS服务器把查询报文转发到根DNS服务器，根DNS服务器注意到其com后缀，于是向本地DNS服务器返回comDNS服务器的IP地址。
+本地DNS服务器再次向comDNS服务器发送查询请求，comDNS服务器注意到其https://www.jianshu.com后缀并用负责该域名的权威DNS服务器的IP地址作为回应。
+最后，本地DNS服务器将含有https://www.jianshu.com的IP地址的响应报文发送给客户端。
+从客户端到本地服务器属于递归查询，而DNS服务器之间的交互属于迭代查询。
+正常情况下，本地DNS服务器的缓存中已有comDNS服务器的地址，因此请求根域名服务器这一步不是必需的。
+3、浏览器获取端口号
+知道ip地址后，还需要端口号，这样才能知道具体在603室的哪个房间里。
+http协议默认端口号是80
+HTTPS（securely transferring web pages）服务器，默认端口号为443
+4、TCP建立连接
+IP和端口都有了，在http消息发送前，需要建立客户端与服务器的TCP链接，也就是进行所谓的三次握手。
+TCP是因特网中的传输层协议，使用三次握手协议建立连接。当主动方发出SYN连接请求后，
+等待对方回答SYN+ACK，并最终对对方的 SYN 执行 ACK 确认。这种建立连接的方法可以防止产生错误的连接，
+TCP使用的流量控制协议是可变大小的滑动窗口协议。
+TCP三次握手的过程如下：
+a、客户端发送SYN（SEQ=x）报文给服务器端，进入SYN_SEND状态。
+b、服务器端收到SYN报文，回应一个SYN （SEQ=y）ACK(ACK=x+1）报文，进入SYN_RECV状态。
+c、客户端收到服务器端的SYN报文，回应一个ACK(ACK=y+1）报文，进入Established状态。
+三次握手完成，TCP客户端和服务器端成功地建立连接，可以开始传输数据了。
+5、发送HTTP请求
+6、服务器处理请求
+请求到达服务器之后，接下来服务器需要响应浏览器的请求。服务器端收到请求后的由web服务器（准确说应该是http服务器）处理请求，诸如Apache、Ngnix、IIS等。web服务器解析用户请求，知道了需要调度哪些资源文件，再通过相应的这些资源文件处理用户请求和参数，并调用数据库信息，最后将结果通过web服务器返回给浏览器客户端、返回响应结果。在HTTP里，有请求就会有响应，哪怕是错误信息。
+在响应结果中都会有个一个HTTP状态码，比如我们熟知的200、301、404、500等。通过这个状态码我们可以知道服务器端的处理是否正常，并能了解具体的错误。
+状态码由3位数字和原因短语组成。根据首位数字，状态码可以分为五类：
+1xx  信息性状态码   一般标识接收的请求正在处理
+2xx  成功状态码     请求正常处理完毕   
+3xx  重定向状态码   需要进行附加操作以完成请求
+4xx  客户端错误状态码   服务器无法处理请求
+5xx  服务端错误状态码   服务器处理请求出错
+8、关闭TCP连接
+为了避免服务器与客户端双方的资源占用和损耗，当双方没有请求或响应传递时，任意一方都可以发起关闭请求
+2MSL（MSL是Maximum Segment Lifetime,译为“报文最大生存时间” RFC 793中规定MSL为2分钟） 是数据包往返的最大时间，如果 2MSL 后还未收到服务器重传的 FIN 包，就说明服务器已经收到了 ACK 包。
+ROUND 1:
+客户端发送连接释放报文段，停止发送数据，主动关闭TCP连接。FIN=1，seq=u
+ROUND 2:
+服务器端回送一个确认报文段，客户到服务器这个方向的连接就释放了一一半关闭状态。ACK=1，seq=v, ack=u+1
+ROUND 3:
+服务器端发完数据，就发出连接释放报文段，主动关闭TCP连接。FIN=1，ACK=1， seq=w， ack=u+1
+ROUND 4:
+客户端回送一个确认报文段，再等到时间等待计时器设置的2MSL (最长报文段寿命)后，连接彻底关闭。ACK=1，seq=u+1，ack=w+1
+9.浏览器渲染
+关键渲染路径是指浏览器请求下载资源，然后解析、构建树、渲染布局、绘制，最后呈现给客户界面的整个过程。
+用户看到页面实际上可以分为两个阶段：
+页面内容加载完成 DOMContentLoaded
+页面资源加载完成 Load。
+window.onload 和DOMContentLoaded的区别。
+window.addEventListener("load",function(){
+// 页面的全部资源加载完才会执行，包括图片、视频等。
+})
+document.addEventListener("DOMContentLoaded",function(){
+//DOM 渲染完即可执行，此时样式表、图片、视频还可能没有加载完(比较好)
+})
+构建DOM树
+当浏览器接收到服务器响应来的HTML文档后，会遍历文档节点，生成DOM树。
+需要注意以下几点：
+DOM树在构建的过程中可能会被CSS和JS的加载而执行阻塞
+display:none的元素也会在DOM树中
+注释也会在DOM树中
+script标签会在DOM树中
+无论是DOM还是CSSOM，都是要经过Bytes→characters→tokens→nodes→objectmodel这个过程。
+当前节点的所有子节点都构建好后才会去构建当前节点的下一个兄弟节点。
+
+构建CSSOM规则树
+浏览器解析CSS文件并生成CSSOM，每个CSS文件都被分析成一个StyleSheet对象，每个对象都包含CSS规则。CSS规则对象包含对应于CSS语法的选择器和声明对象以及其他对象。
+在这个过程需要注意的是：
+CSS解析可以与DOM解析同时进行。
+CSS解析与script的执行互斥 。
+在Webkit内核中进行了script执行优化，只有在JS访问CSS时才会发生互斥。
+
+构建渲染树（Render Tree）
+通过DOM树和CSS规则树，浏览器就可以通过它两构建渲染树了。浏览器会先从DOM树的根节点开始遍历每个可见节点，然后对每个可见节点找到适配的CSS样式规则并应用。
+有以下几点需要注意：
+Render Tree和DOM Tree不完全对应
+display: none的元素不在Render Tree中
+visibility: hidden的元素在Render Tree中
+渲染树生成后，还是没有办法渲染到屏幕上，渲染到屏幕需要得到各个节点的位置信息，这就需要布局（Layout）的处理了。
+
+渲染树布局(layout of the render tree)
+定位DOM元素坐标和大小
+布局阶段会从渲染树的根节点开始遍历，由于渲染树的每个节点都是一个Render Object对象，包含宽高，位置，背景色等样式信息。所以浏览器就可以通过这些样式信息来确定每个节点对象在页面上的确切大小和位置，布局阶段的输出就是我们常说的盒子模型，它会精确地捕获每个元素在屏幕内的确切位置与大小。需要注意的是：
+float元素，absoulte元素，fixed元素会发生位置偏移。
+我们常说的脱离文档流，其实就是脱离Render Tree。
+渲染树绘制（Painting the render tree）
+在绘制阶段，浏览器会遍历渲染树，调用渲染器的paint()方法在屏幕上显示其内容。渲染树的绘制工作是由浏览器的UI后端组件完成的。
+
+常见知识点
+浏览器如果渲染过程中遇到JS文件怎么处理？
+渲染过程中，如果遇到<script>就停止渲染，执行 JS 代码。JavaScript的加载、解析与执行会阻塞DOM的构建。（将 script 标签放在 body 标签底部的原因）
+JS文件不只是阻塞DOM的构建，它会导致CSSOM也阻塞DOM的构建。CSS阻塞渲染意味着，在CSSOM完备前，页面将一直处理白屏状态，这就是为什么样式放在head中，仅仅是为了更快的解析CSS，保证更快的首次渲染。需要注意的是，即便你没有给页面任何的样式声明，CSSOM依然会生成，默认生成的CSSOM自带浏览器默认样式。
+原因：
+如果JavaScript想访问CSSOM并更改它，那么在执行JavaScript时，必须要能拿到完整的CSSOM。所以此时浏览器会先下载和构建CSSOM，然后再执行JavaScript，最后在继续构建DOM。
+
+回流（重排）和重绘（reflow和repaint）
+HTML默认是流式布局的，但CSS和JS会打破这种布局，改变DOM的外观样式以及大小和位置。因此我们就需要知道两个概念：reflow和replaint。
+
+回流（重排）：对 DOM 的修改引发了 DOM 几何尺寸的变化（比如修改元素的宽、高或隐藏元素等）时，浏览器需要重新计算元素的几何属性（其他元素的几何属性和位置也会因此受到影响），然后再将计算的结果绘制出来。这个过程就是回流（重排）。
+重绘：当我们对 DOM 的修改导致了样式的变化（比如修改了颜色或背景色）却并未影响其几何属性时，浏览器不需重新计算元素的几何属性，直接为该元素绘制新的样式（跳过了重排环节）。
+当网页生成的时候，至少会渲染一次。在用户访问的过程中，还会不断重新渲染。重新渲染会重复回流+重绘或者只有重绘。
+回流（重排）必定会发生重绘，重绘不一定会引发回流。重绘和回流会在我们设置节点样式时频繁出现，同时也会很大程度上影响性能。回流所需的成本比重绘高的多，改变父节点里的子节点很可能会导致父节点的一系列回流。
+
+常见引起回流（重排）属性和方法
+任何会改变元素几何信息(元素的位置和尺寸大小)的操作，都会触发回流。
+添加或者删除可见的DOM元素；
+元素尺寸改变——边距、填充、边框、宽度和高度
+内容变化，比如用户在input框中输入文字
+浏览器窗口尺寸改变——resize事件发生时
+计算 offsetWidth 和 offsetHeight 属性
+设置 style 属性的值
+常见引起重绘属性和方法
+color、border-style、visibility、background、text-decoration等
+
+减少reflow、repaint触发次数
+用transform做形变和位移可以减少reflow。
+使用 visibility 替换 display: none 。
+避免逐个修改节点样式，尽量一次性修改。
+使用DocumentFragment将需要多次修改的DOM元素缓存，最后一次性append到真实DOM中渲染
+CSS 选择符避免节点层级过多
+不要使用 table 布局，可能很小的一个小改动会造成整个 table 的重新布局。
+避免多次读取某些属性。
+
+async和defer
+1）情况1
+<script src="script.js"></script>
+没有 defer 或 async，浏览器会立即加载并执行指定的脚本，
+2）情况2
+<script async src="script.js"></script> (异步下载)
+async是异步下载脚本文件，下载完毕立即解释执行代码。如果是多个，执行顺序和加载顺序无关
+3）情况3
+<script defer src="script.js"></script>(延迟执行)
+defer是在HTML解析完之后才会执行，如果是多个，按照加载的顺序依次执行
+
+基于浏览器渲染原理的性能优化策略？
+CSS放在head中，JS放在body最下面
+懒加载（图片懒加载，上滑加载更多）
+用DOMContentLoaded触发执行JS
+减少reflow、repaint触发次数
+非核心代码异步加载
+
+浏览器渲染页面的两种模式（可通过document.compatMode获取，比如，语雀官网的文档类型是**CSS1Compat**）：
+- **CSS1Compat：标准模式（Strick mode）**，默认模式，浏览器使用W3C的标准解析渲染页面。在标准模式中，浏览器以其支持的最高标准呈现页面。
+- **BackCompat：怪异模式(混杂模式)(Quick mode)**，浏览器使用自己的怪异模式解析渲染页面。在怪异模式中，页面以一种比较宽松的向后兼容的方式显示。
