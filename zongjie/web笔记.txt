@@ -125,7 +125,7 @@ DOCTYPE是HTML5中一种标准通用标记语言的文档类型声明，它的�
 - - 表单必须提交过
   - 必须有name属性。
 - required：要求输入框不能为空，必须有值才能够提交。
-- pattern=" " 里面写入想要的正则模式，例如手机号patte="^(+86)?\d{10}$"
+- pattern=" " 里面写入想要的正则模式，例如手机号pattern="^(+86)?\d{10}$"
 - multiple：可以选择多个文件或者多个邮箱
 - form=" form表单的ID"
 **表单事件：**
@@ -156,7 +156,7 @@ HTML5 提供了两种在客户端存储数据的新方法：
 <canvas id="myCanvas" width="200" height="100"></canvas>
 ```
 - SVG：SVG 指可伸缩矢量图形，用于定义用于网络的基于矢量的图形，使用 XML 格式定义图形，图像在放大或改变尺寸的情况下其图形质量不会有损失，它是万维网联盟的标准
-- 地理定位：Geolocation（地理定位）用于定位用户的位置。‘
+- 地理定位：Geolocation（地理定位）用于定位用户的位置。
 **总结：**
 （1）新增语义化标签：nav、header、footer、aside、section、article
 （2）音频、视频标签：audio、video
@@ -462,8 +462,8 @@ MDN对该方法的描述：
 - **函数节流**：在高频率事件( resize, scroll 等)中，为了防止在一个刷新间隔内发生多次函数执行，RequestAnimationFrame可保证每个刷新间隔内，函数只被执行一次，这样既能保证流畅性，也能更好的节省函数执行的开销，一个刷新间隔内函数执行多次时没有意义的，因为多数显示器每16.7ms刷新一次，多次绘制并不会在屏幕上体现出来。
 - **减少DOM操作**：requestAnimationFrame 会把每一帧中的所有DOM操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
 **setTimeout执行动画的缺点**：它通过设定间隔时间来不断改变图像位置，达到动画效果。但是容易出现卡顿、抖动的现象；原因是：
-- settimeout任务被放入异步队列，只有当主线程任务执行完后才会执行队列中的任务，因此实际执行时间总是比设定时间要晚；
-- settimeout的固定时间间隔不一定与屏幕刷新间隔时间相同，会引起丢帧。
+- setTimeout任务被放入异步队列，只有当主线程任务执行完后才会执行队列中的任务，因此实际执行时间总是比设定时间要晚；
+- setTimeout的固定时间间隔不一定与屏幕刷新间隔时间相同，会引起丢帧。
 ### 11. 对盒模型的理解
 CSS3中的盒模型有以下两种：标准盒子模型、IE盒子模型
 盒模型都是由四个部分组成的，分别是margin、border、padding和content。
@@ -471,8 +471,8 @@ CSS3中的盒模型有以下两种：标准盒子模型、IE盒子模型
 - 标准盒模型的width和height属性的范围只包含了content，
 - IE盒模型的width和height属性的范围包含了border、padding和content。
 可以通过修改元素的box-sizing属性来改变元素的盒模型：
-- `box-sizeing: content-box`表示标准盒模型（默认值）
-- `box-sizeing: border-box`表示IE盒模型（怪异盒模型）
+- `box-sizing: content-box`表示标准盒模型（默认值）
+- `box-sizing: border-box`表示IE盒模型（怪异盒模型）
 ### 12. 为什么有时候⽤**translate**来改变位置⽽不是定位？ 
 translate 是 transform 属性的⼀个值。改变transform或opacity不会触发浏览器重新布局（reflow）或重绘（repaint），只会触发复合（compositions）。⽽改变绝对定位会触发重新布局，进⽽触发重绘和复合。transform使浏览器为元素创建⼀个 GPU 图层，但改变绝对定位会使⽤到 CPU。 因此translate()更⾼效，可以缩短平滑动画的绘制时间。 ⽽translate改变位置时，元素依然会占据其原始空间，绝对定位就不会发⽣这种情况。
 ### 13. li 与 li 之间有看不见的空白间隔是什么原因引起的？如何解决？
@@ -720,6 +720,22 @@ z-index属性在下列情况下会失效：
 **使用场景：**
 - 对于只需要适配少部分移动设备，且分辨率对页面影响不大的，使用px即可 。
 - 对于需要适配各种移动设备，使用rem，例如需要适配iPhone和iPad等分辨率差别比较挺大的设备。
+//适配兼容
+(function (doc, win) {
+    console.log(doc, win)
+    // var docEle = doc.documentElement;
+    const resizeEvent = 'orientationchange' in window ? 'orientationchange' : 'resize';
+
+    var recalCulate = function () {
+        var docEle = document.documentElement,
+            w = docEle.clientWidth,
+            num = (w > 750 ? 750 : w) / 750;       // **此时的750就是你设计稿的尺寸
+        docEle.style.fontSize = (num * 100).toFixed(1) + 'px';
+    };
+    recalCulate();
+    if (!doc.addEventListener) return;
+    win.addEventListener(resizeEvent, recalCulate, false);
+})(document, window);
 ### 3. 两栏布局的实现
 一般两栏布局指的是**左边一栏宽度固定，右边一栏宽度自适应**，两栏布局的具体实现：
 - 利用浮动，将左边元素宽度设置为200px，并且设置向左浮动。将右边元素的margin-left设置为200px，宽度设置为auto（默认为auto，撑满整个父元素）。
@@ -1258,7 +1274,7 @@ div {
 div{
     border: 100px solid transparent;
     width: 0;
-    heigt: 0;
+    height: 0;
     border-radius: 100px;
     border-top-color: red;
 }
@@ -1376,6 +1392,8 @@ JavaScript共有八种数据类型，分别是 Undefined、Null、Boolean、Numb
 其中 Symbol 和 BigInt 是ES6 中新增的数据类型：
 - Symbol 代表创建后独一无二且不可变的数据类型，它主要是为了解决可能出现的全局变量冲突的问题。
 - BigInt 是一种数字类型的数据，它可以表示任意精度格式的整数，使用 BigInt 可以安全地存储和操作大整数，即使这个数已经超出了 Number 能够表示的安全整数范围。
+Number.MAX_SAFE_INTEGER  9007199254740991
+Math.pow(2,53)  9007199254740992
 这些数据可以分为原始数据类型和引用数据类型：
 - 栈：原始数据类型（Undefined、Null、Boolean、Number、String）
 - 堆：引用数据类型（对象、数组和函数）
@@ -2143,9 +2161,9 @@ function objectFactory() {
 objectFactory(构造函数, 初始化参数);
 ```
 ### 2. map和Object的区别
-|          | Map                                                          | Object                                                       |
+|          | Map            | Object             |
 | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 意外的键 | Map默认情况不包含任何键，只包含显式插入的键。                | Object 有一个原型, 原型链上的键名有可能和自己在对象上的设置的键名产生冲突。 |
+| 意外的键 | Map默认情况不包含任何键，只包含显式插入的键。| Object 有一个原型, 原型链上的键名有可能和自己在对象上的设置的键名产生冲突。 |
 | 键的类型 | Map的键可以是任意值，包括函数、对象或任意基本类型。          | Object 的键必须是 String 或是Symbol。                        |
 | 键的顺序 | Map 中的 key 是有序的。因此，当迭代的时候， Map 对象以插入的顺序返回键值。 | Object 的键是无序的                                          |
 | Size     | Map 的键值对个数可以轻易地通过size 属性获取                  | Object 的键值对个数只能手动计算                              |
@@ -2252,8 +2270,7 @@ var regex = /^[a-zA-Z\$][a-zA-Z0-9_\$]{4,16}$/;
 ```
 ### 6. 对JSON的理解
 JSON 是一种基于文本的轻量级的数据交换格式。它可以被任何的编程语言读取和作为数据格式来传递。
-在项目开发中，使用 JSON 作为前后端数据交换的方式。在前端通过将一个符合 JSON 格式的数据结构序列化为 
-JSON 字符串，然后将它传递到后端，后端通过 JSON 格式的字符串解析后生成对应的数据结构，以此来实现前后端数据的一个传递。
+在项目开发中，使用 JSON 作为前后端数据交换的方式。在前端通过将一个符合 JSON 格式的数据结构序列化为 JSON 字符串，然后将它传递到后端，后端通过 JSON 格式的字符串解析后生成对应的数据结构，以此来实现前后端数据的一个传递。
 因为 JSON 的语法是基于 js 的，因此很容易将 JSON 和 js 中的对象弄混，但是应该注意的是 JSON 和 js 中的对象不是一回事，JSON 中对象格式更加严格，比如说在 JSON 中属性值不能为函数，不能出现 NaN 这样的属性值等，因此大多数的 js 对象是不符合 JSON 对象的格式的。
 在 js 中提供了两个函数来实现 js 数据结构和 JSON 格式的转换处理，
 - JSON.stringify 函数，通过传入一个符合 JSON 格式的数据结构，将其转换为一个 JSON 字符串。如果传入的数据结构不符合 JSON 格式，那么在序列化的时候会对这些值进行对应的特殊处理，使其符合规范。在前端向后端发送数据时，可以调用这个函数将数据对象转化为 JSON 格式的字符串。
@@ -2359,12 +2376,12 @@ Array.from(arrayLike);
 现代计算机中数据都是以二进制的形式存储的，即0、1两种状态，计算机对二进制数据进行的运算加减乘除等都是叫位运算，即将符号位共同参与运算的运算。
 常见的位运算有以下几种：
 
-| 运算符 | 描述 | 运算规则                                                 |
-| ------ | ---- | -------------------------------------------------------- |
-| `&`    | 与   | 两个位都为1时，结果才为1                                 |
+| 运算符 | 描述 | 运算规则                                            |
+| ------ | ---- | -------------------------------------------------  |
+| `&`    | 与   | 两个位都为1时，结果才为1                            |
 | `|`    | 或   | 两个位都为0时，结果才为0                                 |
 | `^`    | 异或 | 两个位相同为0，相异为1                                   |
-| `~`    | 取反 | 0变1，1变0                                               |
+| `~`    | 取反 | 0变1，1变0                                             |
 | `<<`   | 左移 | 各二进制位全部左移若干位，高位丢弃，低位补0              |
 | `>>`   | 右移 | 各二进制位全部右移若干位，正数左补0，负数左补1，右边丢弃 |
 #### 1. 按位与运算符（&）
@@ -2380,7 +2397,7 @@ Array.from(arrayLike);
 例如：3&5 即：
 ```
 0000 0011 
-   0000 0101 
+0000 0101 
  = 0000 0001
 ```
 因此 3&5 的值为1。
@@ -2403,7 +2420,7 @@ Array.from(arrayLike);
 例如：3|5即：
 ```
 0000 0011
-  0000 0101 
+0000 0101 
 = 0000 0111
 ```
 因此，3|5的值为7。
@@ -2421,7 +2438,7 @@ Array.from(arrayLike);
 例如：3|5即：
 ```
 0000 0011
-  0000 0101 
+0000 0101 
 = 0000 0110
 ```
 因此，3^5的值为6。
@@ -2447,7 +2464,7 @@ Array.from(arrayLike);
 当发现按位取反为负数时，就**直接取其补码**，变为十进制：
 ```
 0000 0110
-   = 1111 1001
+ = 1111 1001
 反码：1000 0110
 补码：1000 0111
 ```
@@ -2455,7 +2472,8 @@ Array.from(arrayLike);
 #### 5. 左移运算符（<<）
 **定义：** 将一个运算对象的各二进制位全部左移若干位，左边的二进制位丢弃，右边补0。
 设 a=1010 1110，a = a<< 2 将a的二进制位左移2位、右补0，即得a=1011 1000。
-若左移时舍弃的高位不包含1，则每左移一位，相当于该数乘以2。
+若左移时舍弃的高位不包含1，则每左移一位，相当于该数乘以2。  
+m<<n===> m*(2的n次方)
 #### 6. 右移运算符（>>）
 **定义：** 将一个数的各二进制位全部右移若干位，正数左补0，负数左补1，右边丢弃。
 例如：a=a>>2 将a的二进制位右移2位，左补0 或者 左补1得看被移数是正还是负。
@@ -2508,7 +2526,7 @@ function foo(){
 ```
 ### 13. 什么是 DOM 和 BOM？
 - DOM 指的是文档对象模型，它指的是把文档当做一个对象，这个对象主要定义了处理网页内容的方法和接口。
-- BOM 指的是浏览器对象模型，它指的是把浏览器当做一个对象来对待，这个对象主要定义了与浏览器进行交互的法和接口。BOM的核心是 window，而 window 对象具有双重角色，它既是通过 js 访问浏览器窗口的一个接口，又是一个 Global（全局）对象。这意味着在网页中定义的任何对象，变量和函数，都作为全局对象的一个属性或者方法存在。window 对象含有 location 对象、navigator 对象、screen 对象等子对象，并且 DOM 的最根本的对象 document 对象也是 BOM 的 window 对象的子对象。
+- BOM 指的是浏览器对象模型，它指的是把浏览器当做一个对象来对待，这个对象主要定义了与浏览器进行交互的方法和接口。BOM的核心是 window，而 window 对象具有双重角色，它既是通过 js 访问浏览器窗口的一个接口，又是一个 Global（全局）对象。这意味着在网页中定义的任何对象，变量和函数，都作为全局对象的一个属性或者方法存在。window 对象含有 location 对象、navigator 对象、screen 对象等子对象，并且 DOM 的最根本的对象 document 对象也是 BOM 的 window 对象的子对象。
 ### 14. 对类数组对象的理解，如何转化为数组
 一个拥有 length 属性和若干索引属性的对象就可以被称为类数组对象，类数组对象和数组类似，但是不能调用数组的方法。常见的类数组对象有 arguments 和 DOM 方法的返回结果，函数参数也可以被看作是类数组对象，因为它含有 length属性值，代表可接收的参数个数。
 常见的类数组转换为数组的方法有这样几种：
@@ -2540,9 +2558,9 @@ AJAX是 Asynchronous JavaScript and XML 的缩写，指的是通过 JavaScript �
 - 当对象的属性和监听函数设置完成后，最后调**用 sent 方法来向服务器发起请求**，可以传入参数作为发送的数据体。
 ```
 const SERVER_URL = "/server";
-let xhr = new XMLHttpRequest();
+let xhr = new XMLHttpRequest(); // new ActiveXObject(aVersions[i]);兼容
 // 创建 Http 请求
-xhr.open("GET", url, true);
+xhr.open("GET", url, true);//这个true代表是否是异步  true代表使用异步模式
 // 设置状态监听函数
 xhr.onreadystatechange = function() {
   if (this.readyState !== 4) return;
@@ -2598,7 +2616,7 @@ function getJSON(url) {
 ```
 ### 17. JavaScript为什么要进行变量提升，它导致了什么问题？
 变量提升的表现是，无论在函数中何处位置声明的变量，好像都被提升到了函数的首部，可以在变量声明前访问到而不会报错。
-造成变量声明提升的**本质原因**是 js 引擎在代码执行前有一个解析的过程，创建了执行上下文，初始化了一些代码执行时需要用到的对象。当访问一个变量时，会到当前执行上下文中的作用域链中去查找，而作用域链的首端指向的是当前执行上下文的变量对象，这个变量对象是执行上下文的一个属性，它包含了函数的形参、所有的函数和变量声明，这个对象的是在代码解析的时候创建的。
+造成变量声明提升的**本质原因**是 js 引擎在代码执行前有一个预解析的过程，创建了执行上下文，初始化了一些代码执行时需要用到的对象。当访问一个变量时，会到当前执行上下文中的作用域链中去查找，而作用域链的首端指向的是当前执行上下文的变量对象，这个变量对象是执行上下文的一个属性，它包含了函数的形参、所有的函数和变量声明，这个对象的是在代码解析的时候创建的。
 首先要知道，JS在拿到一个变量或者一个函数的时候，会有两步操作，即解析和执行。
 - **在解析阶段**，JS会检查语法，并对函数进行预编译。解析的时候会先创建一个全局执行上下文环境，先把代码中即将执行的变量、函数声明都拿出来，变量先赋值为undefined，函数先声明好可使用。在一个函数执行之前，也会创建一个函数执行上下文环境，跟全局执行上下文类似，不过函数执行上下文会多出this、arguments和函数的参数。
 - - 全局上下文：变量定义，函数声明
@@ -2816,26 +2834,23 @@ obj[Symbol.iterator] = function(){
     var count = 0;
     return {
         next(){
-            if(count<keys.length){
-                return {value: obj[keys[count++]],done:false};
-            }else{
-                return {value:undefined,done:true};
-            }
+          return count<keys.length?{value: obj[keys[count++]],done:false}:{value:undefined,done:true};
         }
     }
 };
 for(var k of obj){
     console.log(k);
-}// 方法二
+}
+// 方法二
 var obj = {
     a:1,
     b:2,
     c:3
 };
 obj[Symbol.iterator] = function*(){
-    var keys = Object.keys(obj);
+    var keys = Object.keys(this);
     for(var k of keys){
-        yield [k,obj[k]]
+        yield [k,this[k]]
     }
 };
 for(var [k,v] of obj){
@@ -3810,21 +3825,15 @@ LXX-VUE篇
 ## 一、Vue 基础
 
 ### 1. Vue的基本原理
-
 当一个Vue实例创建时，Vue会遍历data中的属性，用 Object.defineProperty（vue3.0使用proxy ）将它们转为 getter/setter，并且在内部追踪相关依赖，在属性被访问和修改时通知变化。 每个组件实例都有相应的 watcher 程序实例，它会在组件渲染的过程中把属性记录为依赖，之后当依赖项的setter被调用时，会通知watcher重新计算，从而致使它关联的组件得以更新。
 
-![0_tB3MJCzh_cB6i3mS-1.png](https://cdn.nlark.com/yuque/0/2021/png/1500604/1620128979608-f7465ffc-9411-43e3-a6bc-96ab44dd77df.png)
-
 ### 2. 双向数据绑定的原理
-
 Vue.js 是采用**数据劫持**结合**发布者-订阅者模式**的方式，通过Object.defineProperty()来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。主要分为以下几个步骤：
 
 1. 需要observe的数据对象进行递归遍历，包括子属性对象的属性，都加上setter和getter这样的话，给这个对象的某个值赋值，就会触发setter，那么就能监听到了数据变化
 2. compile解析模板指令，将模板中的变量替换成数据，然后初始化渲染页面视图，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据有变动，收到通知，更新视图
 3. Watcher订阅者是Observer和Compile之间通信的桥梁，主要做的事情是: ①在自身实例化时往属性订阅器(dep)里面添加自己 ②自身必须有一个update()方法 ③待属性变动dep.notice()通知时，能调用自身的update()方法，并触发Compile中绑定的回调，则功成身退。
 4. MVVM作为数据绑定的入口，整合Observer、Compile和Watcher三者，通过Observer来监听自己的model数据变化，通过Compile来解析编译模板指令，最终利用Watcher搭起Observer和Compile之间的通信桥梁，达到数据变化 -> 视图更新；视图交互变化(input) -> 数据model变更的双向绑定效果。
-
-![image](https://cdn.nlark.com/yuque/0/2021/png/1500604/1618656573096-ebdc520c-5d60-4d12-ad04-5df4ebbb5fe7.png)
 
 ### 3. 使用 Object.defineProperty() 来进行数据劫持有什么缺点？
 
@@ -3841,8 +3850,6 @@ MVC、MVP 和 MVVM 是三种常见的软件架构设计模式，主要通过分�
 
 MVC 通过分离 Model、View 和 Controller 的方式来组织代码结构。其中 View 负责页面的显示逻辑，Model 负责存储页面的业务数据，以及对相应数据的操作。并且 View 和 Model 应用了观察者模式，当 Model 层发生改变的时候它会通知有关 View 层更新页面。Controller 层是 View 层和 Model 层的纽带，它主要负责用户与应用的响应操作，当用户与页面产生交互的时候，Controller 中的事件触发器就开始工作了，通过调用 Model 层，来完成对 Model 的修改，然后 Model 层再去通知 View 层更新。
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1500604/1603814137582-5a9aa62f-0045-4272-bef0-447dedb25596.png)
-
 （2）MVVM
 
 MVVM 分为 Model、View、ViewModel：
@@ -3854,7 +3861,6 @@ MVVM 分为 Model、View、ViewModel：
 Model和View并无直接关联，而是通过ViewModel来进行联系的，Model和ViewModel之间有着双向数据绑定的联系。因此当Model中的数据改变时会触发View层的刷新，View中由于用户交互操作而改变的数据也会在Model中同步。
 
 这种模式实现了 Model和View的数据自动同步，因此开发者只需要专注于数据的维护操作即可，而不需要自己操作DOM。
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1500604/1603814104939-8c8ac923-735d-4476-937a-cb1f795ffe84.png)
 
 **（3）MVP**
 
@@ -3889,7 +3895,7 @@ MVP 模式与 MVC 唯一不同的在于 Presenter 和 Controller。在 MVC 模�
 - method 调用总会执行该函数。
 ### 7. slot是什么？有什么作用？原理是什么？
 slot又名插槽，是Vue的内容分发机制，组件内部的模板引擎使用slot元素作为承载分发内容的出口。插槽slot是子组件的一个模板标签元素，而这一个标签元素是否显示，以及怎么显示是由父组件决定的。slot又分三类，默认插槽，具名插槽和作用域插槽。
-- 默认插槽：又名匿名查抄，当slot没有指定name属性值的时候一个默认显示插槽，一个组件内只有有一个匿名插槽。
+- 默认插槽：又名匿名插槽，当slot没有指定name属性值的时候一个默认显示插槽，一个组件内只有有一个匿名插槽。
 - 具名插槽：带有具体名字的插槽，也就是带有name属性的slot，一个组件可以出现多个具名插槽。
 - 作用域插槽：默认插槽、具名插槽的一个变体，可以是匿名插槽，也可以是具名插槽，该插槽的不同点是在子组件渲染作用域插槽时，可以将子组件内部的数据传递给父组件，让父组件根据子组件的传递过来的数据决定如何渲染该插槽。
 
@@ -3981,7 +3987,7 @@ slot又名插槽，是Vue的内容分发机制，组件内部的模板引擎使�
 - **编译过程**：v-if切换有一个局部编译/卸载的过程，切换过程中合适地销毁和重建内部的事件监听和子组件；v-show只是简单的基于css切换；
 - **编译条件**：v-if是惰性的，如果初始条件为假，则什么也不做；只有在条件第一次变为真时才开始局部编译; v-show是在任何条件下，无论首次条件是否为真，都被编译，然后被缓存，而且DOM元素保留；
 - **性能消耗**：v-if有更高的切换消耗；v-show有更高的初始渲染消耗；
-- **使用场景**：v-if适合运营条件不大可能改变；v-show适合频繁切换。
+- **使用场景**：v-if适合运行条件不大可能改变；v-show适合频繁切换。
 ### 14. v-model 是如何实现的，语法糖实际是什么？
 **（1）作用在表单元素上**
 动态绑定了 input 的 value 指向了 messgae 变量，并且在触发 input 事件的时候去动态把 message设置为目标值：
@@ -4120,13 +4126,13 @@ render () {
   //
   function getFirstComponentChild (children: ?Array<VNode>): ?VNode {
     if (Array.isArray(children)) {
-  for (let i = 0; i < children.length; i++) {
-    const c = children[i]
-    if (isDef(c) && (isDef(c.componentOptions) || isAsyncPlaceholder(c))) {
-      return c
+      for (let i = 0; i < children.length; i++) {
+        const c = children[i]
+        if (isDef(c) && (isDef(c.componentOptions) || isAsyncPlaceholder(c))) {
+          return c
+        }
+      }
     }
-  }
-  }
   }
   const slot = this.$slots.default // 获取默认插槽
   const vnode: VNode = getFirstComponentChild(slot)// 获取第一个子组件
@@ -4368,7 +4374,7 @@ const { render, staticRenderFns } = compileToFunctions(template,options//省略}
 CompileToFunctions中的主要逻辑如下∶
 **（1）调用parse方法将template转化为ast（抽象语法树）**
 ```
-constast = parse(template.trim(), options)
+const ast = parse(template.trim(), options)
 ```
 - **parse的目标**：把tamplate转换为AST树，它是一种用 JavaScript对象的形式来描述整个模板。
 - **解析过程**：利用正则表达式顺序解析模板，当解析到开始标签、闭合标签、文本的时候都会分别执行对应的 回调函数，来达到构造AST树的目的。
@@ -4409,6 +4415,16 @@ if(!child._base) {
 ```
 - 合并处理。根据一个通用 Vue 实例所包含的选项进行分类逐一判断合并，如 props、data、 methods、watch、computed、生命周期等，将合并结果存储在新定义的 options 对象里。
 - 返回合并结果 options。
+组件合并组件选项和全局选项的优先级
+组件选项  (最高)
+组件mixin
+组件mixin的mixin
+组件mixin的…的mixin
+全局选项(最低)
+1.函数合并或者对象合并叠加， 比如data、provide、props, methods, computed, inject, 如何各个选项中存在重复，那么优先级较高的会覆盖优先级较低的。
+2.数组叠加, 比如生命周期函数、watch 是优先级较小的先执行
+3.原型叠加，比如components, filters, directives两个对象合并的时候，不会相互叠加，而是权重小的被放到权重大的原型上，这样权重大的访问快些，因为作用域链断了
+4.直接替换，比如el, template, propData这些属性只允许存在一个，所以权重大的会替换掉权重小的
 ### 25. 描述下Vue自定义指令
 在 Vue2.0 中，代码复用和抽象的主要形式是组件。然而，有的情况下，你仍然需要对普通 DOM 元素进行底层操作，这时候就会用到自定义指令。
 一般需要对DOM元素进行底层操作时使用，尽量只用来操作 DOM展示，不修改内部的值。当使用自定义指令直接修改 value 值时绑定v-model的值也不会同步更新；如必须修改可以在自定义指令中使用keydown事件，在vue组件中使用 change事件，回调中修改vue数据; 
@@ -4839,33 +4855,6 @@ export default {
 </script>
 ```
 ```
-// 父组件
-<template>
-  <div class="section">
-    <com-article :articles="articleList" @onEmitIndex="onEmitIndex"></com-article>
-    <p>{{currentIndex}}</p>
-  </div>
-</template>
-<script>
-import comArticle from './test/article.vue'
-export default {
-  name: 'comArticle',
-  components: { comArticle },
-  data() {
-    return {
-      currentIndex: -1,
-      articleList: ['红楼梦', '西游记', '三国演义']
-    }
-  },
-  methods: {
-    onEmitIndex(idx) {
-      this.currentIndex = idx
-    }
-  }
-}
-</script>
-```
-```
 //子组件
 <template>
   <div>
@@ -4992,7 +4981,19 @@ data() {
 inject: ['app']
 console.log(this.app.num)
 ```
-**注意：** 依赖注入所提供的属性是**非响应式**的。
+**注意：** 依赖注入所提供的属性是**非响应式**的。如果想要实现响应式  需要在provide中传递函数
+provide: function() {
+  return {
+    getParentLiveList: () => this.ParentLiveList
+  }
+}
+子孙组件中
+inject: ["getParentLiveList"],
+computed: {
+  childLiveList: function() {
+    return this.getParentLiveList()
+  }
+},
 ### （3）ref / $refs
 这种方式也是实现**父子组件**之间的通信。
 `ref`： 这个属性用在子组件上，它的引用就指向了子组件的实例。可以通过实例来访问组件的数据和方法。
@@ -5295,7 +5296,7 @@ window.location.hash 的值可读可写，读取来判断状态是否改变，�
 // 方法2：
 this.$router.push({name:'users',params:{uname:wade}})
 // 方法3：
-this.$router.push('/user/' + wade)
+this.$router.push('/user/' + uname)
 ```
 3）参数获取
 通过 `$route.params.userid` 获取传递的值
@@ -5393,7 +5394,7 @@ export default [
 beforeRouteUpdate、beforeRouteEnter、beforeRouteLeave
 这三个钩子都有三个参数∶to、from、next
 - beforeRouteEnter∶ 进入组件前触发
-- beforeRouteUpdate∶ 当前地址改变并且改组件被复用时触发，举例来说，带有动态参数的路径foo/∶id，在 /foo/1 和 /foo/2 之间跳转的时候，由于会渲染同样的foa组件，这个钩子在这种情况下就会被调用
+- beforeRouteUpdate∶ 当前地址改变并且该组件被复用时触发，举例来说，带有动态参数的路径foo/∶id，在 /foo/1 和 /foo/2 之间跳转的时候，由于会渲染同样的foa组件，这个钩子在这种情况下就会被调用
 - beforeRouteLeave∶ 离开组件被调用
 注意点，beforeRouteEnter组件内还访问不到this，因为该守卫执行前组件实例还没有被创建，需要传一个回调给 next来访问，例如：
 ```
@@ -5409,7 +5410,7 @@ beforeRouteEnter(to, from, next) {
 1. 完整的路由导航解析流程（不包括其他生命周期）
 - 触发进入其他路由。
 - 调用要离开路由的组件守卫beforeRouteLeave
-- 调用局前置守卫∶ beforeEach
+- 调用全局前置守卫∶ beforeEach
 - 在重用的组件里调用 beforeRouteUpdate
 - 调用路由独享守卫 beforeEnter。
 - 解析异步路由组件。
@@ -5427,8 +5428,8 @@ beforeRouteEnter(to, from, next) {
 - beforeRouteEnter：路由组件的组件进入路由前钩子。
 - beforeResolve：路由全局解析守卫
 - afterEach：路由全局后置钩子
-- beforeCreate：组件生命周期，不能访问tAis。
-- created;组件生命周期，可以访问tAis，不能访问dom。
+- beforeCreate：组件生命周期，不能访问this。
+- created;组件生命周期，可以访问this，不能访问dom。
 - beforeMount：组件生命周期
 - deactivated：离开缓存组件a，或者触发a的beforeDestroy和destroyed组件销毁钩子。
 - mounted：访问/操作dom。
@@ -5439,7 +5440,7 @@ beforeRouteEnter(to, from, next) {
 - 在失活的组件里调用离开守卫 beforeRouteLeave。
 - 调用全局的 beforeEach守卫。
 - 在重用的组件里调用 beforeRouteUpdate 守卫(2.2+)。
-- 在路由配置里调用 beforeEnteY。 
+- 在路由配置里调用 beforeEnter。 
 - 解析异步路由组件（如果有）。
 - 在被激活的组件里调用 beforeRouteEnter。
 - 调用全局的 beforeResolve 守卫（2.5+），标示解析阶段完成。
@@ -5741,8 +5742,6 @@ LXX-REACT篇
 ```
 React并不是将click事件绑定到了div的真实DOM上，而是在document处监听了所有的事件，当事件发生并且冒泡到document处的时候，React将事件内容封装并交由真正的处理函数运行。这样的方式不仅仅减少了内存的消耗，还能在组件挂在销毁时统一订阅和移除事件。
 除此之外，冒泡到document上的事件也不是原生的浏览器事件，而是由react自己实现的合成事件（SyntheticEvent）。因此如果不想要是事件冒泡的话应该调用event.preventDefault()方法，而不是调用event.stopProppagation()方法。
-JSX 上写的事件并没有绑定在对应的真实 DOM 上，而是通过事件代理的方式，将所有的事件都统一绑定在了 `document` 上。这样的方式不仅减少了内存消耗，还能在组件挂载销毁时统一订阅和移除事件。
-另外冒泡到 `document` 上的事件也不是原生浏览器事件，而是 React 自己实现的合成事件（SyntheticEvent）。因此我们如果不想要事件冒泡的话，调用 `event.stopPropagation` 是无效的，而应该调用 `event.preventDefault`。
 实现合成事件的目的如下：
 - 合成事件首先抹平了浏览器之间的兼容问题，另外这是一个跨浏览器原生事件包装器，赋予了跨浏览器开发的能力；
 - 对于原生浏览器事件来说，浏览器会给监听器创建一个事件对象。如果你有很多的事件监听，那么就需要分配很多的事件对象，造成高额的内存分配问题。但是对于合成事件来说，有一个事件池专门来管理它们的创建和销毁，当事件需要被使用时，就会从池子中复用对象，事件回调结束后，就会销毁事件对象上的属性，从而便于下次复用事件对象。### 2. React的事件和普通的HTML事件有什么不同？
@@ -9114,7 +9113,7 @@ import { a } from './test.js'
 - **Code Splitting:** 将代码按路由维度或者组件分块(chunk),这样做到按需加载,同时可以充分利⽤浏览器缓存 
 - **提取公共第三⽅库**: SplitChunksPlugin插件来进⾏公共模块抽取,利⽤浏览器缓存可以⻓期缓存这些⽆需频繁变动的公共代码 
 ### 4. 如何提⾼**webpack**的构建速度？ 
-1. 多⼊⼝情况下，使⽤ CommonsChunkPlugin 来提取公共代码 
+1. 多⼊⼝情况下，使⽤ CommonsChunkPlugin 来提取公共代码 splitChunks在Webpack 4里被用于取代我们熟悉CommonsChunkPlugin
 2. 通过 externals 配置来提取常⽤库 
 3. 利⽤ DllPlugin 和 DllReferencePlugin 预编译资源模块 通过 DllPlugin 来对那些我们引⽤但是绝对不会修改的npm包来进⾏预编译，再通过 DllReferencePlugin 将预编译的模块加载进来。 
 4. 使⽤ Happypack 实现多线程加速编译 
@@ -9773,14 +9772,14 @@ TCP不像UDP一样那样一个个报文独立地传输，而是在不保留报�
 **6）提供全双工通信**
 TCP允许通信双方的应用程序在任何时候都能发送数据，因为TCP连接的两端都设有缓存，用来临时存放双向通信的数据。当然，TCP可以立即发送一个数据段，也可以缓存一段时间以便一次发送更多的数据段（最大的数据段大小取决于MSS）
 ### 2. TCP和UDP的区别
-|              | UDP                                        | TCP                                                  |
+|              | UDP                   | TCP                        |
 | ------------ | ------------------------------------------ | ---------------------------------------------------- |
-| 是否连接     | 无连接                                     | 面向连接                                             |
-| 是否可靠     | 不可靠传输，不使用流量控制和拥塞控制       | 可靠传输（数据顺序和正确性），使用流量控制和拥塞控制 |
-| 连接对象个数 | 支持一对一，一对多，多对一和多对多交互通信 | 只能是一对一通信                                     |
-| 传输方式     | 面向报文                                   | 面向字节流                                           |
-| 首部开销     | 首部开销小，仅8字节                        | 首部最小20字节，最大60字节                           |
-| 适用场景     | 适用于实时应用，例如视频会议、直播         | 适用于要求可靠传输的应用，例如文件传输               |
+| 是否连接     | 无连接                          | 面向连接                                             |
+| 是否可靠     | 不可靠传输，不使用流量控制和拥塞控制 | 可靠传输（数据顺序和正确性），使用流量控制和拥塞控制 |
+| 连接对象个数  | 支持一对一，一对多，多对一和多对多交互通信 |  只能是一对一通信           |
+| 传输方式     | 面向报文           | 面向字节流                                           |
+| 首部开销     | 首部开销小，仅8字节          | 首部最小20字节，最大60字节                 |
+| 适用场景     | 适用于实时应用，例如视频会议、直播   | 适用于要求可靠传输的应用，例如文件传输     |
 ### 3. TCP和UDP的使用场景
 - **TCP应用场景：** 效率要求相对低，但对准确性要求相对高的场景。因为传输中需要对数据确认、重发、排序等操作，相比之下效率没有UDP高。例如：文件传输（准确高要求高、但是速度可以相对慢）、接受邮件、远程登录。
 - **UDP应用场景：** 效率要求相对高，对准确性要求相对低的场景。例如：QQ聊天、在线视频、网络语音电话（即时通讯，速度要求高，但是出现偶尔断续不是太大问题，并且此处完全不可以使用重发机制）、广播通信（广播、多播）。
@@ -10300,7 +10299,7 @@ HTML 和 CSS 规范中规定了浏览器解释 html 文档的方式，由 W3C �
 可以通过以下几种方式来减少渲染的时间：
 - HTML文件的代码层级尽量不要太深
 - 使用语义化的标签，来避免不标准语义化的特殊处理
-- 减少CSSD代码的层级，因为选择器是从左向右进行解析的
+- 减少CSSD代码的层级，因为选择器是从右向左进行解析的
 **（4）减少回流与重绘：**
 - 操作DOM时，尽量在低层级的DOM节点进行操作
 - 不要使用`table`布局， 一个小的改动可能会使整个`table`进行重新布局
@@ -10435,7 +10434,7 @@ IndexedDB 具有以下特点：
 
 > 同源策略限制了从同一个源加载的文档或脚本如何与另一个源的资源进行交互。这是浏览器的一个用于隔离潜在恶意文件的重要的安全机制。同源指的是：**协议**、**端口号**、**域名**必须一致。
 下表给出了与 URL http://store.company.com/dir/page.html 的源进行对比的示例:
-| URL                                             | 是否跨域 | 原因                             |
+| URL                      | 是否跨域 | 原因                             |
 | ----------------------------------------------- | -------- | -------------------------------- |
 | http://store.company.com/dir/page.html          | 同源     | 完全相同                         |
 | http://store.company.com/dir/inner/another.html | 同源     | 只有路径不同                     |
@@ -10959,6 +10958,10 @@ document.getElementById('list').addEventListener('click', function (e) {
 });
 ```
 在上述代码中， target 元素则是在 #list 元素之下具体被点击的元素，然后通过判断 target 的一些属性（比如：nodeName，id 等等）可以更精确地匹配到某一类 #list li 元素之上；
+event.target 对触发事件的对象的引用(即它标识事件发生的元素) 返回触发事件的元素
+event.currentTarget 当事件遍历DOM时，标识事件的当前目标。它总是引用事件处理程序附加到的元素   返回绑定事件的元素
+target在事件流的目标阶段；currentTarget在事件流的捕获，目标及冒泡阶段。只有当事件流处在目标阶段的时候，两个的指向才是一样的，
+而当处于捕获和冒泡阶段的时候，target指向被单击的对象而currentTarget指向当前事件活动的对象（一般为父级）
 #### （3）局限性
 当然，事件委托也是有局限的。比如 focus、blur 之类的事件没有事件冒泡机制，所以无法实现事件委托；mousemove、mouseout 这样的事件，虽然有事件冒泡，但是只能不断通过位置去计算定位，对性能消耗高，因此也是不适合于事件委托的。
 当然事件委托不是只有优点，它也是有**缺点**的，事件委托会影响页面性能，主要影响因素有：
@@ -11206,14 +11209,12 @@ instanceof 运算符用于判断构造函数的 prototype 属性是否出现在�
 function myInstanceof(left, right) {
   let proto = Object.getPrototypeOf(left), // 获取对象的原型
       prototype = right.prototype; // 获取构造函数的 prototype 对象
-
   // 判断构造函数的 prototype 对象是否在对象的原型链上
-  while (true) {
-    if (!proto) return false;
+  while (proto) {
     if (proto === prototype) return true;
-
     proto = Object.getPrototypeOf(proto);
   }
+  return false;
 }
 ```
 ### 3. 手写 new 操作符
@@ -11639,7 +11640,7 @@ AJAX是 Asynchronous JavaScript and XML 的缩写，指的是通过 JavaScript �
 - **创建一个 XMLHttpRequest 对象。**
 - 在这个对象上**使用 open 方法创建一个 HTTP 请求**，open 方法所需要的参数是请求的方法、请求的地址、是否异步和用户的认证信息。
 - 在发起请求前，可以为这个对象**添加一些信息和监听函数**。比如说可以通过 setRequestHeader 方法来为请求添加头信息。还可以为这个对象添加一个状态监听函数。一个 XMLHttpRequest 对象一共有 5 个状态，当它的状态变化时会触发onreadystatechange 事件，可以通过设置监听函数，来处理请求成功后的结果。当对象的 readyState 变为 4 的时候，代表服务器返回的数据接收完成，这个时候可以通过判断请求的状态，如果状态是 2xx 或者 304 的话则代表返回正常。这个时候就可以通过 response 中的数据来对页面进行更新了。
-- 当对象的属性和监听函数设置完成后，最后调**用 sent 方法来向服务器发起请求**，可以传入参数作为发送的数据体。
+- 当对象的属性和监听函数设置完成后，最后调**用 send 方法来向服务器发起请求**，可以传入参数作为发送的数据体。
 
 ```
 const SERVER_URL = "/server";
@@ -11747,38 +11748,6 @@ console.log(arr.concat() === arr); //false
 ```
 #### （4）手写实现浅拷贝
 ```
-// 浅拷贝的实现;
-function shallowCopy(object) {
-  // 只拷贝对象
-  if (!object || typeof object !== "object") return;
-
-  // 根据 object 的类型判断是新建一个数组还是对象
-  let newObject = Array.isArray(object) ? [] : {};
-
-  // 遍历 object，并且判断是 object 的属性才拷贝
-  for (let key in object) {
-    if (object.hasOwnProperty(key)) {
-      newObject[key] = object[key];
-    }
-  }
-  return newObject;
-}// 浅拷贝的实现;
-function shallowCopy(object) {
-  // 只拷贝对象
-  if (!object || typeof object !== "object") return;
-
-  // 根据 object 的类型判断是新建一个数组还是对象
-  let newObject = Array.isArray(object) ? [] : {};
-
-  // 遍历 object，并且判断是 object 的属性才拷贝
-  for (let key in object) {
-    if (object.hasOwnProperty(key)) {
-      newObject[key] = object[key];
-    }
-  }
-
-  return newObject;
-}// 浅拷贝的实现;
 function shallowCopy(object) {
   // 只拷贝对象
   if (!object || typeof object !== "object") return;
@@ -12184,26 +12153,6 @@ console.log(add(1)(2)(3)); // 6
 ```
 
 2）柯里化解决方案
-- 参数长度固定
-```
-var add = function (m) {
-  var temp = function (n) {
-    return add(m + n);
-  }
-  temp.toString = function () {
-    return m;
-  }
-  return temp;
-};
-console.log(add(3)(4)(5)); // 12
-console.log(add(3)(6)(9)(25)); // 43
-```
-对于add(3)(4)(5)，其执行过程如下：
-1. 先执行add(3)，此时m=3，并且返回temp函数；
-2. 执行temp(4)，这个函数内执行add(m+n)，n是此次传进来的数值4，m值还是上一步中的3，所以add(m+n)=add(3+4)=add(7)，此时m=7，并且返回temp函数
-3. 执行temp(5)，这个函数内执行add(m+n)，n是此次传进来的数值5，m值还是上一步中的7，所以add(m+n)=add(7+5)=add(12)，此时m=12，并且返回temp函数
-4. 由于后面没有传入参数，等于返回的temp函数不被执行而是打印，了解JS的朋友都知道对象的toString是修改对象转换字符串的方法，因此代码中temp函数的toString函数return m值，而m值是最后一步执行函数时的值m=12，所以返回值是12。
-- 参数长度不固定
 ```
 function add (...args) {
     //求和
@@ -12312,7 +12261,6 @@ function jsonToTree(data) {
   data.forEach(item => {
     map[item.id] = item;
   });
-  // 
   data.forEach(item => {
     let parent = map[item.pid];
     if(parent) {
@@ -13056,20 +13004,6 @@ then：success1
 这个题目考察的就是**Promise的状态在发生变化之后，就不会再发生变化**。开始状态由`pending`变为`resolve`，说明已经变为已完成状态，下面的两个状态的就不会再执行，同时下面的catch也不会捕获到错误。
 ### 6. 代码输出结果
 ```
-Promise.resolve(1)
-  .then(2)
-  .then(Promise.resolve(3))
-  .then(console.log)
-```
-输出结果如下：
-```
-1
-Promise {<fulfilled>: undefined}
-```
-Promise.resolve方法的参数如果是一个原始值，或者是一个不具有then方法的对象，则Promise.resolve方法返回一个新的Promise对象，状态为resolved，Promise.resolve方法的参数，会同时传给回调函数。
-then方法接受的参数是函数，而如果传递的并非是一个函数，它实际上会将其解释为then(null)，这就会导致前一个Promise的结果会传递下面。
-### 7. 代码输出结果
-```
 const promise1 = new Promise((resolve, reject) => {
   setTimeout(() => {
     resolve('success')
@@ -13093,7 +13027,7 @@ Uncaught (in promise) Error: error!!!
 promise1 Promise {<fulfilled>: "success"}
 promise2 Promise {<rejected>: Error: error!!}
 ```
-### 8. 代码输出结果
+### 7. 代码输出结果
 ```
 Promise.resolve(1)
   .then(res => {
@@ -13114,7 +13048,7 @@ Promise.resolve(1)
 ```
 Promise是可以链式调用的，由于每次调用 `.then` 或者 `.catch` 都会返回一个新的 promise，从而实现了链式调用, 它并不像一般任务的链式调用一样return this。
 上面的输出结果之所以依次打印出1和2，是因为`resolve(1)`之后走的是第一个then方法，并没有进catch里，所以第二个then中的res得到的实际上是第一个then的返回值。并且return 2会被包装成`resolve(2)`，被最后的then打印输出2。
-### 9. 代码输出结果
+### 8. 代码输出结果
 ```
 Promise.resolve().then(() => {
   return new Error('error!!!')
@@ -13129,7 +13063,7 @@ Promise.resolve().then(() => {
 "then: " "Error: error!!!"
 ```
 返回任意一个非 promise 的值都会被包裹成 promise 对象，因此这里的`return new Error('error!!!')`也被包裹成了`return Promise.resolve(new Error('error!!!'))`，因此它会被then捕获而不是catch。
-### 10. 代码输出结果
+### 9. 代码输出结果
 ```
 const promise = Promise.resolve().then(() => {
   return promise;
@@ -13141,7 +13075,7 @@ promise.catch(console.err)
 Uncaught (in promise) TypeError: Chaining cycle detected for promise #<Promise>
 ```
 这里其实是一个坑，`.then` 或 `.catch` 返回的值不能是 promise 本身，否则会造成死循环。
-### 11. 代码输出结果
+### 10. 代码输出结果
 ```
 Promise.resolve(1)
   .then(2)
@@ -13153,8 +13087,9 @@ Promise.resolve(1)
 1
 ```
 看到这个题目，好多的then，实际上只需要记住一个原则：`.then` 或`.catch` 的参数期望是函数，传入非函数则会发生**值透传**。
+then方法接受的参数是函数，而如果传递的并非是一个函数，它实际上会将其解释为then(null)，这就会导致前一个Promise的结果会传递下面。
 第一个then和第二个then中传入的都不是函数，一个是数字，一个是对象，因此发生了透传，将`resolve(1)` 的值直接传到最后一个then里，直接打印出1。
-### 12. 代码输出结果
+### 11. 代码输出结果
 ```
 Promise.reject('err!!!')
   .then((res) => {
@@ -13186,7 +13121,7 @@ Promise.resolve()
   })
 ```
 在`then`的第一参数中抛出了错误，那么他就不会被第二个参数不活了，而是被后面的`catch`捕获到。
-### 13. 代码输出结果
+### 12. 代码输出结果
 ```
 Promise.resolve('1')
   .then(res => {
@@ -13236,7 +13171,7 @@ Promise.resolve('1')
 'finally1'
 '捕获错误' Error: 我是finally中抛出的异常
 ```
-### 14. 代码输出结果
+### 13. 代码输出结果
 ```
 function runAsync (x) {
     const p = new Promise(r => setTimeout(() => r(x, console.log(x)), 1000))
@@ -13254,7 +13189,7 @@ Promise.all([runAsync(1), runAsync(2), runAsync(3)]).then(res => console.log(res
 ```
 首先，定义了一个Promise，来异步执行函数runAsync，该函数传入一个值x，然后间隔一秒后打印出这个x。
 之后再使用`Promise.all`来执行这个函数，执行的时候，看到一秒之后输出了1，2，3，同时输出了数组[1, 2, 3]，三个函数是同步执行的，并且在一个回调函数中返回了所有的结果。并且结果和函数的执行顺序是一致的。
-### 15. 代码输出结果
+### 14. 代码输出结果
 ```
 function runAsync (x) {
   const p = new Promise(r => setTimeout(() => r(x, console.log(x)), 1000))
@@ -13280,7 +13215,7 @@ Error: 2
 4
 ```
 可以看到。catch捕获到了第一个错误，在这道题目中最先的错误就是`runReject(2)`的结果。如果一组异步操作中有一个异常都不会进入`.then()`的第一个回调函数参数中。会被`.then()`的第二个回调函数捕获。
-### 16. 代码输出结果
+### 15. 代码输出结果
 ```
 function runAsync (x) {
   const p = new Promise(r => setTimeout(() => r(x, console.log(x)), 1000))
@@ -13298,7 +13233,7 @@ Promise.race([runAsync(1), runAsync(2), runAsync(3)])
 3
 ```
 then只会捕获第一个成功的方法，其他的函数虽然还会继续执行，但是不是被then捕获了。
-### 17. 代码输出结果
+### 16. 代码输出结果
 ```
 function runAsync(x) {
   const p = new Promise(r =>
@@ -13324,9 +13259,9 @@ Error: 0
 2
 3
 ```
-可以看到在catch捕获到第一个错误之后，后面的代码还不执行，不过不会再被捕获了。
+可以看到在catch捕获到第一个错误之后，后面的代码还会继续执行，不过不会再被捕获了。
 注意：`all`和`race`传入的数组中如果有会抛出异常的异步任务，那么只有最先抛出的错误会被捕获，并且是被then的第二个参数或者后面的catch捕获；但并不会影响数组中其它的异步任务的执行。
-### 18. 代码输出结果
+### 17. 代码输出结果
 ```
 async function async1() {
   console.log("async1 start");
@@ -13351,7 +13286,7 @@ async1 end
 2. 跳出`async1`函数后，执行同步代码`start`；
 3. 在一轮宏任务全部执行完之后，再来执行`await`后面的内容`async1 end`。
 这里可以理解为await后面的语句相当于放到了new Promise中，下一行及之后的语句相当于放在Promise.then中。
-### 19. 代码输出结果
+### 18. 代码输出结果
 ```
 async function async1() {
   console.log("async1 start");
@@ -13389,7 +13324,7 @@ timer1
 3. 由于`async2`阻塞了后面代码的执行，所以执行后面的定时器`timer3`，将其加入宏任务队列，之后打印`start`；
 4. 然后执行async2后面的代码，打印出`async1 end`，遇到定时器timer1，将其加入宏任务队列；
 5. 最后，宏任务队列有三个任务，先后顺序为`timer2`，`timer3`，`timer1`，没有微任务，所以直接所有的宏任务按照先进先出的原则执行。
-### 20. 代码输出结果
+### 19. 代码输出结果
 ```
 async function async1 () {
   console.log('async1 start');
@@ -13402,14 +13337,14 @@ async function async1 () {
 console.log('srcipt start')
 async1().then(res => console.log(res))
 console.log('srcipt end')
-输出结果如下
+//输出结果如下
 script start
 async1 start
 promise1
 script end
 ```
 这里需要注意的是在`async1`中`await`后面的Promise是没有返回值的，也就是它的状态始终是`pending`状态，所以在`await`之后的内容是不会执行的，包括`async1`后面的 `.then`。
-### 21. 代码输出结果
+### 20. 代码输出结果
 ```
 async function async1 () {
   console.log('async1 start');
@@ -13435,7 +13370,7 @@ promise1 resolve
 async1 success
 async1 end
 ```
-### 22. 代码输出结果
+### 21. 代码输出结果
 ```
 async function async1() {
   console.log("async1 start");
@@ -13481,7 +13416,7 @@ setTimeout
 6. 遇到resolve，将其加入到微任务队列，然后执行后面的script代码，打印出script end；
 7. 之后就该执行微任务队列了，首先打印出async1 end，然后打印出promise2；
 8. 执行完微任务队列，就开始执行宏任务队列中的定时器，打印出setTimeout。
-### 23. 代码输出结果
+### 22. 代码输出结果
 ```
 async function async1 () {
   await async2();
@@ -13517,7 +13452,7 @@ error!!!
 async1
 async1 success
 ```
-### 24. 代码输出结果
+### 23. 代码输出结果
 ```
 const first = () => (new Promise((resolve, reject) => {
     console.log(3);
@@ -13558,7 +13493,7 @@ Promise{<resolved>: 1}
 7. 这样第一轮宏任务就执行完了，开始执行微任务队列中的任务，先后打印出1和2；
 8. 这样微任务就执行完了，开始执行下一轮宏任务，宏任务队列中有一个定时器，执行它，打印出5，由于执行已经变为resolved状态，所以`resolve(6)`不会再执行；
 9. 最后`console.log(p)`打印出`Promise{<resolved>: 1}`；
-### 25. 代码输出结果
+### 24. 代码输出结果
 ```
 const async1 = async () => {
   console.log('async1');
@@ -13597,8 +13532,8 @@ timer1
 3. 之后是执行Promise，打印出promise1，由于Promise没有返回值，所以后面的代码不会执行；
 4. 然后执行同步代码，打印出script end；
 5. 继续执行下面的Promise，.then和.catch期望参数是一个函数，这里传入的是一个数字，因此就会发生值渗透，将resolve(1)的值传到最后一个then，直接打印出1；
-6. 遇到第二个定时器，将其加入到微任务队列，执行微任务队列，按顺序依次执行两个定时器，但是由于定时器时间的原因，会在两秒后先打印出timer2，在四秒后打印出timer1。
-### 26. 代码输出结果
+6. 遇到第二个定时器，将其加入到微任务队列，执行微任务队列，按顺序依次执行两个定时器，但是由于定时器时间的原因，会在1秒后先打印出timer2，在2秒后打印出timer1。
+### 25. 代码输出结果
 ```
 const p1 = new Promise((resolve) => {
   setTimeout(() => {
@@ -13612,6 +13547,7 @@ const p1 = new Promise((resolve) => {
   setTimeout(() => {
     console.log(p1)
   }, 1000)
+  return 'aaa' 
 }).finally(res => {
   console.log('finally', res)
 })
@@ -13619,9 +13555,9 @@ const p1 = new Promise((resolve) => {
 resolve1
 finally  undefined
 timer1
-Promise{<resolved>: undefined}
+Promise{<resolved>: undefined}//根据then中的返回值来的  如果是return 'aaa'此时结果是Promise {<fulfilled>: 'aaa'}   finally中写上return也对promise的状态结果没影响  只跟最后一个then里面的返回值有关
 ```
-### 27. 代码输出结果
+### 26. 代码输出结果
 ```
 console.log('1');
 setTimeout(function() {
@@ -13714,7 +13650,7 @@ setTimeout(function() {
 - 输出12。
 第三轮事件循环结束，第三轮输出9，11，10，12。
 整段代码，共进行了三次事件循环，完整的输出为1，7，6，8，2，4，3，5，9，11，10，12。
-### 28. 代码输出结果
+### 27. 代码输出结果
 ```
 console.log(1)
 setTimeout(() => {
@@ -13759,7 +13695,7 @@ console.log(8)
 9. 此时没有微任务，继续执行宏任务中的第二个定时器，首先打印出5，遇到Promise，首选打印出6，遇到resolve，将其加入到微任务队列；
 10. 执行微任务队列，打印出6；
 11. 执行宏任务队列中的最后一个定时器，打印出7。
-### 29. 代码输出结果
+### 28. 代码输出结果
 ```
 console.log(1);
 setTimeout(() => {
@@ -13800,7 +13736,7 @@ console.log(7);
 7. 执行宏任务中的第一个定时器setTimeout，首先打印出2，然后遇到 Promise.resolve().then()，将其加入到微任务队列；
 8. 执行完这个宏任务，就开始执行微任务队列，打印出3；
 9. 继续执行宏任务队列中的第二个定时器，打印出6。
-### 30. 代码输出结果
+### 29. 代码输出结果
 ```
 Promise.resolve().then(() => {
     console.log('1');
@@ -13824,7 +13760,7 @@ Promise.resolve().then(() => {
 6
 ```
 在这道题目中，我们需要知道，无论是thne还是catch中，只要throw 抛出了错误，就会被catch捕获，如果没有throw出错误，就被继续执行后面的then。
-### 31. 代码输出结果
+### 30. 代码输出结果
 ```
 setTimeout(function () {
   console.log(1);
@@ -14221,16 +14157,6 @@ undefined
 undefined 
 3
 ```
-
-```
-undefined 
-undefined 
-3 
-3 
-undefined 
-3
-```
-
 这个题目和上面题目考察的知识点类似，b赋值为3，b此时是一个全局变量，而将3赋值给a，a是一个局部变量，所以最后打印的时候，a仍旧是undefined。
 ### 3. 代码输出结果
 ```
@@ -14276,8 +14202,7 @@ fn2 = function() {
 fn2()
 输出结果： 
 fn1
-Uncaught TypeError: fn2 is not a function
-fn2
+Uncaught TypeError: fn2 is not a function  //函数报错之后  后续代码不会执行  也就是不会执行fn2()
 ```
 这里也是在考察变量提升，关键在于第一个fn2()，这时fn2仍是一个undefined的变量，所以会报错fn2不是一个函数。
 ### 5. 代码输出结果
@@ -14290,6 +14215,7 @@ function a() {
     b();
 }
 a();
+---------------------------------------------------------------------
 function a() {
     var temp = 10;
     b();
@@ -14339,12 +14265,13 @@ g = function() {return false;};
 (function() {   
    if (g() && [] == ![]) {   
       f = function f() {return false;};   
-      function g() {return true;}   
    }   
+   function g() {return true;}   
 })();   
 console.log(f());
+console.log(g());
 ```
-输出结果： false
+输出结果： false false
 这里首先定义了两个变量f和g，我们知道变量是可以重新赋值的。后面是一个匿名自执行函数，在 if 条件中调用了函数 g()，由于在匿名函数中，又重新定义了函数g，就覆盖了外部定义的变量g，所以，这里调用的是内部函数 g 方法，返回为 true。第一个条件通过，进入第二个条件。
 第二个条件是[] == ![]，先看 ![] ，在 JavaScript 中，当用于布尔运算时，比如在这里，对象的非空引用被视为 true，空引用 null 则被视为 false。由于这里不是一个 null, 而是一个没有元素的数组，所以 [] 被视为 true, 而 ![] 的结果就是 false 了。当一个布尔值参与到条件运算的时候，true 会被看作 1, 而 false 会被看作 0。现在条件变成了 [] == 0 的问题了，当一个对象参与条件比较的时候，它会被求值，求值的结果是数组成为一个字符串，[] 的结果就是 '' ，而 '' 会被当作 0 ，所以，条件成立。
 两个条件都成立，所以会执行条件中的代码， f 在定义是没有使用var，所以他是一个全局变量。因此，这里会通过闭包访问到外部的变量 f, 重新赋值，现在执行 f 函数返回值已经成为 false 了。而 g 则不会有这个问题，这里是一个函数内定义的 g，不会影响到外部的 g 函数。所以最后的结果就是 false。
@@ -14376,26 +14303,21 @@ console.log(Object.prototype.__proto__)//null
 这道义题目考察原型、原型链的基础，记住就可以了。
 ### 2. 代码输出结果
 ```
-// a
 function Foo () {
  getName = function () {
    console.log(1);
  }
  return this;
 }
-// b
 Foo.getName = function () {
  console.log(2);
 }
-// c
 Foo.prototype.getName = function () {
  console.log(3);
 }
-// d
 var getName = function () {
  console.log(4);
 }
-// e
 function getName () {
  console.log(5);
 }
@@ -14511,7 +14433,7 @@ function B(a){
 }
 function C(a){
 　　if(a){
-this.a = a;
+      this.a = a;
 　　}
 }
 A.prototype.a = 1;
@@ -14614,6 +14536,359 @@ console.log(instance.getSuperValue());
 ```
 输出结果：true
 实际上，这段代码就是在实现原型链继承，SubType继承了SuperType，本质是重写了SubType的原型对象，代之以一个新类型的实例。SubType的原型被重写了，所以instance.constructor指向的是SuperType。具体如下：
+
+LXX-Docker基础篇之快速上手
+什么是docker?
+其实docker 就是一项容器虚拟化技术.
+什么是容器虚拟化技术? 举出一个简单的例子, 就是把开发环境和代码一起打包做成一个容器, 放在其他的电脑上就可以直接运行. 类似虚拟机一样, 把环境配好, 项目代码往里面一放, 就可以运行了.
+但是 容器虚拟化和虚拟机还是有很大区别的, 只是说前者是建立在后者的基础上的.
+
+docker 能做什么?
+一次构建,随处运行!
+更快捷的应用交付和部署;更便捷的升级和扩缩容; 更加简单的系统运维;更高效的计算机资源利用.
+因为它解决了 虚拟机存在的资源占用多;冗余步骤多和启动慢的缺点.
+因为它把虚拟机中, 模拟硬件,以及不必要的东西都给剔除了, 就只保留了必要的内核和用户自己根据需要安装的容器,所以就会更加轻便.
+
+docker 三要素
+镜像(image):Docker 镜像, image, 就是一个只读的模版, 镜像可以用来创建Docker 容器, 一个镜像可以创建很多容器.
+容器(container): Docker 利用容器独立运行的一个或者一组应用. 容器就是镜像创建的运行实例. 可以把容器看成一个简易版的linux 系统.
+仓库(repository): 就是存放镜像的地方.
+
+安装 docker
+#### Centos6.8安装Docker
+1、yum install -y epel-release
+2、yum install -y docker-io
+3、安装后的配置文件： etc/sysconfig/docker
+4、启动 Docker后台服务: service docker start
+5、docker version 验证
+#### Centos7.0安装Docker(https://docs.docker.com/engine/install/centos/)
+cat /etc/redhat-release查看操作系统内核
+yum -y install gcc
+yum -y install gcc-c++
+yum install -y yum-utils device-mapper-persistent-data lvm2
+yum-config-manager \
+    --add-repo \
+    #### https://download.docker.com/linux/centos/docker-ce.repo(换成阿里云的镜像)
+    https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum makecache fast
+配置镜像加速
+mkdir -p /etc/docker
+vim /etc/docker/daemon.json
+systemctl daemon-reload
+systemctl restart docker
+
+使用yum卸载Docker库(如果原来有的话就卸载)
+yum remove docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
+
+安装yum工具包和存储驱动
+yum install -y yum-utils device-mapper-persistent-data lvm2
+
+安装Docker的yum源, 这里指定了阿里的源
+yum-config-manager –add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+安装社区版的docker
+yum install docker-ce docker-ce-cli containerd.io
+
+启动docker
+sudo service docker start
+
+设置开机启动
+systemctl enable docker
+
+将指定用户添加到用户组
+usermod -aG docker root
+
+安装后查看Docker版本
+docker version
+
+阿里云镜像加速配置
+要去到阿里云, 用支付宝账号登陆或者重新注册一个也行, 然后去拿加速器的地址 https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors
+
+页面上有命令, 直接复制过来, 运行就完事了, 不需要手动配置一次.
+
+docker 常用命令
+attach    Attach to a running container                 # 当前 shell 下 attach 连接指定运行镜像
+build     Build an image from a Dockerfile              # 通过 Dockerfile 定制镜像
+commit    Create a new image from a container changes   # 提交当前容器为新的镜像
+cp        Copy files/folders from the containers filesystem to the host path   #从容器中拷贝指定文件或者目录到宿主机中
+create    Create a new container                        # 创建一个新的容器，同 run，但不启动容器
+diff      Inspect changes on a container’s filesystem   # 查看 docker 容器变化
+events    Get real time events from the server          # 从 docker 服务获取容器实时事件
+exec      Run a command in an existing container        # 在已存在的容器上运行命令
+export    Stream the contents of a container as a tar archive   # 导出容器的内容流作为一个 tar 归档文件[对应 import ]
+history   Show the history of an image                  # 展示一个镜像形成历史
+images    List images                                   # 列出系统当前镜像
+import    Create a new filesystem image from the contents of a tarball # 从tar包中的内容创建一个新的文件系统映像[对应export]
+info      Display system-wide information               # 显示系统相关信息
+inspect   Return low-level information on a container   # 查看容器详细信息
+kill      Kill a running container                      # kill 指定 docker 容器
+load      Load an image from a tar archive              # 从一个 tar 包中加载一个镜像[对应 save]
+login     Register or Login to the docker registry server    # 注册或者登陆一个 docker 源服务器
+logout    Log out from a Docker registry server          # 从当前 Docker registry 退出
+logs      Fetch the logs of a container                 # 输出当前容器日志信息
+port      Lookup the public-facing port which is NAT-ed to PRIVATE_PORT    # 查看映射端口对应的容器内部源端口
+pause     Pause all processes within a container        # 暂停容器
+ps        List containers                               # 列出容器列表
+pull      Pull an image or a repository from the docker registry server   # 从docker镜像源服务器拉取指定镜像或者库镜像
+push      Push an image or a repository to the docker registry server    # 推送指定镜像或者库镜像至docker源服务器
+restart   Restart a running container                   # 重启运行的容器
+rm        Remove one or more containers                 # 移除一个或者多个容器
+rmi       Remove one or more images             # 移除一个或多个镜像[无容器使用该镜像才可删除，否则需删除相关容器才可继续或 -f 强制删除]
+run       Run a command in a new container              # 创建一个新的容器并运行一个命令
+save      Save an image to a tar archive                # 保存一个镜像为一个 tar 包[对应 load]
+search    Search for an image on the Docker Hub         # 在 docker hub 中搜索镜像
+start     Start a stopped containers                    # 启动容器
+stop      Stop a running containers                     # 停止容器
+tag       Tag an image into a repository                # 给源中镜像打标签
+top       Lookup the running processes of a container   # 查看容器中运行的进程信息
+unpause   Unpause a paused container                    # 取消暂停容器
+version   Show the docker version information           # 查看 docker 版本号
+wait      Block until a container stops, then print its exit code   # 截取容器停止时的退出状态值
+
+docker 的镜像命令
+查看本地镜像 docker images
+查找镜像 docker search image_name 会先从本地查找,再从云端 查找
+拉取镜像 docker pull image_name:tag
+删除单个镜像 docker rmi -f image_id 删除多个镜像 docker rmi -f image_name1:tag image_name2:tag 删除全部镜像 docker rmi -f $(docker images -qa)
+
+docker 的容器命令(一)基本使用
+使用容器的前提是一定要有镜像, 容器就是镜像的实例化.
+新建并启动容器 docker run [options] image(镜像名字或者ID) [command]
+options说明: 有些是一个减号, 有些是两个的
+–name 容器新名字,为容器指定一个名称
+-d 后台运行容器,并返回容器ID, 也就是启动守护式容器
+-i 以交互模式运行容器, 通常与 -t 同时使用
+-t 为容器重新分配一个伪输入终端, 通常与 -i 同时使用
+-P 随机端口映射
+-p 指定端口映射
+
+简单的使用实例 docker run -it centos:latest /bin/bash 后面的 /bin/bash 写不写, 都是一样的
+启动成功后,终端左边会显示容器的ID
+
+列出当前正在运行的容器
+docker ps [options]
+-a 列出当前所有正在运行的容器+历史上运行过的
+-l 显示最近创建的容器
+-n 显示最近n个创建的容器
+-q 静默模式,只显示容器编号
+–no-trunc 不截断输出
+
+docker 容器的命令(二)启动守护式容器以及容器的运行机制
+docker run -d centos
+ 
+问题：然后docker ps -a 进行查看, 会发现容器已经退出
+很重要的要说明的一点: Docker容器后台运行,就必须有一个前台进程.
+容器运行的命令如果不是那些一直挂起的命令（比如运行top，tail），就是会自动退出的。
+ 
+这个是docker的机制问题,比如你的web容器,我们以nginx为例，正常情况下,我们配置启动服务只需要启动响应的service即可。例如
+service nginx start
+但是,这样做,nginx为后台进程模式运行,就导致docker前台没有运行的应用,
+这样的容器后台启动后,会立即自杀因为他觉得他没事可做了.
+所以，最佳的解决方案是,将你要运行的程序以前台进程的形式运行
+容器的运行命令如果不是那些一直挂起的命令(比如运行top, tail ), 就会自动退出的.
+这个是docker 的机制问题.比如web 容器, 以Nginx 为例, nginx 作为后台进程模式运行, 就需要docker 前台也要有运行的应用. 没事干就会退出.
+
+docker 容器的命令(三)
+进入正在运行的容器并以命令行交互, 可以用 attach 或者 exec
+使用 docker attach 容器ID/容器名字 就可以直接进入启动的容器终端, 不会启动新的进程
+使用 dokcer exec -it 容器ID bashShell 就能把进入启动的终端执行shell 脚本, 把shell 脚本的结果返回
+如果使用 dokcer exec -it 容器ID /bin/bash 也可以直接进入启动的容器的终端 ,直接 docker exec -it 容器ID bash 也可以
+
+查看容器内运行的进程 docker top 容器ID
+查看容器内部细节 docker inspect 容器ID
+查看容器日志 docker logs -f -t –tail 100 容器ID
+从容器内拷贝文件到主机上 docker cp 容器ID:容器内路径 目的主机路径
+
+容器commit就会成为新的镜像了
+docker commit 提交容器副本使之成为一个新的镜像
+命令是 docker commit -m “提交的描述信息” -a “作者” 容器ID 要创建的目标镜像名:标签名
+
+数据卷的概念和作用
+先来看看Docker的理念：
+将应用与运行的环境打包形成容器运行 ，运行可以伴随着容器，但是我们对数据的要求希望是持久化的
+容器之间希望有可能共享数据.
+Docker容器产生的数据，如果不通过docker commit生成新的镜像，使得数据做为镜像的一部分保存下来，
+那么当容器删除后，数据自然也就没有了。
+为了能保存数据在docker中我们使用卷。
+那么数据卷可以干什么呢?
+容器的持久化存储;容器间继承 + 数据共享;
+卷就是目录或文件，存在于一个或多个容器中，由docker挂载到容器，但不属于联合文件系统，因此能够绕过Union File System提供一些用于持续存储或共享数据的特性：
+卷的设计目的就是数据的持久化，完全独立于容器的生存周期，因此Docker不会在容器删除时删除其挂载的数据卷
+特点：
+1：数据卷可在容器之间共享或重用数据
+2：卷中的更改可以直接生效
+3：数据卷中的更改不会包含在镜像的更新中
+4：数据卷的生命周期一直持续到没有容器使用它为止
+
+数据卷的使用(1)直接命令添加
+命令 docker run -it -v 宿主机路径:容器内的路径
+其中宿主机路径没有存在的话, 就会自动吃Aug你家, 容器内的路径也是
+命令 docker run -it -v /export/datavol:/datavol -v /export/datavol2:/datavol2 centos
+如果数据卷要多个, 就写多个 -v 宿主机路径:容器内的路径, 只有一个就写一个
+
+数据卷的使用(2) 使用dockerfile 添加
+说明：
+出于可移植和分享的考虑，用-v 主机目录:容器目录这种方法不能够直接在Dockerfile中实现。
+由于宿主机目录是依赖于特定宿主机的，并不能够保证在所有的宿主机上都存在这样的特定目录。
+File文件构建
+# volume test
+FROM centos
+
+VOLUME ["/dataVolumeContainer1","/dataVolumeContainer2"]
+
+CMD echo "finished,--------success1"
+
+CMD /bin/bash
+根据 dockerfile , 去构建一个镜像, 通过 build 命令
+docker build -f dockerfile -t image_name:tag .
+
+此时就可看到我们生成的镜像, docker images
+
+通过这个镜像去实例化一个容器 docker run -it 容器ID
+此时可以看到数据卷已经有了, 在dockerfile 里面指定的数据卷按照规定生成了
+那么此时在宿主机上, 数据卷在哪里呢? 怎么看呢?
+通过 docker inspect 容器ID 去查看
+从这里就可以看出 在宿主机上,数据卷的位置了, Monuts下, Source是数据卷在宿主机下的路径, Destination是数据卷在容器内的路径(docker20版本)
+
+随后我们就可以去自行验证是否数据共享了.
+
+数据卷的使用(3)容器数据卷的数据共享
+命名的容器挂载数据卷，其它容器通过挂载这个(父容器)实现数据共享，挂载数据卷的容器，称之为数据卷容器
+翻译成白话就是, 子容器继承父容器的数据, 并且实现数据共享.
+新建子容器, 让它的数据卷继承来自父容器, 后面一定要有镜像名(或镜像ID)
+docker run -it –name dc02 –volumes-from 容器ID liezhongyu/centos
+你们可以自己去试试, 父容器和子容器之间的数据共享 , 子容器A 和子容器B的数据共享, 删除了父容器后, 其他子容器是否还能正常使用数据卷.
+结论:容器之间配置信息的传递, 数据卷的生命周期一直持续到没有容器使用它为止
+
+什么是Dockerfile
+其实 Dockerfile 就是用来构建docker镜像的文件, 是由一系列命令和参数构成的脚本.
+构建的步骤: 编写dockerfile 文件 >> docker build >> docker run
+
+构建过程解析
+Dockerfile内容基础知识
+1.每条保留字指令都必须为大写字母 且后面要跟随至少一个参数.
+2.指令按照从上到下, 顺序执行.
+3.# 表示注释.
+4.每条指令都会创建一个新的镜像层, 并对镜像进行提交
+Docker执行Dockerfile 的大致流程
+(1)docker从基础镜像运行一个容器
+(2)执行一条指令并对容器做出修改
+(3)执行类似docker commit 的操作 提交一个新的镜像层
+(4)docker 再基于刚刚提交的镜像运行一个新容器
+(5)执行dockerfile 中的下一条指令直到所有指令都执行完成
+
+总结
+从应用软件的角度来看，Dockerfile、Docker镜像与Docker容器分别代表软件的三个不同阶段，
+Dockerfile是软件的原材料
+Docker镜像是软件的交付品
+Docker容器则可以认为是软件的运行态。
+Dockerfile面向开发，Docker镜像成为交付标准，Docker容器则涉及部署与运维，三者缺一不可，合力充当Docker体系的基石。
+
+dockerfile体系结构(保留字指令)
+保留关键字 FROM - 基础镜像, 当前新镜像是基于哪个镜像的;
+MAINTAINER - 镜像维护者的姓名和邮箱地址;
+RUN - 容器构建时需要运行的命令;
+EXPOSE - 当前容器对外暴露的端口;
+WORKDIR - 指定在创建容器后, 终端默认登陆的进来工作目录, 一个落脚点
+
+ENV用来构建镜像过程中设置环境变量
+ENV MY_PATH /usr/mytest
+这个环境变量可以在后续的任何RUN指令中使用，这就如同在命令前面指定了环境变量前缀一样；
+也可以在其它指令中直接使用这些环境变量，
+比如：WORKDIR $MY_PATH
+
+ADD是将宿主机目录下的文件拷贝进镜像且ADD命令会自动处理URL 和解压tar 压缩包, COPY 是 只把拷贝文件和目录到镜像中
+VOLUME是容器数据卷, 用于数据保存和持久化工作
+
+CMD指定一个容器启动时要启动的命令
+CMD和ENTRYPOINT 不同之处是 CMD 会被docker run 之后的参数替换, 而且CMD 指令如果有多个, 就只有最后一个生效. 但是 ENTRYPOINT 的命令, 会以追加的形式启动,不会被替换掉
+ONBUILD是当构建一个被继承的Dcokerfile时运行命令, 父镜像在被子继承后的父镜像的onbuild 被触发
+
+简单小案例
+FROM centos
+MAINTAINER zzyy<zzyy167@126.com>
+ENV MYPATH /usr/local
+WORKDIR $MYPATH
+RUN yum -y install vim
+RUN yum -y install net-tools
+EXPOSE 80
+CMD echo $MYPATH
+CMD echo "success--------------ok"
+CMD /bin/bash
+
+dockerfile 内容如上
+(一)编写dockerfile
+上面是dockerfile 文件里的内容, 只需要 vim xxxdockerfile 进行编写dockerfile,把上面的放进去就可以了, expose 是暴露的端口,RUN 是容器构建的时候需要执行的命令
+
+(二)根据dockerfile构建新镜像
+docker build -f DockerFileOne -t onenight:centos .
+最后面的 . 是当前路径的意思, 最后一个 . 不要忘记了
+注意, 这个镜像名字必须是小写的, 不能是大写的, 不然就会报错的
+(三) 根据镜像运行容器并去 看看容器里是否有 vim 和 ifconfig 命令
+
+命令是 docker run -it 镜像ID
+
+自定义tomcat镜像以及使用过程中的问题
+先在宿主机上创建目录 mkdir -p /lie/mydockerfile/tomcat9, 并创建一个txt文件, 和上传tomcat和jdk 的压缩包
+随后编写一个 dockerfile文件
+FROM         centos
+MAINTAINER    lzy<lie384858216@126.com>
+#把宿主机当前上下文的c.txt拷贝到容器/usr/local/路径下
+COPY goodbye.txt /usr/local/cincontainer.txt
+#把java与tomcat添加到容器中
+ADD jdk-8u241-linux-x64.tar.gz /usr/local/
+ADD apache-tomcat-9.0.45.tar.gz /usr/local/
+#安装vim编辑器
+RUN yum -y install vim
+#设置工作访问时候的WORKDIR路径，登录落脚点
+ENV MYPATH /usr/local
+WORKDIR $MYPATH
+#配置java与tomcat环境变量 jdk1.8.0_241 apache-tomcat-9.0.45
+ENV JAVA_HOME /usr/local/jdk1.8.0_241
+ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV CATALINA_HOME /usr/local/apache-tomcat-9.0.45
+ENV CATALINA_BASE /usr/local/apache-tomcat-9.0.45
+ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
+#容器运行时监听的端口
+EXPOSE  8080
+#启动时运行tomcat
+# ENTRYPOINT ["/usr/local/apache-tomcat-9.0.45/bin/startup.sh" ]
+# CMD ["/usr/local/apache-tomcat-9.0.45/bin/catalina.sh","run"]
+CMD /usr/local/apache-tomcat-9.0.45/bin/startup.sh && tail -F /usr/local/apache-tomcat-9.0.45/bin/logs/catalina.out
+
+构建 镜像 docker build -t mytomcat9 .
+注意事项: 如果要构建的文件是dockerfile , 就可以不需要 -f 直接docker build 就可以了 ,如果使用docker build -f 就要指定要构建的文件
+
+创建容器的命令,tomcat默认项目根目录是ROOT, 而不像官方镜像里根目录是 webapps
+docker run -d -p 9080:8080 –name myt13 -v /lie/mydockerfile/tomcat9/test:/usr/local/apache-tomcat-9.0.45/webapps/ROOT/test/ -v /lie/mydockerfile/tomcat9/tomcat9logs/:/usr/local/apache-tomcat-9.0.45/logs –privileged=true mytomcat9
+
+此时去到宿主机下的/lie/mydockerfile/tomcat9/test 目录下新建文件和目录
+mkdir WEB-INF
+cd WEB-INF
+WEB-INF 里要有一个 web.xml 文件, 文件内容如下
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+??xmlns="http://java.sun.com/xml/ns/javaee"
+??xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+??id="WebApp_ID" version="2.5">
+??
+??<display-name>test</display-name>
+</web-app>
+
+回到test目录下, 新建一个 html 文件, 内容随便写
+此时重启 容器 docker restart 容器ID
+
+去到浏览器上, 输入 ip:9080/test/xxx.html 就可以看到html文件了,虽然是静态文件.此时我们修改html文件的内容, 浏览器上可以看到我们修改的内容.
+
+docker file 中继承父类镜像出错的提示
+pull access denied for df4, repository does not exist or may require ‘docker login’: denied: requested access to the resource is denied
+出现这个错误, 其实通常并不都是没有登陆的原因, csdn 查到的很多,都是复制粘贴, 并没有什么作用的.
+
+真正出错的原因是因为在继承父类镜像的时候, 没有指定标签名
+from 我们自定义的镜像:标签名
+RUN yum install -y curl 
+......
+在继承父类镜像的时候,指定了标签名就不会出错了, 不然如果我们自定义的镜像,就会出现没有找到, 然后就会报错上面的提示, 说没有登陆, 登陆之后,再构建docker build 也是会出现那个错误.
 
 LXX-前端工作总结
 写 React / Vue 项目时为什么要在列表组件中写 key，其作用是什么？
@@ -15117,6 +15392,9 @@ arr.toString().split(",").sort((a,b)=>{ return a-b})
 Array.prototype.flat= function() {
     return [].concat(...self.map(item => (Array.isArray(item) ? item.flat() : [item])));
 }
+
+const flatten = array => array.reduce((acc, cur) => (Array.isArray(cur) ? [...acc, ...flatten(cur)] : [...acc, cur]), [])
+
 Array.prototype.unique = function() {
     return [...new Set(self)]
 }
@@ -15398,7 +15676,7 @@ Object.prototype.toString.call()这个方法也不是完全靠谱的啊，
 <body>
 <div class="error">
     <h4>我的组件</h4>
-    <p><strong>错误：</strong>错误的描述…</p>
+    <p><strong>错误：错误的描述…</p>
     <h5>错误纠正</h5>
     <ol>
         <li>第一步</li>
@@ -15479,7 +15757,6 @@ let aa = 1;
 const bb = 2;
 console.log(aa); // 1
 console.log(bb); // 2
-
 
 cookie 和 token 都存放在 header 中，为什么不会劫持 token？
 1、首先token不是防止XSS的，而是为了防止CSRF的；
@@ -15612,11 +15889,11 @@ var b = 10;
 打印什么？
 1打印结果内容如下：
 ƒ b() {
-b = 20;
-console.log(b)
+  b = 20;
+  console.log(b)
 }
 2原因：
-作用域：执行上下文中包含作用于链：
+作用域：执行上下文中包含作用域链：
 在理解作用域链之前，先介绍一下作用域，作用域可以理解为执行上下文中申明的变量和作用的范围；包括块级作用域/函数作用域；
 特性：声明提前：一个声明在函数体内都是可见的，函数声明优先于变量声明；
 在非匿名自执行函数中，函数变量为只读状态无法修改；
@@ -15644,23 +15921,6 @@ var b = 10;
 
 请求时浏览器缓存 from memory cache 和 from disk cache 的依据是什么，哪些数据什么时候存放在 Memory Cache 和 Disk Cache中？
 https://juejin.im/post/5c22ee806fb9a049fb43b2c5?utm_source=gold_browser_extension
-
-使用迭代的方式实现 flatten 函数
-let arr = [1, 2, [3, 4, 5, [6, 7], 8], 9, 10, [11, [12, 13]]]
-
-let arr1 = arr.toString().split(",").map(val =>parseInt(val));
-console.log(arr1); 
-
-const flatten = function (arr) {
-    while (arr.some(item => Array.isArray(item))) {
-        arr = [].concat(...arr)
-    }
-    return arr
-}
-
-console.log(flatten(arr))
-
-const flatten = array => array.reduce((acc, cur) => (Array.isArray(cur) ? [...acc, ...flatten(cur)] : [...acc, cur]), [])
 
 下面代码中 a 在什么情况下会打印 1？
 var a = ?;
@@ -15797,8 +16057,8 @@ sleep(output,1000);
 我的答案：
 [102, 15, 22, 29, 3, 8]
 解析：
-根据MDN上对Array.sort()的解释，默认的排序方法会将数组元素转换为字符串，然后比较字符串中字符的UTF-16编码顺序来进行排序。所以'102' 会排在 '15' 前面。以下是MDN中的解释原文：
-The sort() method sorts the elements of an array in place and returns the array. The default sort order is built upon converting the elements into strings, then comparing their sequences of UTF-16 code units values.
+根据MDN上对Array.sort()的解释，默认的排序方法会将数组元素转换为字符串，那是因为sort()排序是按照字符串的Unicode码。所以'102' 会排在 '15' 前面。
+V8 引擎 sort 函数只给出了两种排序 InsertionSort 和 QuickSort，数量小于10的数组使用 InsertionSort，比10大的数组则使用 QuickSort。
 
 输出以下代码执行的结果并解释为什么 
 var obj = {
@@ -16299,25 +16559,17 @@ redux 为什么要把 reducer 设计成纯函数 ？
   <ul>
     <li>图片1</li>
     <li>图片2</li>
-   <li>图片3</li>
+    <li>图片3</li>
   </ul>
 </div>
 1、最外层div.slide定宽、相对定位relative
-
 2、ul 足够宽，最起码li数*li宽度，这里有个技巧，直接 width: 9999em，目的是让里面的所有li一字排开
-
 3、滚动效果通过控制ul的left或者transform来进行滚动效果
-
 4、到了最后一个li，往后看第一个li的时：
-
 4.1、准备继续滚动，把最后一个的li设置为相对定位relative，left值为此时此刻相对ul的位置（设置的时候不要带缓动效果），目的是让最后一个li不动。
-
 4.2、然后把ul的left或者transform设为0（这步没有缓动效果），
-
 4.3、然后再正常的开始一样出现第一个li的滚动效果（这步有缓动效果）
-
 4.4、最后等无缝的第一个li效果完成后，把最后一个li的left值复原为0
-
 5、到第一个li，往前看最后一个li时，也是和上面同理
 <!DOCTYPE html>
 <html lang="en">
@@ -16369,7 +16621,7 @@ redux 为什么要把 reducer 设计成纯函数 ？
         </ul>
     </div>
 </body>
-<script src="./js/jquery3.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     let selectNum = 0
     function lunboFun (selectNum, time) {
@@ -16915,34 +17167,28 @@ moveArr([1,2,3,4,5,6,7],8) => [7,1,2,3,4,5,6]
 // example 1
 var a={}, b='123', c=123;
 a[b]='b';
-
 // c 的键名会被转换成字符串'123'，这里会把 b 覆盖掉。
 a[c]='c';  
-
 // 输出 c
 console.log(a[b]);
+
 // example 2
 var a={}, b=Symbol('123'), c=Symbol('123');  
-
 // b 是 Symbol 类型，不需要转换。
 a[b]='b';
-
 // c 是 Symbol 类型，不需要转换。任何一个 Symbol 类型的值都是不相等的，所以不会覆盖掉 b。
 a[c]='c';
-
 // 输出 b
 console.log(a[b]);
+
 // example 3
 var a={}, b={key:'123'}, c={key:'456'};  
-
 // b 不是字符串也不是 Symbol 类型，需要转换成字符串。
 // 对象类型会调用 toString 方法转换成字符串 [object Object]。
 a[b]='b';
-
 // c 不是字符串也不是 Symbol 类型，需要转换成字符串。
 // 对象类型会调用 toString 方法转换成字符串 [object Object]。这里会把 b 覆盖掉。
 a[c]='c';  
-
 // 输出 c
 console.log(a[b]);
 
@@ -16967,8 +17213,6 @@ ref="input"
 >
 这3个方法是原生的方法，这里简单介绍下，官方定义如下compositionstart 事件触发于一段文字的输入之前（类似于 keydown 事件，但是该事件仅在若干可见字符的输入之前，而这些可见字符的输入可能需要一连串的键盘操作、语音识别或者点击输入法的备选词）
 简单来说就是切换中文输入法时在打拼音时(此时input内还没有填入真正的内容)，会首先触发compositionstart，然后每打一个拼音字母，触发compositionupdate，最后将输入好的中文填入input中时触发compositionend。触发compositionstart时，文本框会填入 “虚拟文本”（待确认文本），同时触发input事件；在触发compositionend时，就是填入实际内容后（已确认文本）,所以这里如果不想触发input事件的话就得设置一个bool变量来控制。
-image
-根据上图可以看到
 
 输入到input框触发input事件
 失去焦点后内容有改变触发change事件
@@ -16978,9 +17222,7 @@ image
 
 那么问题来了 使用这几个事件能做什么？
 因为input组件常常跟form表单一起出现，需要做表单验证
-image
 为了解决中文输入法输入内容时还没将中文插入到输入框就验证的问题
-
 我们希望中文输入完成以后才验证
 
 介绍下 Promise.all 使用、原理实现及错误处理 ？
@@ -17032,7 +17274,7 @@ var p1=Promise.resolve(1),
 p2=Promise.resolve(2),
 p3=Promise.resolve(3);
 promiseAll([p1,p2,p3]).then(function(value){
-console.log(value)
+  console.log(value)
 })
 四、Promise.all错误处理
 有时候我们使用Promise.all()执行很多个网络请求，可能有一个请求出错，但我们并不希望其他的网络请求也返回reject，要错都错，这样显然是不合理的。如何做才能做到promise.all中即使一个promise程序reject，promise.all依然能把其他数据正确返回呢?
@@ -17130,57 +17372,42 @@ function zeroMove(array) {
     return array;
 }
 
-  const moveZore = (arr) => {
-      let n = 0
-      arr.forEach((item, index) => {
-          if (item === 0){
-              arr.splice(index, 1)
-              n++;
-          }
-      })
-      arr.push(...(new Array(n)).fill(0))
-      return arr;
-  }
-
-请实现一个 add 函数，满足以下功能。?
-  function add() {
-  let args = [].slice.call(arguments);
-  let fn = function(){
-   let fn_args = [].slice.call(arguments)
-   return add.apply(null,args.concat(fn_args))
- }
-fn.toString = function(){
-  return args.reduce((a,b)=>a+b)
+const moveZore = (arr) => {
+    let n = 0
+    arr.forEach((item, index) => {
+        if (item === 0){
+            arr.splice(index, 1)
+            n++;
+        }
+    })
+    arr.push(...(new Array(n)).fill(0))
+    return arr;
 }
-return fn
-}
-https://github.com/yygmind/blog/issues/37
-https://github.com/yygmind/blog/issues/36#%E6%80%9D%E8%80%83%E9%A2%98
 
 react-router 里的 <Link> 标签和 <a> 标签有什么区别?
 先看Link点击事件handleClick部分源码
 
-      if (_self.props.onClick) _self.props.onClick(event);
+if (_self.props.onClick) _self.props.onClick(event);
 
-      if (!event.defaultPrevented && // onClick prevented default
-      event.button === 0 && // ignore everything but left clicks
-      !_self.props.target && // let browser handle "target=_blank" etc.
-      !isModifiedEvent(event) // ignore clicks with modifier keys
-      ) {
-          event.preventDefault();
+  if (!event.defaultPrevented && // onClick prevented default
+  event.button === 0 && // ignore everything but left clicks
+  !_self.props.target && // let browser handle "target=_blank" etc.
+  !isModifiedEvent(event) // ignore clicks with modifier keys
+  ) {
+      event.preventDefault();
 
-          var history = _self.context.router.history;
-          var _self$props = _self.props,
-              replace = _self$props.replace,
-              to = _self$props.to;
+      var history = _self.context.router.history;
+      var _self$props = _self.props,
+          replace = _self$props.replace,
+          to = _self$props.to;
 
 
-          if (replace) {
-            history.replace(to);
-          } else {
-            history.push(to);
-          }
-        }
+      if (replace) {
+        history.replace(to);
+      } else {
+        history.push(to);
+      }
+}
 Link做了3件事情：
 
 有onclick那就执行onclick
@@ -17210,6 +17437,25 @@ var twoSum = function(nums, target) {
     }
   }
 }
+//存在多个的时候
+var twoSum = function(nums, target=9) {
+  const result = []
+  const map = {}
+  for (let i = 0; i < nums.length; i++) {
+    const n = nums[i]
+    if (map[target - n] && map[target - n].length) {
+      map[target - n].push(i)
+    } else {
+      map[n] = [i]
+    }
+  }
+  for(let [key,value] of Object.entries(map)){
+    value.length === 2 && result.push(value)
+  }
+  return result
+}
+var nums = [2, 7, 11, 15,4,5]
+console.log(twoSum(nums)) //[[0,1], [4,5]]
 // 暴力破解法
 function findTowOfSum(nums, target) {
   let i, j;
@@ -17469,9 +17715,9 @@ export function deepCopy (obj, cache = []) {
 
 写出如下代码的打印结果?
 function changeObjProperty(o) {
-o.siteUrl = "http://www.baidu.com"
-o = new Object() // 形参 o 的指向发生改变，指向堆内存中一个新的对象
-o.siteUrl = "http://www.google.com"
+  o.siteUrl = "http://www.baidu.com"
+  o = new Object() // 形参 o 的指向发生改变，指向堆内存中一个新的对象
+  o.siteUrl = "http://www.google.com"
 }
 let webSite = new Object();
 changeObjProperty(webSite);
@@ -17565,12 +17811,12 @@ for(var i = 0; i < 100; i++) {
 
 利用settimeout 接受多个参数的方向，将Math.floor(Math.random() * 1000)作为第三个参数，第二参数可以设置为任意值。
 function print(n){
-setTimeout(() => {
-console.log(n);
-}, 1, Math.floor(Math.random() * 1000));
+  setTimeout(() => {
+    console.log(n);
+  }, 1, Math.floor(Math.random() * 1000));
 }
 for(var i = 0; i < 100; i++){
-print(i);
+  print(i);
 }
 2.可以利用settimeout 第一个参数可以是function是立即执行或者一个执行函数。
 
@@ -17643,9 +17889,7 @@ https://www.xx.cn/api?keyword=&level1=&local_batch_id=&elective=&local_province_
 https://www.xx.cn/api?keyword=&level1=&local_batch_id=&elective=800&local_province_id=33
 https://www.xx.cn/api?keyword=&level1=&local_batch_id=&elective=800,700&local_province_id=33
 匹配elective后的数字输出（写出你认为的最优解法）:
-
 [] || ['800'] || ['800','700']?
-
 new URLSearchParams('https://www.xx.cn/api?keyword=&level1=&local_batch_id=&elective=800,700&local_province_id=33').get('elective')
 
 
@@ -17681,10 +17925,9 @@ str1 === str2 // false
 typeof str1  // "string"
 typeof str2 // "object"
 总结：
-
 ==时做了隐式转换，调用了toString
-2者类型不一样，一个是string，一个是object
 
+2者类型不一样，一个是string，一个是object
 var str = “32px”;
 var str1 = str.slice(-2);
 alert(str);
@@ -17795,7 +18038,12 @@ changObjStructureOfNormal(entry);
 'abcaakjbb' => {'a':2,'b':2}
 'abbkejsbcccwqaa' => {'c':3}
 注意：题目说的是连续出现，注意连续二字
-
+正则表达式中\1代表引用第一个分组，\2引用第二个分组；
+分组就是（）里的内容，一个（）叫一个分组。
+如判断一个字符串中有没有连续相同的两个字符：
+/([a-zA-Z])\1/.test(str)
+假设一个字符串aa；首先a属于a-z，\1再引用一次a，为aa，满足条件，返回true；
+假设一个字符串ab；首先a属于a-z，\1再引用一次a，为aa，不符合条件，返回false。
 const arr = str.match(/(\w)\1*/g);
 const maxLen = Math.max(...arr.map(s => s.length));
 const result = arr.reduce((pre, curr) => {
@@ -17818,20 +18066,17 @@ function quchong(arr){
 输出以下代码运行结果？
 1 + "1"
 加性操作符：如果只有一个操作数是字符串，则将另一个操作数转换为字符串，然后再将两个字符串拼接起来
-
 所以值为：“11”
 
 2 * "2"
-乘性操作符：如果有一个操作数不是数值，则在后台调用 Number()将其转换为数值
+乘性操作符：如果有一个操作数不是数值，则在后台调用 Number()将其转换为数值   4
 
 [1, 2] + [2, 1]
 Javascript中所有对象基本都是先调用valueOf方法，如果不是数值，再调用toString方法。
-
 所以两个数组对象的toString方法相加，值为："1,22,1"
 
 "a" + + "b"
 后边的“+”将作为一元操作符，如果操作数是字符串，将调用Number方法将该操作数转为数值，如果操作数无法转为数值，则为NaN。
-
 所以值为："aNaN"
 
 介绍下 http1.0、1.1、2.0 协议的区别？
@@ -18069,9 +18314,7 @@ background: linear-gradient(to right, transparent, #fff 55%);
 
 输出以下代码执行结果?
 function wait() {
-  return new Promise(resolve =>
-  	setTimeout(resolve, 10 * 1000)
-  )
+  return new Promise(resolve =>setTimeout(resolve, 10 * 1000))
 }
 
 async function main() {
@@ -18088,22 +18331,22 @@ main();
 执行wait方法是同步执行的，所以耗时是选最高的，x，y，z 的返回的结果await等于执行同步代码Promise.resolve()，await 的时候只执行同步代码
 
 稍微改造一下就可以得到30 * 1000 ms以上的结果了
-`function wait () {
-return new Promise(resolve => setTimeout(resolve, 10 * 1000))
+function wait () {
+   return new Promise(resolve => setTimeout(resolve,10 * 1000))
 }
 
 async function main () {
-console.time()
-const x = await wait()
-const y = await wait()
-const z = await wait()
-// await x
-// await y
-// await z
-console.timeEnd()
+  console.time()
+  const x = await wait()
+  const y = await wait()
+  const z = await wait()
+  // await x
+  // await y
+  // await z
+  console.timeEnd()
 }
 
-main()`
+main()
 
 用 setTimeout 实现 setInterval，阐述实现的效果与setInterval的差异?
 简单的代码实现
@@ -18141,22 +18384,18 @@ const stringOrder = {
 如何在 H5 和小程序项目中计算白屏时间和首屏时间，说说你的思路 ?
 白屏时间=页面开始展示的时间点-开始请求时间点。
 
-开始请求时间点可以通过Performance Timing.navigation Start 。那么页面开始展示的时间点怎么获取呢。已经知道渲染过程是逐步完成的，而且页面解析是按照文档流从上至下解析的，因此一般认为开始解析body的时间点就是页面开始展示的时间。所以可以通过在head标签的末尾插入script来统计时间节点作为页面开始展示时间节点。但是这种方式需要打点，因此也有很多项目为了简化白屏时间的获取会选择忽略head解析时间直接用Performance Timing.dom Loading 来表示页面开始展示的时间，即使用domloading-navigation Start来表示白屏时间。
+开始请求时间点可以通过performance.timing.navigationStart 。那么页面开始展示的时间点怎么获取呢。已经知道渲染过程是逐步完成的，而且页面解析是按照文档流从上至下解析的，因此一般认为开始解析body的时间点就是页面开始展示的时间。所以可以通过在head标签的末尾插入script来统计时间节点作为页面开始展示时间节点。但是这种方式需要打点，因此也有很多项目为了简化白屏时间的获取会选择忽略head解析时间直接用performance.timing.domLoading 来表示页面开始展示的时间，即使用domloading-navigationStart来表示白屏时间。
 
 首屏时间=首屏内容渲染结束时间点-开始请求时间点。
 
-同样开始请求时间点可以通过Performance Timing.navigation Start获取。首屏内容渲染结束的时间点通常有以下几种方法获取：
-
+同样开始请求时间点可以通过performance.timing.navigationStart获取。首屏内容渲染结束的时间点通常有以下几种方法获取：
 （1）首屏模块标签标记法
-
 适用于于首屏内容不需要通过拉取数据才能生存以及页面不考虑图片等资源加载的情况。通过在 HTML 文档中对应首屏内容的标签结束位置，使用内联的 JavaScript 代码记录当前时间戳作为首屏内容渲染结束的时间点。
 
 （2）统计首屏内加载最慢的图片的时间
-
 通常首屏内容加载最慢的就是图片资源，因此可以把首屏内加载最慢的图片加载完成的时间作为首屏时间。由于浏览器对每个页面的 TCP 连接数有限制，使得并不是所有图片都能立刻开始下载和显示。因此在 DOM树 构建完成后会通过遍历首屏内的所有图片标签，并且监听所有图片标签 onload 事件，最终遍历图片标签的加载时间获取最大值，将这个最大值作为首屏时间。
 
 （3）自定义首屏内容计算法
-
 由于统计首屏内图片完成加载的时间比较复杂。所以在项目中通常会通过自定义模块内容，来简化计算首屏时间。例如忽略图片等资源加载情况，只考虑页面主要 DOM；只考虑首屏的主要模块，而不是严格意义首屏线以上的所有内容。
 
 可交互时间=用户可以正常进行事件输入时间点-开始请求时间点。
@@ -18185,11 +18424,8 @@ export default {
     }
 }
 当我们按下 click 按钮的时候，number 会被循环增加1000次。
-
 那么按照之前的理解，每次 number 被 +1 的时候，都会触发 number 的 setter 方法，从而根据上面的流程一直跑下来最后修改真实 DOM。那么在这个过程中，DOM 会被更新 1000 次！那怎么办？
-
 Vue.js中的 nextTick 函数，会传入一个 cb ，这个 cb 会被存储到一个队列中，在下一个 tick 时触发队列中的所有 cb 事件。
-
 Vue.js 肯定不会以如此低效的方法来处理。Vue.js在默认情况下，每次触发某个数据的 setter 方法后，对应的 Watcher 对象其实会被 push 进一个队列 queue 中，在下一个 tick 的时候将这个队列 queue 全部拿出来 run（ Watcher 对象的一个方法，用来触发 patch 操作） 一遍。
 
 因为目前浏览器平台并没有实现 nextTick 方法，所以 Vue.js 源码中分别用 Promise、setTimeout、setImmediate 等方式在 microtask（或是task）中创建一个事件，目的是在当前调用栈执行完毕以后（不一定立即）才会去执行这个事件。
@@ -18249,11 +18485,9 @@ HTML5标准规定了setTimeout()的第二个参数的最小值（最短间隔）
 HTTP1.x是序列和阻塞机制
 
 HTTP 2.0 是多工复用TCP连接，在一个连接里，客户端和浏览器都可以同时发送多个请求或回应，而且不用按照顺序一一对应，这样就避免了"队头堵塞"。
-
 举例来说，在一个TCP连接里面，服务器同时收到了A请求和B请求，于是先回应A请求，结果发现处理过程非常耗时，于是就发送A请求已经处理好的部分， 接着回应B请求，完成后，再发送A请求剩下的部分。
 
 旧的http1.1是会等 A请求完全处理完后在 处理B请求，会阻塞
-
 另：http1.1已经实现了管道机制：即 在同一个TCP连接里面，客户端可以同时发送多个请求。http 1.0并做不到，所以效率很低
 
 Vue 中的 computed 是如何实现的?
@@ -18331,29 +18565,22 @@ loader，它是一个转换器，将A文件进行编译成B文件，比如：将
 
 plugin是一个扩展器，它丰富了webpack本身，针对是loader结束后，webpack打包的整个过程，它并不直接操作文件，而是基于事件机制工作，会监听webpack打包过程中的某些节点，执行广泛的任务
 一、webpack的打包原理
-
 识别入口文件
 通过逐层识别模块依赖(Commonjs、amd或者es6的import，webpack都会对其进行分析，来获取代码的依赖)
 webpack做的就是分析代码，转换代码，编译代码，输出代码
 最终形成打包后的代码
+
 二、什么是loader
-
 loader是文件加载器，能够加载资源文件，并对这些文件进行一些处理，诸如编译、压缩等，最终一起打包到指定的文件中
-
 处理一个文件可以使用多个loader，loader的执行顺序和配置中的顺序是相反的，即最后一个loader最先执行，第一个loader最后执行
-
 第一个执行的loader接收源文件内容作为参数，其它loader接收前一个执行的loader的返回值作为参数，最后执行的loader会返回此模块的JavaScript源码
 
 三、什么是plugin
-
 在webpack运行的生命周期中会广播出许多事件，plugin可以监听这些事件，在合适的时机通过webpack提供的API改变输出结果。
 
 四、loader和plugin的区别
-
 对于loader，它是一个转换器，将A文件进行编译形成B文件，这里操作的是文件，比如将A.scss转换为A.css，单纯的文件转换过程
-
 plugin是一个扩展器，它丰富了webpack本身，针对是loader结束后，webpack打包的整个过程，它并不直接操作文件，而是基于事件机制工作，会监听webpack打包过程中的某些节点，执行广泛的任务
-
 
 v-if、v-show、v-html 的原理是什么，它是如何封装的？
 v-if会调用addIfCondition方法，生成vnode的时候会忽略对应节点，render的时候就不会渲染；
@@ -18364,88 +18591,43 @@ v-html会先移除节点下的所有节点，调用html方法，通过addProp添
 二分查找基础代码
 //递归查找
 function erfen_digui(arr, val, left = 0, right = arr.length - 1) {
-        if (left > right) {
-          return -1;
-        }
-        let cent = Math.floor((right + left) / 2);
-        if (arr[cent] === val) {
-          return `最终查找结果下标为${cent}`;
-        } else if (arr[cent] > val) {
-          right = cent - 1;
-        } else {
-          left = cent + 1;
-        }
-        return erfen_digui(arr, val, left, right);
-      }
+  if (left > right) {
+    return -1;
+  }
+  let cent = Math.floor((right + left) / 2);
+  if (arr[cent] === val) {
+    return `最终查找结果下标为${cent}`;
+  } else if (arr[cent] > val) {
+    right = cent - 1;
+  } else {
+    left = cent + 1;
+  }
+  return erfen_digui(arr, val, left, right);
+}
 //非递归查找
-      function erfen_feidigui(arr, val) {
-        let left = 0,
-          right = arr.length - 1;
-        while (left <= right) {
-          let cent = left + Math.floor((right - left) / 2);
-          if (arr[cent] === val) {
-            return `最终查找结果下标为${cent}`;
-          } else if (arr[cent] > val) {
-            right = cent - 1;
-          } else {
-            left = cent + 1;
-          }
-        }
-        return -1;
-      }
-
-//左边界查找（查找第一个元素）
-function erfen_digui(arr, val, left = 0, right = arr.length - 1) {
-        if (left > right) {
-          return -1;
-        }
-        let cent = Math.floor((right + left) / 2);
-        if (arr[cent] === val) {
-          /****************改动点********************/
-          if (arr[cent - 1] === val) {
-            right = cent - 1;
-          } else {
-            return `最终查找结果下标为${cent}`;
-          }
-          /*****************************************/
-        } else if (arr[cent] > val) {
-          right = cent - 1;
-        } else {
-          left = cent + 1;
-        }
-        return erfen_digui(arr, val, left, right);
-      }
-
-// 二分查找右边界（查找最后一个元素）
-function erfen_digui(arr, val, left = 0, right = arr.length - 1) {
-        if (left > right) {
-          return -1;
-        }
-        let cent = Math.floor((right + left) / 2);
-        if (arr[cent] === val) {
-          /****************改动点********************/
-          if (arr[cent + 1] === val) {
-            left = cent + 1;
-          } else {
-            return `最终查找结果下标为${cent}`;
-          }
-          /*****************************************/
-        } else if (arr[cent] > val) {
-          right = cent - 1;
-        } else {
-          left = cent + 1;
-        }
-        return erfen_digui(arr, val, left, right);
-      }
+function erfen_feidigui(arr, val) {
+  let left = 0,
+    right = arr.length - 1;
+  while (left <= right) {
+    let cent = left + Math.floor((right - left) / 2);
+    if (arr[cent] === val) {
+      return `最终查找结果下标为${cent}`;
+    } else if (arr[cent] > val) {
+      right = cent - 1;
+    } else {
+      left = cent + 1;
+    }
+  }
+  return -1;
+}
 
 详解JS函数柯里化？
 维基百科上说道：柯里化，英语：Currying(果然是满满的英译中的既视感)，是把接受多个参数的函数变换成接受一个单一参数（最初函数的第一个参数）的函数，并且返回接受余下的参数而且返回结果的新函数的技术。
 柯里化一共有三大作用，分别是：
 参数复用
 一、参数复用
-　　所谓参数复用，就是利用闭包的原理，让我们前面传输过来的参数不要被释放掉。看一下下面这段代码就显而易见了：
-提前确认
-　二、 提前确认
+　　所谓参数复用，就是利用闭包的原理，让我们前面传输过来的参数不要被释放掉。
+二、 提前确认
 　　这一特性经常是用来对浏览器的兼容性做出一些判断并初始化api，比如说我们目前用来监听事件大部分情况是使用addEventListener来实现的，但是一些较久的浏览器并不支持该方法，所以在使用之前，我们可以先做一次判断，之后便可以省略这个步骤了。
 var on = (function() {
      if (document.addEventListener) {
@@ -18475,20 +18657,16 @@ Function.prototype.bind = function (context) {
 
 // 支持多参数传递
 function progressCurrying(fn, args) {
-
     var _self = self
     var len = fn.length;
     var args = args || [];
-
     return function() {
         var _args = Array.prototype.slice.call(arguments);
         Array.prototype.push.apply(args, _args);
-
         // 如果参数个数小于最初的fn.length，则递归调用，继续收集参数
         if (_args.length < len) {
             return progressCurrying.call(_self, fn, _args);
         }
-
         // 参数收集完毕，则执行fn
         return fn.apply(self, _args);
     }
@@ -18508,7 +18686,7 @@ function add() {
         return _adder;
     };
     // 利用toString隐式转换的特性，当最后执行时隐式转换，并计算最终的值返回
-    _adder.toString = function () {
+    _adder.valueOf = function () {
         return _args.reduce(function (a, b) {
             return a + b;
         });
@@ -18768,7 +18946,7 @@ dependencies与devDependencies有什么区别呢？
 devDependencies 里面的插件只用于开发环境，不用于生产环境
 dependencies 是需要发布到生产环境的
 有点儿不好理解，别怕，举个例子就好：
-你开发一个前端项目，在项目中你需要使用gulp构建你的开发和本地运行环境,这时你就要放到dependencies里。gulp是你用来压缩代码，打包等需要的工具，程序实际运行的时候并不需要，所以放到dev里就ok了。
+你开发一个前端项目，在项目中你需要使用gulp构建你的开发和本地运行环境,这时你就要放到devDependencies里。gulp是你用来压缩代码，打包等需要的工具，程序实际运行的时候并不需要，所以放到dev里就ok了。
 你写程序要用element-ui,生产环境运行项目时肯定要用到element-ui,这时element-ui就应该安装到dependencies中去。
 
 /deep/ 样式
@@ -18827,7 +19005,7 @@ v-cloak 指令
   display: none;
 }
 <div v-cloak>
-  {{message/}}
+  {{message}}
 </div>
 
 eltree 懒加载问题
@@ -18906,7 +19084,7 @@ number.toLocaleString('en', {style:'currency', currency:'USD'}) // "$12,123.00"
 number.toLocaleString('cn', {style:'currency', currency:'CNY'}) // "￥12,123.00"
 
 Mac zip压缩加密
-zip -e 目标文件名.zip 需要加密的zip文件
+zip -e
 # 输入上面的命令后，会提示输入两次密码
 更多zip命令相关用法，可以在控制台使用 man zip 查看文档
 
@@ -18968,9 +19146,6 @@ Number.prototype.myToFixed = function (num) {
 
 CI/CD/CO
 CI持续集成 => CD持续交付 => CO持续运营
-
-npm设置私有仓库
-npm config set registry http://xxx.xx.xx.xx:4873/     
 
 vue性能优化 - webpack包体积优化
 安装 webpack-bundle-analyzer npm包
@@ -19062,29 +19237,6 @@ iOS环境下点击输入框页面被顶起不能自动回弹底部的问题
 
 解决方法：在对应的input元素加 @blur 事件，input失去焦点时，手动滚动页面 window.scroll(0,0)
 
-npm install --save 与 --save-dev的区别
-参考：https://www.cnblogs.com/limitcode/p/7906447.html
-
-#npm install moduleName
-安装模块到项目node_modules目录下。
-不会将模块依赖写入devDependencies或dependencies 节点。
-运行 npm install 初始化项目时不会下载模块。
-#npm install -g moduleName
-安装模块到全局，不会在项目node_modules目录中保存模块包。
-不会将模块依赖写入devDependencies或dependencies 节点。
-运行 npm install 初始化项目时不会下载模块。
-#npm install -save moduleName
-安装模块到项目node_modules目录下。
-会将模块依赖写入dependencies 节点。
-运行 npm install 初始化项目时，会将模块下载到项目目录下。
-运行npm install --production或者注明NODE_ENV变量值为production时，会自动下载模块到node_modules目录中。
-#npm install -save-dev moduleName
-安装模块到项目node_modules目录下。
-会将模块依赖写入devDependencies 节点。
-运行 npm install 初始化项目时，会将模块下载到项目目录下。
-运行npm install --production或者注明NODE_ENV变量值为production时，不会自动下载模块到node_modules目录中。
-对于只有在开发中使用的，比如node中间件、gulp、压缩css、js的模块，可以使用 --save-dev形式安装，如果线上代码必须依赖的模块，需要使用--save
-
 安卓 input键盘弹起导致底部按钮也被抬起
 监听onresize，如果之前的视窗高度不为
 
@@ -19126,10 +19278,9 @@ document.getElementById("myDIV").classList.add("mystyle");
 document.getElementById("myDIV").classList.remove(“mystyle");
 
 vuex页面刷新后还原的问题
-参考： https://blog.csdn.net/chen123789hkb/article/details/90175607
-
+vuex状态管理，在网页刷新数据被清空的解决方法。
+在main.js中写入下面的代码段（亲测有效）
 思路：存到storage, 再取出
-
 //刷新保存状态
 if (sessionStorage.getItem("store")) {
   store.replaceState(
@@ -19253,7 +19404,7 @@ npm config list [--json]
 npm config edit
 npm set <key> <value>
 npm get [<key>]
-
+npm cache clean --force
 alias: c
 
 git clone 大文件仓库超时问题
@@ -19628,10 +19779,10 @@ document.body.oncopy = function(event) {
   // console.log(document.getSelection().toString());
   // 在copy内容里加入信息
   var msg = `
------------------------------
-标题：${document.title}
-链接：${location.href}
-作者：guoqzuo (http://github/zuoxiaobai)
+    -----------------------------
+    标题：${document.title}
+    链接：${location.href}
+    作者：guoqzuo (http://github/zuoxiaobai)
   `
   event.clipboardData.setData('text/plain', `${document.getSelection().toString()} ${msg}`);
   event.preventDefault();
@@ -19757,7 +19908,7 @@ Vue.use(infiniteScroll);
 后台要求的数据格式 "2020-04-10T04:01:00.000Z" 为TZ格式的字符串。Date对象toString为 "Fri Apr 10 2020 12:00:00 GMT+0800 (中国标准时间)" 这种格式，那怎么转TZ字符串格式呢？用 Date.prototype.toJSON() 方法即可
 
 a = new Date('2020/04/10 12:00:00') 
-Fri Apr 10 2020 12:00:00 GMT+0800 (中国标准时间)
+//Fri Apr 10 2020 12:00:00 GMT+0800 (中国标准时间)
 
 a.toJSON() //"2020-04-10T04:01:00.000Z"
 
@@ -19766,7 +19917,6 @@ Date.prototype.toLocaleString()的坑
 
 a = new Date('2020/04/10 00:00:00') 
 // Fri Apr 10 2020 00:00:00 GMT+0800 (中国标准时间)
-
 a.toLocaleString() // "2020/4/10 上午12:00:00"
 a.getHours() // 0
 a.getMinutes() // 0
@@ -20167,7 +20317,6 @@ FileReader.readAsDataURL 读取文件之后是 base64 编码的字符串，这�
 
 为什么会有回流/重排(Reflow)和重绘(Repaint)？怎么避免？
 1. 什么是回流或重绘
-
 浏览器使用流式布局模型 (Flow Based Layout)
 浏览器把 HTML 解析成 DOM，把 CSS 解析为 CSDOM，DOM 和 CSDOM 合并就产生了 Render Tree(渲染树)
 根据Render Tree，计算各个元素在页面中的大小和位置，绘制到页面上。
@@ -20176,24 +20325,19 @@ FileReader.readAsDataURL 读取文件之后是 base64 编码的字符串，这�
 重绘（RePaint）: 当页面中元素样式的改变并不影响它在文档中的位置时，浏览器会重绘该区域，这个过程称为重绘
 
 2. 回流和重绘的比较
-
-DOM、CSS style的改变会照成回流或者重绘，回流比重绘更消耗性能
-
+DOM、CSS style的改变会造成回流或者重绘，回流比重绘更消耗性能
 回流：重新布局，会引起元素位置变化的就会reflow，比如修改 DOM 的宽高、字体大小、窗口大小改变、元素位置改变等
 重绘：重新绘制区域，不改变元素位置，比如修改背景、颜色，visibility等
 3. 如何避免回流或重绘
-
 CSS：
-
 尽可能在DOM树的最末端改变class
 避免设置多层内联样式，将动画效果应用到 position 属性为 absolute 或 fixed 的元素上
 避免使用CSS表达式（例如：calc())
-JavaScript
 
+JavaScript
 避免频繁操作样式、DOM
 在 documentFragment 或 display 为 none 的元素上进行 dom 操作不会引起回流或重绘
 对复杂动画，使用绝对定位脱离文档流，避免整体回流
-
 var docCookies = {
   getItem: function (sKey) {
     return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
@@ -20317,8 +20461,8 @@ QRCode.js使用很简单，下面来写一个自动生成二维码的工具，�
         correctLevel: QRCode.CorrectLevel.H
       });
       // 上面使用清空dom，再重绘，也可以使用内置的方法来重绘
-      // qrcode.clear(); // clear the code.
-      // qrcode.makeCode(inputEl.value); // make another code.
+      qrcode.clear(); // clear the code.
+      qrcode.makeCode(inputEl.value); // make another code.
     }
   </script>
 </body>
@@ -20422,7 +20566,7 @@ export default {
 // .eslintignore
 mock
 
-ue组件的封装性与可操作性：ref拿不到子组件实例以及vuex增加代码复杂度问题
+vue组件的封装性与可操作性：ref拿不到子组件实例以及vuex增加代码复杂度问题
 一般在封装vue组件时，怎么把组件封装的更好，更容易维护理解是值得思考的问题
 
 来看一个实际场景：一个组件里有高级查询和列表，他们东西都比较多，需要拆分成两个子组件
@@ -20451,7 +20595,6 @@ a 标签加上 noreferer 和 noopener 后会有什么效果？
 Referer 是什么？
 Referer 的应用场景
 window.opener 可以做什么？
-noreferer_1.png
 
 a 标签加上 noreferer 和 noopener 后会有什么效果？
 
@@ -20506,6 +20649,8 @@ if (console) {
 lodash.js打包后默认是整包，怎么按需打包，减少包体积
 在 vue-cli 打包 lib 项目时，发现包体积较大有 600多KB，于是使用 -- report 参数看具体是哪个包较大，发现尽管只用到了 lodash 的一个函数，但打包体积却有几百k，如下图，应该是整包打的，没有按需打包。
 
+通过vue-cli的命令选项可以生成打包报告
+vue-cli-service build --report  (--report选项可以生成report.html帮助分析包内容)
 # 以 src/index.js 为入口，以库的形式打包到lib目录下，并生成 report.html
 vue-cli-service build --mode lib --target lib --dest lib --report src/index.js
 以下是 打开 lib/项目名.umd-report.html 后，显示的各模块大小示意图
@@ -20600,7 +20745,6 @@ Google广告一个页面怎么显示多个广告，多个广告只显示的一�
 在 Google Adsense 中，理论上配置好广告形式后，获取代码，把对应的代码放到页面中就可以显示广告了。但发现，如果放多个广告，只有一个可以显示出来，下面来看看是为什么？
 
 官方提供的代码如下:
-
 <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'></script>
 <ins class='adsbygoogle'
      style='display:block'
@@ -20614,7 +20758,6 @@ Google广告一个页面怎么显示多个广告，多个广告只显示的一�
 一般在验证开通 Google Adsense 时，就会引入第一行 script 代码。那么只需要把下面的 ins 元素 和 script 里的代码拷贝进页面里就行。
 
 当有多个广告时，我只拷贝了 多个 ins 到指定位置。 script 里面 (adsbygoogle = window.adsbygoogle || []).push({}); 只放到了 body最后面的 script 里，这时只能显示一个广告。于是我看了下其他可以显示多个 google 广告的页面，打开源码后，发现最下面的 script 里的内容也要多次拷贝。也就是 如果页面上要放多个 google 广告，每次都需要引入 ins + script 两部分的代码
-
 <!-- 广告 1 -->
 <ins class='adsbygoogle' style="ins内容简写"></ins>
 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
@@ -20627,11 +20770,8 @@ DOMContentLoaded与Load时间具体指的是什么时间？
 在 Chrome DevTools 官网 Network Reference (opens new window)里是这样介绍的：
 
 View load events
-
 来看看 DOMContentLoaded 和 load 事件在 MDN 的解释
-
 DOMContentLoaded事件：window 和 document 上都可以监听，意思一致
-
 window.addEventListener('DOMContentLoaded', (event) => {
   console.log('DOM fully loaded and parsed');
 });
@@ -20646,7 +20786,6 @@ async 是和页面html一起解析  不是顺次加载
 defer 等页面的HTML和DOM解析完成才会去解析js  顺次执行js脚本   谁先加载完谁先执行
 
 load事件：window
-
 window.addEventListener('load', (event) => {
   console.log('page is fully loaded');
 });
@@ -20654,45 +20793,6 @@ window.addEventListener('load', (event) => {
 window.onload = (event) => {
   console.log('page is fully loaded');
 };
-
-当整个页面加载完成时（包括所有相关资源，例如css样式表和图片），这与 DOMContentLoaded 相反，它在页面DOM被加载后立即触发，而无需等待资源完成加载。
-
-DOMContentLoaded与Load时间具体指的是什么时间？
-在 Chrome DevTools 官网 Network Reference (opens new window)里是这样介绍的：
-
-chrome_load_events.png
-
-View load events
-
-DevTools displays the timing of the DOMContentLoaded and load events in multiple places on the Network panel. The DOMContentLoaded event is colored blue, and the load event is red.
-
-来看看 DOMContentLoaded 和 load 事件在 MDN 的解释
-
-DOMContentLoaded事件：window 和 document 上都可以监听，意思一致
-
-window.addEventListener('DOMContentLoaded', (event) => {
-  console.log('DOM fully loaded and parsed');
-});
-document.addEventListener('DOMContentLoaded', (event) => {
-  console.log('DOM fully loaded and parsed');
-});
-The DOMContentLoaded event fires when the initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.
-
-DOMContentLoaded 事件：当 DOM (HTML document) 完成加载并解析，而不用等 css样式、图片和子 frame 完全加载完成时触发
-
-同步 JS 会使 DOM 的解析暂停，如果希望用户在请求页面后尽快解析DOM，你可以把 JS 使用异步加载，并优化 css 样式加载方式。如果按照惯例加载，样式表和 JS 是并行加载的，会减慢 DOM 解析，窃取主html文档解析速度。下面是 head 中 script 默认加载以及加上 async, defer 参数的对比，一般把 script 放到 body 末尾，基本等价于 header 中 defer 的效果
-
-load事件：window
-
-window.addEventListener('load', (event) => {
-  console.log('page is fully loaded');
-});
-// 或
-window.onload = (event) => {
-  console.log('page is fully loaded');
-};
-
-
 当整个页面加载完成时（包括所有相关资源，例如css样式表和图片），这与 DOMContentLoaded 相反，它在页面DOM被加载后立即触发，而无需等待资源完成加载。
 
 #vue项目页面打开时间优化：从16秒到2秒内
@@ -20814,7 +20914,7 @@ module.exports = {
     externals: {
       // 需要使用外部引入的包名：包名
       echarts: "echarts", 
-      vue: "Vue", // 注意 vue需要外部引入。放到 echarts前面，防止 console 报错
+      vue: "Vue", // 注意 vue需要外部引入。放到element前面，防止 console 报错
       // element: "ElementUI" 可以打包成功，但chunk-vendors.js里面会打包element
       "element-ui": "ELEMENT"
     }
@@ -21122,13 +21222,12 @@ S数据类型有多少种，有哪些细节需要注意的？
 ES3 有 5 种基本数据类型，1种复杂数据类型。ES6+ 后面新增了两种基本数据类型：Symbol, bigint
 
 注意：
-
 typeof 函数值为 function, typeof null 值为 object，本质上其实有 9 种数据类型。
 new String('12') 是字符串对象，不是 string，new Number(1) 是数字对象，不是 number，new Boolean(false) 是对象，不是 boolean
 新增的 Symbol 以及 bigint 都是不能 new 的，没有 constructor 构造函数方法
 var a = null,       // null
     b = undefined, // undefined 
-    c = false, // bollean
+    c = false, // boolean
     d = 1, // mumber
     e = "123", // string
     f = {}, // object
@@ -21194,21 +21293,20 @@ __proto__: Array(0)
         b=temp;
 
 方法二：
-　　　　int  a  = 1;  //0001
-　　      int b = 2;    //0010
+　　　　 int a = 1;  //0001
+　　    int b = 2;    //0010
 
-            a = a+b;
-            b=a-b;
-            a=a-b;
+        a = a+b;
+        b=a-b;
+        a=a-b;
 
 方法三：
-
-　　　　int  a  = 1;  //0001
-           int b = 2;    //0010//          
+　　　　int a = 1;  //0001
+       int b = 2;    //0010        
 
   　　　a = a^b; //0011 
-           b=a^b;   //0001
-           a=a^b;   //0010
+        b=a^b;   //0001
+        a=a^b;   //0010
            
 方法四:   [a,b] = [b,a]
 
@@ -21333,7 +21431,7 @@ num = num ^ 1;
 ~4+1  =>  -4
 应用场景：
 
-取整 （位运算花样取整）
+取整 （位运算花样取整）得到的结果都是将小数点后面去掉
 ~~(-5.88) // -5
 
 判断数组中某项是否存在
@@ -21342,7 +21440,7 @@ if (arr.indexOf(item) > -1) {
     // code
 }
 // 按位非    ~-1 = - (-1 + 1)
-if (~arr.indexOf(item)) {
+if (~arr.indexOf(item)) {  这是当不存在某项时的逻辑
     // code
 }
 
@@ -21475,7 +21573,6 @@ for(var j=0;j<a.length;j++){
 
 <router-view v-if="isRouterAlive"></router-view>
 
-
 provide和inject的用法
 provide (){
     return {
@@ -21505,14 +21602,6 @@ function getValue(obj,str){
   },obj)
 }
 console.log(getValue(obj,'m.n.p.value'))
-
-function deepObjectMerge(FirstOBJ, SecondOBJ) { 
-    for (var key in SecondOBJ) {
-        FirstOBJ[key] = FirstOBJ[key] && FirstOBJ[key].toString() === "[object Object]" ?
-            deepObjectMerge(FirstOBJ[key], SecondOBJ[key]) : FirstOBJ[key] = SecondOBJ[key];
-    }
-    return FirstOBJ;
-}
 
 const setTimeout = (fn,timeout,...args)=>{
   const start = +new Date()
@@ -21567,7 +21656,20 @@ function deepClone(obj){
   return cloneObj
 }
 
-
+对象深层级的合并
+function deepMerge(obj1, obj2) {
+  let key;
+  for (key in obj2) {
+    // 如果target(也就是obj1[key])存在，且是对象的话再去调用deepMerge，否则就是obj1[key]里面没这个对象，需要与obj2[key]合并
+    // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
+    obj1[key] = obj1[key] &&
+        obj1[key].toString() === "[object Object]" &&
+        (obj2[key] && obj2[key].toString() === "[object Object]")
+        ? deepMerge(obj1[key], obj2[key])
+        : (obj1[key] = obj2[key]);
+  }
+  return obj1;
+}
 
 function instance_of(L,R){
   var prototype = R.prototype
@@ -21618,7 +21720,7 @@ const removeDuplicates = function(s, k) {
     }
     return stack.join('')
 };
-removeDuplicates('deeedbbcccbdaa',3)
+removeDuplicates('deeedbbcccbdaa',3)//aa
 
 1、获取字符串中的字符数
 const characterCount = (str, char) => str.split(char).length - 1
@@ -21734,7 +21836,7 @@ word-break: break-all;
 overflow: hidden;
 max-width: 100%;
 1-3. 负边距使用技巧
-规律: 左为负时，是左移，右为负时，是左拉。上下与左右类似
+规律: margin-left:-100px;左为负时，是左移
 1-4. 定位同时设置方位情况
 规律: 绝对定位和固定定位时，同时设置 left 和 right 等同于隐式地设置宽度
 span{
@@ -21867,7 +21969,7 @@ table{
   border-style: dashed;
   background-color: rgba(15, 65, 83, 0.4);
   border-color: transparent;
-  border-width: 1.5px;
+  border-width: 1.496px;
   background-clip: padding-box;
 }
 .scroll-container::-webkit-scrollbar-thumb:hover {
@@ -22455,7 +22557,7 @@ paused 动画暂停播放
 
 js实现并发控制
 async function asyncPool(poolLimit,array,iteratorFn){
-  const ret = []//存储所以的异步任务
+  const ret = []//存储所有的异步任务
   const executing = []//存储正在执行的异步任务
   for(const item of array){
     //调用iteratorFn创建异步任务
@@ -23376,9 +23478,6 @@ a ^= b;
 a = { a, b };
 b = a.a;
 a = a.b;
-// a = [a, b];
-// b = a[0];
-// a = a[1];
 •方法四：ES 6 解构赋值
 [a, b] = [b, a];
 •方案五：运算符优先级
@@ -23399,10 +23498,10 @@ import VueLazyload from 'vue-lazyload'
 Vue.use(VueLazyload)
 或者添加自定义选项
 Vue.use(VueLazyload, {
-preLoad: 1.3,
-error: 'dist/error.png',
-loading: 'dist/loading.gif',
-attempt: 1
+  preLoad: 1.3,
+  error: 'dist/error.png',
+  loading: 'dist/loading.gif',
+  attempt: 1
 })
 在 vue 文件中将 img 标签的 src 属性直接改为 v-lazy ，从而将图片显示方式更改为懒加载显示：
 <img v-lazy="/static/img/1.png">
@@ -23416,13 +23515,13 @@ npm install babel-plugin-component -D
 {
  "presets": [["es2015", { "modules": false }]],
  "plugins": [
- [
- "component",
- {
- "libraryName": "element-ui",
- "styleLibraryName": "theme-chalk"
- }
- ]
+      [
+        "component",
+        {
+        "libraryName": "element-ui",
+        "styleLibraryName": "theme-chalk"
+        }
+      ]
  ]
 }
 3）在 main.js 中引入部分组件：
@@ -23823,15 +23922,24 @@ git stash pop stash@{1}恢复指定的进度到工作区。stash_id是通过git 
 通过git stash pop命令恢复进度后，会删除当前进度。
 git stash apply [–index] [stash_id]
 除了不删除恢复的进度之外，其余和git stash pop 命令一样。
-
+当有多条 stash，可以指定操作stash，首先使用stash list 列出所有记录：
+$ git stash list
+stash@{0}: WIP on ...
+stash@{1}: WIP on ...
+stash@{2}: On ...
+应用第二条记录：
+$ git stash apply stash@{1}
 git stash drop [stash_id]
 删除一个存储的进度。如果不指定stash_id，则默认删除最新的存储进度。
-
 git stash clear
 删除所有存储的进度。
+stash：存储临时代码。
+reset --soft：软回溯，回退 commit 的同时保留修改内容。
+cherry-pick：复制 commit。
+revert：撤销 commit 的修改内容。
+reflog：记录了 commit 的历史操作。
 
 Git Bash:
-
 切换到要操作的项目文件夹 
 命令行 : $ cd <ProjectPath>
 
@@ -24010,6 +24118,22 @@ git commit -m "xxx" --no-verify 绕过验证，强制提交
           }
         )
       })
+    })
+  }
+
+  Promise.allSettled = function (promises) {
+    return Promise.all(promises.map(p => Promise.resolve(p).then(res => {
+      return { status: 'fulfilled', value: res }
+    }, error => {
+      return { status: 'rejected', reason: error }
+    })));
+  };
+
+  Promise.prototype.finally (callback) {
+    return this.then(value => {
+      return Promise.resolve(callback()).then(() => value)
+    }, reason => {
+      return Promise.resolve(callback()).then(() => {throw reason})
     })
   }
 
@@ -24277,65 +24401,57 @@ npm run dev
 ## 1.拉开序幕的setup
 
 1. 理解：Vue3.0中一个新的配置项，值为一个函数。
-2. setup是所有<strong style="color:#DD5145">Composition API（组合API）</strong><i style="color:gray;font-weight:bold">“ 表演的舞台 ”</i>。
+2. setup是所有Composition API（组合API“ 表演的舞台 ”）。
 4. 组件中所用到的：数据、方法等等，均要配置在setup中。
 5. setup函数的两种返回值：
    1. 若返回一个对象，则对象中的属性、方法, 在模板中均可以直接使用。（重点关注！）
-   2. <span style="color:#aad">若返回一个渲染函数：则可以自定义渲染内容。（了解）</span>
+   2.若返回一个渲染函数：则可以自定义渲染内容。（了解）
 6. 注意点：
-   1. 尽量不要与Vue2.x配置混用
-      - Vue2.x配置（data、methos、computed...）中<strong style="color:#DD5145">可以访问到</strong>setup中的属性、方法。
-      - 但在setup中<strong style="color:#DD5145">不能访问到</strong>Vue2.x配置（data、methos、computed...）。
-      - 如果有重名, setup优先。
-   2. setup不能是一个async函数，因为返回值不再是return的对象, 而是promise, 模板看不到return对象中的属性。（后期也可以返回一个Promise实例，但需要Suspense和异步组件的配合）
+  1. 尽量不要与Vue2.x配置混用
+    - Vue2.x配置（data、methos、computed...）中可以访问到setup中的属性、方法。
+    - 但在setup中不能访问到Vue2.x配置（data、methos、computed...）。
+    - 如果有重名, setup优先。
+  2. setup不能是一个async函数，因为返回值不再是return的对象, 而是promise, 模板看不到return对象中的属性。（后期也可以返回一个Promise实例，但需要Suspense和异步组件的配合）
 
 ##  2.ref函数
-
 - 作用: 定义一个响应式的数据
 - 语法: ```const xxx = ref(initValue)``` 
-  - 创建一个包含响应式数据的<strong style="color:#DD5145">引用对象（reference对象，简称ref对象）</strong>。
+  - 创建一个包含响应式数据的引用对象（reference对象，简称ref对象）。
   - JS中操作数据： ```xxx.value```
   - 模板中读取数据: 不需要.value，直接：```<div>{{xxx}}</div>```
 - 备注：
   - 接收的数据可以是：基本类型、也可以是对象类型。
   - 基本类型的数据：响应式依然是靠``Object.defineProperty()``的```get```与```set```完成的。
-  - 对象类型的数据：内部 <i style="color:gray;font-weight:bold">“ 求助 ”</i> 了Vue3.0中的一个新函数—— ```reactive```函数。
+  - 对象类型的数据：内部 求助了Vue3.0中的一个新函数—— ```reactive```函数。
 
 ## 3.reactive函数
-
-- 作用: 定义一个<strong style="color:#DD5145">对象类型</strong>的响应式数据（基本类型不要用它，要用```ref```函数）
-- 语法：```const 代理对象= reactive(源对象)```接收一个对象（或数组），返回一个<strong style="color:#DD5145">代理对象（Proxy的实例对象，简称proxy对象）</strong>
+- 作用: 定义一个对象类型的响应式数据（基本类型不要用它，要用```ref```函数）
+- 语法：```const 代理对象= reactive(源对象)```接收一个对象（或数组），返回一个代理对象（Proxy的实例对象，简称proxy对象）
 - reactive定义的响应式数据是“深层次的”。
 - 内部基于 ES6 的 Proxy 实现，通过代理对象操作源对象内部数据进行操作。
 
 ## 4.Vue3.0中的响应式原理
-
 ### vue2.x的响应式
-
 - 实现原理：
   - 对象类型：通过```Object.defineProperty()```对属性的读取、修改进行拦截（数据劫持）。
   
   - 数组类型：通过重写更新数组的一系列方法来实现拦截。（对数组的变更方法进行了包裹）。
-  
     ```js
     Object.defineProperty(data, 'count', {
         get () {}, 
         set () {}
     })
     ```
-
 - 存在问题：
   - 新增属性、删除属性, 界面不会更新。
   - 直接通过下标修改数组, 界面不会自动更新。
 
 ### Vue3.0的响应式
-
 - 实现原理: 
   - 通过Proxy（代理）:  拦截对象中任意属性的变化, 包括：属性值的读写、属性的添加、属性的删除等。
   - 通过Reflect（反射）:  对源对象的属性进行操作。
   - MDN文档中描述的Proxy与Reflect：
     - Proxy：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy
-    
     - Reflect：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Reflect
     
       ```js
@@ -24360,18 +24476,17 @@ npm run dev
 ## 5.reactive对比ref
 
 -  从定义数据角度对比：
-   -  ref用来定义：<strong style="color:#DD5145">基本类型数据</strong>。
-   -  reactive用来定义：<strong style="color:#DD5145">对象（或数组）类型数据</strong>。
-   -  备注：ref也可以用来定义<strong style="color:#DD5145">对象（或数组）类型数据</strong>, 它内部会自动通过```reactive```转为<strong style="color:#DD5145">代理对象</strong>。
+   -  ref用来定义：基本类型数据。
+   -  reactive用来定义：对象（或数组）类型数据。
+   -  备注：ref也可以用来定义对象（或数组）类型数据, 它内部会自动通过```reactive```转为代理对象。
 -  从原理角度对比：
    -  ref通过``Object.defineProperty()``的```get```与```set```来实现响应式（数据劫持）。
-   -  reactive通过使用<strong style="color:#DD5145">Proxy</strong>来实现响应式（数据劫持）, 并通过<strong style="color:#DD5145">Reflect</strong>操作<strong style="color:orange">源对象</strong>内部的数据。
+   -  reactive通过使用Proxy来实现响应式（数据劫持）, 并通过Reflect操作源对象内部的数据。
 -  从使用角度对比：
-   -  ref定义的数据：操作数据<strong style="color:#DD5145">需要</strong>```.value```，读取数据时模板中直接读取<strong style="color:#DD5145">不需要</strong>```.value```。
-   -  reactive定义的数据：操作数据与读取数据：<strong style="color:#DD5145">均不需要</strong>```.value```。
+   -  ref定义的数据：操作数据需要```.value```，读取数据时模板中直接读取不需要```.value```。
+   -  reactive定义的数据：操作数据与读取数据：均不需要```.value```。
 
 ## 6.setup的两个注意点
-
 - setup执行的时机
   - 在beforeCreate之前执行一次，this是undefined。
   
@@ -24381,7 +24496,6 @@ npm run dev
     - attrs: 值为对象，包含：组件外部传递过来，但没有在props配置中声明的属性, 相当于 ```this.$attrs```。
     - slots: 收到的插槽内容, 相当于 ```this.$slots```。
     - emit: 分发自定义事件的函数, 相当于 ```this.$emit```。
-
 
 ## 7.计算属性与监视
 
@@ -24417,9 +24531,7 @@ npm run dev
 ### 2.watch函数
 
 - 与Vue2.x中watch配置功能一致
-
 - 两个小“坑”：
-
   - 监视reactive定义的响应式数据时：oldValue无法正确获取、强制开启了深度监视（deep配置失效）。
   - 监视reactive定义的响应式数据中某个属性时：deep配置有效。
   
@@ -24493,27 +24605,18 @@ npm run dev
   - `unmounted` =====>`onUnmounted`
 
 ## 9.自定义hook函数
-
 - 什么是hook？—— 本质是一个函数，把setup函数中使用的Composition API进行了封装。
-
 - 类似于vue2.x中的mixin。
-
 - 自定义hook的优势: 复用代码, 让setup中的逻辑更清楚易懂。
 
 ## 10.toRef
-
 - 作用：创建一个 ref 对象，其value值指向另一个对象中的某个属性。
 - 语法：```const name = toRef(person,'name')```
 - 应用:   要将响应式对象中的某个属性单独提供给外部使用时。
-
-
 - 扩展：```toRefs``` 与```toRef```功能一致，但可以批量创建多个 ref 对象，语法：```toRefs(person)```
 
-
 # 三、其它 Composition API
-
 ## 1.shallowReactive 与 shallowRef
-
 - shallowReactive：只处理对象最外层属性的响应式（浅响应式）。
 - shallowRef：只处理基本数据类型的响应式, 不进行对象的响应式处理。
 
@@ -24522,15 +24625,13 @@ npm run dev
   -  如果有一个对象数据，后续功能不会修改该对象中的属性，而是生新的对象来替换 ===> shallowRef。
 
 ## 2.readonly 与 shallowReadonly
-
 - readonly: 让一个响应式数据变为只读的（深只读）。
 - shallowReadonly：让一个响应式数据变为只读的（浅只读）。
 - 应用场景: 不希望数据被修改时。
 
 ## 3.toRaw 与 markRaw
-
 - toRaw：
-  - 作用：将一个由```reactive```生成的<strong style="color:orange">响应式对象</strong>转为<strong style="color:orange">普通对象</strong>。
+  - 作用：将一个由```reactive```生成的响应式对象转为普通对象。
   - 使用场景：用于读取响应式对象对应的普通对象，对这个普通对象的所有操作，不会引起页面更新。
 - markRaw：
   - 作用：标记一个对象，使其永远不会再成为响应式对象。
@@ -24539,11 +24640,8 @@ npm run dev
     2. 当渲染具有不可变数据源的大列表时，跳过响应式转换可以提高性能。
 
 ## 4.customRef
-
 - 作用：创建一个自定义的 ref，并对其依赖项跟踪和更新触发进行显式控制。
-
 - 实现防抖效果：
-
   ```vue
   <template>
   	<input type="text" v-model="keyword">
@@ -24585,17 +24683,11 @@ npm run dev
   </script>
   ```
 ## 5.provide 与 inject
-
 <img src="https://v3.cn.vuejs.org/images/components_provide.png" style="width:300px" />
-
-- 作用：实现<strong style="color:#DD5145">祖与后代组件间</strong>通信
-
+- 作用：实现祖与后代组件间通信
 - 套路：父组件有一个 `provide` 选项来提供数据，后代组件有一个 `inject` 选项来开始使用这些数据
-
 - 具体写法：
-
   1. 祖组件中：
-
      ```js
      setup(){
      	......
@@ -24606,7 +24698,6 @@ npm run dev
      ```
 
   2. 后代组件中：
-
      ```js
      setup(props,context){
      	......
@@ -24617,14 +24708,12 @@ npm run dev
      ```
 
 ## 6.响应式数据的判断
-
 - isRef: 检查一个值是否为一个 ref 对象
 - isReactive: 检查一个对象是否是由 `reactive` 创建的响应式代理
 - isReadonly: 检查一个对象是否是由 `readonly` 创建的只读代理
 - isProxy: 检查一个对象是否是由 `reactive` 或者 `readonly` 方法创建的代理
 
 # 四、Composition API 的优势
-
 ## 1.Options API 存在的问题
 使用传统OptionsAPI中，新增或者修改一个需求，就需要分别在data，methods，computed里修改 。
 
@@ -24632,7 +24721,6 @@ npm run dev
 我们可以更加优雅的组织我们的代码，函数。让相关功能的代码更加有序的组织在一起。
 
 # 五、新的组件
-
 ## 1.Fragment
 
 - 在Vue2中: 组件必须有一个根标签
@@ -24640,9 +24728,7 @@ npm run dev
 - 好处: 减少标签层级, 减小内存占用
 
 ## 2.Teleport
-
-- 什么是Teleport？—— `Teleport` 是一种能够将我们的<strong style="color:#DD5145">组件html结构</strong>移动到指定位置的技术。
-
+- 什么是Teleport？—— `Teleport` 是一种能够将我们的组件html结构移动到指定位置的技术。
   ```vue
   <teleport to="移动位置">
   	<div v-if="isShow" class="mask">
@@ -24655,11 +24741,8 @@ npm run dev
   ```
 
 ## 3.Suspense
-
 - 等待异步组件时渲染一些额外内容，让应用有更好的用户体验
-
 - 使用步骤：
-
   - 异步引入组件
 
     ```js
@@ -24688,7 +24771,6 @@ npm run dev
 # 六、其他
 
 ## 1.全局API的转移
-
 - Vue 2.x 有许多全局 API 和配置。
   - 例如：注册全局组件、注册全局指令等。
 
@@ -24706,27 +24788,21 @@ npm run dev
       inserted: el => el.focus()
     }
     ```
-
 - Vue3.0中对这些API做出了调整：
-
   - 将全局的API，即：```Vue.xxx```调整到应用实例（```app```）上
-
-    | 2.x 全局 API（```Vue```） | 3.x 实例 API (`app`)                        |
-    | ------------------------- | ------------------------------------------- |
-    | Vue.config.xxxx           | app.config.xxxx                             |
-    | Vue.config.productionTip  | <strong style="color:#DD5145">移除</strong> |
-    | Vue.component             | app.component                               |
-    | Vue.directive             | app.directive                               |
-    | Vue.mixin                 | app.mixin                                   |
-    | Vue.use                   | app.use                                     |
-    | Vue.prototype             | app.config.globalProperties                 |
+    | 2.x 全局 API（```Vue```） | 3.x 实例 API (`app`)        
+    | Vue.config.xxxx           | app.config.xxxx  
+    | Vue.config.productionTip  | 移除 
+    | Vue.component             | app.component    
+    | Vue.directive             | app.directive   
+    | Vue.mixin                 | app.mixin           
+    | Vue.use                   | app.use      
+    | Vue.prototype             | app.config.globalProperties  
   
 ## 2.其他改变
-
 - data选项应始终被声明为一个函数。
 
 - 过度类名的更改：
-
   - Vue2.x写法
 
     ```css
@@ -24741,7 +24817,6 @@ npm run dev
     ```
 
   - Vue3.x写法
-
     ```css
     .v-enter-from,
     .v-leave-to {
@@ -24754,12 +24829,10 @@ npm run dev
     }
     ```
 
-- <strong style="color:#DD5145">移除</strong>keyCode作为 v-on 的修饰符，同时也不再支持```config.keyCodes```
+- 移除keyCode作为 v-on 的修饰符，同时也不再支持```config.keyCodes```
 
-- <strong style="color:#DD5145">移除</strong>```v-on.native```修饰符
-
+- 移除```v-on.native```修饰符
   - 父组件中绑定事件
-
     ```vue
     <my-component
       v-on:close="handleComponentEvent"
@@ -24768,7 +24841,6 @@ npm run dev
     ```
 
   - 子组件中声明自定义事件
-
     ```vue
     <script>
       export default {
@@ -24777,17 +24849,11 @@ npm run dev
     </script>
     ```
 
-- <strong style="color:#DD5145">移除</strong>过滤器（filter）
-
-  > 过滤器虽然这看起来很方便，但它需要一个自定义语法，打破大括号内表达式是 “只是 JavaScript” 的假设，这不仅有学习成本，而且有实现成本！建议用方法调用或计算属性去替换过滤器。
-
-- ......
+- 移除过滤器（filter）
+  过滤器虽然这看起来很方便，但它需要一个自定义语法，打破大括号内表达式是 “只是 JavaScript” 的假设，这不仅有学习成本，而且有实现成本！建议用方法调用或计算属性去替换过滤器。
 
 ## 1. setState
-
 ### setState更新状态的2种写法
-
-```
 	(1). setState(stateChange, [callback])------对象式的setState
             1.stateChange为状态改变对象(该对象可以体现出状态的更改)
             2.callback是可选的回调函数, 它在状态更新完毕、界面也更新后(render调用后)才被调用
@@ -24805,9 +24871,7 @@ npm run dev
 					要在第二个callback函数中读取
 ```
 ## 2. lazyLoad
-
 ### 路由组件的lazyLoad
-
 ```js
 	//1.通过React的lazy函数配合import()函数动态加载路由组件 ===> 路由组件代码会被分开打包
 	const Login = lazy(()=>import('@/pages/Login'))
@@ -24821,24 +24885,18 @@ npm run dev
     </Suspense>
 ```
 ## 3. Hooks
-
 #### 1. React Hook/Hooks是什么?
-
 ```
 (1). Hook是React 16.8.0版本增加的新特性/新语法
 (2). 可以让你在函数组件中使用 state 以及其他的 React 特性
 ```
-
 #### 2. 三个常用的Hook
-
 ```
 (1). State Hook: React.useState()
 (2). Effect Hook: React.useEffect()
 (3). Ref Hook: React.useRef()
 ```
-
 #### 3. State Hook
-
 ```
 (1). State Hook让函数组件也可以有state状态, 并进行状态数据的读写操作
 (2). 语法: const [xxx, setXxx] = React.useState(initValue)  
@@ -24869,36 +24927,28 @@ npm run dev
 (4). 可以把 useEffect Hook 看做如下三个函数的组合
         componentDidMount()
         componentDidUpdate()
-    	componentWillUnmount() 
+    	  componentWillUnmount() 
 ```
 
 #### 5. Ref Hook
-
 ```
 (1). Ref Hook可以在函数组件中存储/查找组件内的标签或任意其它数据
 (2). 语法: const refContainer = useRef()
 (3). 作用:保存标签对象,功能与React.createRef()一样
 ```
-
 ## 4. Fragment
-
 ### 使用
-
 	<Fragment><Fragment>
 	<></>
 
 ### 作用
-
 > 可以不用必须有一个真实的DOM根标签了
 
 ## 5. Context
-
 ### 理解
-
 > 一种组件间通信方式, 常用于【祖组件】与【后代组件】间通信
 
 ### 使用
-
 ```js
 1) 创建Context容器对象：
 	const XxxContext = React.createContext()  
@@ -24906,10 +24956,9 @@ npm run dev
 2) 渲染子组时，外面包裹xxxContext.Provider, 通过value属性给后代组件传递数据：
 	<xxxContext.Provider value={数据}>
 		子组件
-    </xxxContext.Provider>
+  </xxxContext.Provider>
     
 3) 后代组件读取数据：
-
 	//第一种方式:仅适用于类组件 
 	  static contextType = xxxContext  // 声明接收context
 	  this.context // 读取context中的value数据
@@ -24925,27 +24974,20 @@ npm run dev
 ```
 
 ### 注意
-
 	在应用开发中一般不用context, 一般都用它的封装react插件
 
 ## 6. 组件优化
-
 ### Component的2个问题 
-
 > 1. 只要执行setState(),即使不改变状态数据, 组件也会重新render() ==> 效率低
->
 > 2. 只当前组件重新render(), 就会自动重新render子组件，纵使子组件没有用到父组件的任何数据 ==> 效率低
 
 ### 效率高的做法
-
 >  只有当组件的state或props数据发生改变时才重新render()
 
 ### 原因
-
 >  Component中的shouldComponentUpdate()总是返回true
 
 ### 解决
-
 	办法1: 
 		重写shouldComponentUpdate()方法
 		比较新旧state或props数据, 如果有变化才返回true, 如果没有返回false
@@ -24957,9 +24999,7 @@ npm run dev
 			不要直接修改state数据, 而是要产生新数据
 	项目中一般使用PureComponent来优化
 ## 7. render props
-
 ### 如何向组件内部动态传入带内容的结构(标签)?
-
 	Vue中: 
 		使用slot技术, 也就是通过组件标签体传入结构  <A><B/></A>
 	React中:
@@ -24967,7 +25007,6 @@ npm run dev
 		使用render props: 通过组件标签属性传入结构,而且可以携带数据，一般用render函数属性
 
 ### children props
-
 	<A>
 	  <B>xxxx</B>
 	</A>
@@ -24975,15 +25014,12 @@ npm run dev
 	问题: 如果B组件需要A组件内的数据, ==> 做不到 
 
 ### render props
-
 	<A render={(data) => <C data={data}></C>}></A>
 	A组件: {this.props.render(内部state数据)}
 	C组件: 读取A组件传入的数据显示 {this.props.data} 
 
 ## 8. 错误边界
-
 #### 理解：
-
 错误边界(Error boundary)：用来捕获后代组件错误，渲染出备用页面
 
 #### 特点：
@@ -24991,7 +25027,6 @@ npm run dev
 只能捕获后代组件生命周期产生的错误，不能捕获自己组件产生的错误和其他组件在合成事件、定时器中产生的错误
 
 ##### 使用方式：
-
 getDerivedStateFromError配合componentDidCatch
 
 ```js
@@ -25053,202 +25088,6 @@ componentDidCatch(error, info) {
 		兄弟组件：消息订阅-发布、集中式管理
 		祖孙组件(跨级组件)：消息订阅-发布、集中式管理、conText(开发用的少，封装插件用的多)
 
-Vue3 - 使用 - Composition API - 响应式原理 - 新特性
-1.性能的提升
-打包大小减少41%
-初次渲染快55%, 更新渲染快133%
-内存减少54%
-
-2.源码的升级
-使用Proxy代替defineProperty实现响应式
-重写虚拟DOM的实现和Tree-Shaking
-
-3.拥抱TypeScript
-Vue3可以更好的支持TypeScript
-
-4.新的特性
-Composition API（组合API）
-setup配置
-ref与reactive
-watch与watchEffect
-provide与 inject
-
-新的内置组件
-Fragment
-Teleport
-Suspense
-
-其他改变
-新的生命周期钩子
-data 选项应始终被声明为一个函数
-移除keyCode支持作为 v-on 的修饰符
-
-## Vite来创建一个Vue3的项目  创建工程
-npm init vite-app yk_vue3
-## 进入工程目录
-cd yk_vue3
-## 安装依赖
-npm install
-## 运行
-npm run dev
-
-四、Composition API
-官方翻译的是组合式 API
-在Vue2中，我们使用的是Options API ，配置项式的API，我们要创建一个Vue实例，然后在里面传入一个配置对象，里面要写data、methods、watch等的东西，而Vue3提出了全新的 Composition API，组合式API，我们不用直接创建Vue实例，而是创建一个app，然后按需引入需要的API，来进行使用.
-1.Options API 存在的问题
-使用传统Options API（配置式API）中，新增或者修改一个需求，就需要分别在data，methods，computed里修改 
-2.Composition API 的优势
-我们可以更加优雅的组织我们的代码，函数。让相关功能的代码更加有序的组织在一起。
-
-3. 常用的Composition API
-拉开序幕的setup
-理解：Vue3.0中一个新的配置项，值为一个函数。
-setup是所有Composition API（组合API）“ 表演的舞台 ”。
-组件中所用到的：数据、方法等等，均要配置在setup中。
-setup函数的两种返回值：
-
-若返回一个对象，则对象中的属性、方法, 在模板中均可以直接使用。（重点关注！）
-若返回一个渲染函数：则可以自定义渲染内容。（了解） (不常用)
-注意点：
-尽量不要与Vue2.x配置混用
-Vue2.x配置（data、methos、computed...）中可以访问到setup中的属性、方法。
-但在setup中不能访问到Vue2.x配置（data、methos、computed...）。
-如果有重名, setup优先。
-setup不能是一个async函数，因为返回值不再是对象, 而是promise, 模板看不到return对象中的属性。（后期也可以返回一个Promise实例，但需要Suspense和异步组件的配合）
-
-ref 函数
-作用: 定义一个响应式的数据
-语法: const xxx = ref(initValue)
-
-创建一个包含响应式数据的引用对象（reference对象，简称ref对象）。
-JS中操作数据： xxx.value
-模板中读取数据: 不需要.value，直接：<div>{{xxx}}</div>
-
-备注：
-接收的数据可以是：基本类型、也可以是对象类型。
-基本类型的数据：响应式依靠的是类上的getter与setter完成的（我们等下看下源码你就知道了）。
-对象类型的数据：内部 “ 求助 ” 了Vue3.0中的一个新函数—— reactive函数。
-
-reactive函数
-
-作用: 定义一个对象类型的响应式数据（基本类型不要用它，要用ref函数）
-语法：const 代理对象= reactive(源对象)接收一个对象（或数组），返回一个代理对象（Proxy的实例对象，简称proxy对象）
-reactive定义的响应式数据是“深层次的”。
-内部基于 ES6 的 Proxy 实现，通过代理对象操作源对象内部数据进行操作。
-
-Vue3.0中的响应式原理
-Vue2.x的响应式
-实现原理
-对象类型：通过Object.defineProperty()对属性的读取、修改进行拦截（数据劫持）。
-数组类型：通过重写更新数组的一系列方法来实现拦截。（对数组的变更方法进行了包裹）
-存在问题
-新增属性、删除属性, 界面不会更新。
-直接通过下标修改数组, 界面不会自动更新。
-解决方案
-使用Vue.set、Vue.delete或者vm.$set、vm.$delete这些API
-
-实现原理
-通过 Proxy（代理）: 拦截对象中任意属性的变化, 包括：属性值的读写、属性的添加、属性的删除等。
-通过Reflect（反射）: 对源对象的属性进行操作。
-
-reactive对比ref
-从定义数据角度对比
-ref用来定义：基本类型数据。
-reactive用来定义：对象（或数组）类型数据。
-备注：ref也可以用来定义对象（或数组）类型数据, 它内部会自动通过reactive转为代理对象。
-
-从原理角度对比
-ref通过类中的的getter与setter来实现响应式（数据劫持）。
-reactive通过使用Proxy来实现响应式（数据劫持）, 并通过Reflect操作源对象内部的数据。
-
-从使用角度对比
-ref定义的数据：操作数据需要.value，读取数据时模板中直接读取不需要.value。
-reactive定义的数据：操作数据与读取数据：均不需要.value。
-
-setup的两个注意点
-setup执行的时机
-在beforeCreate之前执行一次，this是undefined。
-setup的参数
-将setup接收的两个参数(props, context)
-props：值为对象，包含：组件外部传递过来，且组件内部声明接收了的属性。
-context：上下文对象
-attrs: 值为对象，包含：组件外部传递过来，但没有在props配置中声明的属性, 相当于 this.$attrs。
-slots: 收到的插槽内容, 相当于 this.$slots。
-emit: 分发自定义事件的函数, 相当于 this.$emit。
-
-计算属性与监视
-computed函数
-与Vue2.x中computed配置功能一致
-//计算属性 —— 简写
-let fullName = computed(()=>{
-    return person.firstName + '-' + person.lastName
-})
-//计算属性 —— 完整
-let fullName = computed({
-    get(){
-        return person.firstName + '-' + person.lastName
-    },
-    set(value){
-        const nameArr = value.split('-')
-        person.firstName = nameArr[0]
-        person.lastName = nameArr[1]
-    }
-})
-
-watch函数
-与Vue2.x中watch配置功能一致
-两个小“坑”：
-监视reactive定义的响应式数据时：oldValue无法正确获取、强制开启了深度监视（deep配置失效）。
-监视reactive定义的响应式数据中某个属性时：deep配置有效。
-//情况一：监视ref定义的响应式数据
-watch(sum,(newValue,oldValue)=>{
-	console.log('sum变化了',newValue,oldValue)
-},{immediate:true})
-//情况二：监视多个ref定义的响应式数据
-watch([sum,msg],(newValue,oldValue)=>{
-	console.log('sum或msg变化了',newValue,oldValue)
-}) 
-
-情况三：监视reactive定义的响应式数据
-若watch监视的是reactive定义的响应式数据，则无法正确获得oldValue！！
-若watch监视的是reactive定义的响应式数据，则强制开启了深度监视
-watch(person,(newValue,oldValue)=>{
-	console.log('person变化了',newValue,oldValue)
-},{immediate:true,deep:false}) //此处的deep配置不再奏效
-
-情况四：监视reactive定义的响应式数据中的某个属性
-watch(()=>person.job,(newValue,oldValue)=>{
-	console.log('person的job变化了',newValue,oldValue)
-},{immediate:true,deep:true}) 
-
-情况五：监视reactive定义的响应式数据中的某些属性
-watch([()=>person.job,()=>person.name],(newValue,oldValue)=>{
-	console.log('person的job变化了',newValue,oldValue)
-},{immediate:true,deep:true})
-
-watchEffect函数
-watch的套路是：既要指明监视的属性，也要指明监视的回调。
-watchEffect的套路是：不用指明监视哪个属性，监视的回调中用到哪个属性，那就监视哪个属性。
-watchEffect有点像computed：
-但computed注重的计算出来的值（回调函数的返回值），所以必须要写返回值。
-而watchEffect更注重的是过程（回调函数的函数体），所以不用写返回值。
-
-生命周期
-Vue3.0中可以继续使用Vue2.x中的生命周期钩子，但有有两个被更名：
-beforeDestroy改名为 beforeUnmount
-destroyed改名为 unmounted
-可以直接已配置项的形式使用生命周期钩子，也可以使用组合式API的形式使用，尽量统一
-一般来说，组合式API里的钩子会比配置项的钩子先执行，组合式API的钩子名字有变化
-
-Vue3.0也提供了 Composition API 形式的生命周期钩子，与Vue2.x中钩子对应关系如下：
-beforeCreate===>setup()
-created=======>setup()
-beforeMount ===>onBeforeMount
-mounted=======>onMounted
-beforeUpdate===>onBeforeUpdate
-updated =======>onUpdated
-beforeUnmount ==>onBeforeUnmount
-unmounted =====>onUnmounted
 自定义hook函数（重点）
 什么是hook？—— 本质是一个函数，把setup函数中使用的Composition API进行了封装。
 类似于vue2.x中的mixin。
@@ -25297,211 +25136,6 @@ export default function() {
 	}
 </script>
 
-toRef
-作用：创建一个 ref 对象，其value值指向另一个对象中的某个属性。
-语法：const name = toRef(person,'name')
-应用:   要将响应式对象中的某个属性单独提供给外部使用时。
-扩展：toRefs与toRef功能一致，但可以批量创建多个 ref 对象，语法：toRefs(person)
-return {
-    person,
-    // name:toRef(person,'name'),
-    // age:toRef(person,'age'),
-    // salary:toRef(person.job.j1,'salary'),
-    ...toRefs(person)
-  }
-模板中这样使用  相当于做了一层结构
-<h2>姓名：{{name}}</h2>
-<h2>年龄：{{age}}</h2>
-<h2>薪资：{{job.j1.salary}}K</h2>
-
-五、其它 Composition API
-1. shallowReactive 与 shallowRef
-shallowReactive：只处理对象最外层属性的响应式（浅响应式）。
-shallowRef：只处理基本数据类型的响应式, 不进行对象的响应式处理。
-什么时候使用?
-如果有一个对象数据，结构比较深, 但变化时只是外层属性变化 ===> shallowReactive。
-如果有一个对象数据，后续功能不会修改该对象中的属性，而是生新的对象来替换 ===> shallowRef。
-
-2. readonly 与 shallowReadonly
-readonly: 让一个响应式数据变为只读的（深只读）。
-shallowReadonly：让一个响应式数据变为只读的（浅只读）。
-应用场景: 不希望数据被修改时。
-
-3. toRaw 与 markRaw
-toRaw
-作用：将一个由reactive生成的响应式对象转为普通对象。
-使用场景：用于读取响应式对象对应的普通对象，对这个普通对象的所有操作，不会引起页面更新。
-
-markRaw
-作用：标记一个对象，使其永远不会再成为响应式对象。
-应用场景:
-有些值不应被设置为响应式的，例如复杂的第三方类库等。
-当渲染具有不可变数据源的大列表时，跳过响应式转换可以提高性能。
-
-4. customRef
-作用：创建一个自定义的 ref，并对其依赖项跟踪和更新触发进行显式控制。
-实现防抖效果
-<template>
-  <input type="text" v-model="keyWord" />
-  <h3>{{ keyWord }}</h3>
-</template>
-
-<script>
-import { customRef } from "vue";
-export default {
-  name: "App",
-  setup() {
-    //自定义一个ref——名为：myRef
-    function myRef(value, delay) {
-      let timer;
-      return customRef((track, trigger) => {
-        return {
-          get() {
-            console.log(`有人从myRef这个容器中读取数据了，我把${value}给他了`);
-            track(); // 通知Vue追踪value的变化（提前和get商量一下，让他认为这个value是有用的）
-            return value;
-          },
-          set(newValue) {
-            console.log(`有人把myRef这个容器中数据改为了：${newValue}`);
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-              value = newValue;
-              trigger(); // 通知Vue去重新解析模板
-            }, delay);
-          },
-        };
-      });
-    }
-
-    // let keyWord = ref('hello') //使用Vue提供的ref
-    let keyWord = myRef("hello", 500); //使用程序员自定义的ref
-
-    return { keyWord };
-  },
-};
-</script>
-
-5. provide 与 inject
-作用：实现祖与后代组件间通信
-套路：父组件有一个 provide 选项来提供数据，后代组件有一个 inject 选项来开始使用这些数据
-具体写法：
-祖组件中：
-setup(){
-	......
-    let car = reactive({name:'奔驰',price:'40万'})
-    provide('car',car) // 给自己的后代组件传递数据
-    ......
-}
-后代组件中：
-setup(props,context){
-	......
-    const car = inject('car') // 拿到祖先的数据
-    return {car}
-	......
-}
-
-6. 响应式数据的判断
-isRef: 检查一个值是否为一个 ref 对象
-isReactive: 检查一个对象是否是由 reactive 创建的响应式代理
-isReadonly: 检查一个对象是否是由 readonly 创建的只读代理
-isProxy: 检查一个对象是否是由 reactive 或者 readonly 方法创建的代理
-
-六、新的组件
-1. Fragment
-在Vue2中: 组件必须有一个根标签
-在Vue3中: 组件可以没有根标签, 内部会将多个标签包含在一个Fragment虚拟元素中
-好处: 减少标签层级, 减小内存占用
-2. Teleport
-什么是Teleport？—— Teleport 是一种能够将我们的组件html结构移动到指定位置的技术。
-多个嵌套的盒子  我故意给最里面的盒子加了定位，因为相对定位会找他外层最近的定位盒子进行定位，所以效果就是这样了，我们希望这个弹窗是在body下呈现的
-我们在Dialog组件中加一个teleport标签
-<template>
-  <div>
-    <button @click="isShow = true">点我弹个窗</button>
-    <teleport to="body">
-    <div v-if="isShow" class="mask">
-      <div class="dialog">
-        <h3>我是一个弹窗</h3>
-        <h4>一些内容</h4>
-        <h4>一些内容</h4>
-        <h4>一些内容</h4>
-        <button @click="isShow = false">关闭弹窗</button>
-      </div>
-    </div>
-    </teleport>
-  </div>
-</template>
-
-3. Suspense
-等待异步组件时渲染一些额外内容，让应用有更好的用户体验
-使用步骤：
-异步引入组件
-import {defineAsyncComponent} from 'vue'
-const Child = defineAsyncComponent(()=>import('./components/Child.vue'))
-使用Suspense包裹组件，并配置好default与 fallback
-<template>
-	<div class="app">
-		<h3>我是App组件</h3>
-		<Suspense>
-			<template v-slot:default><Child/></template>
-			<template v-slot:fallback><h3>加载中.....</h3></template>
-		</Suspense>
-	</div>
-</template>
-default：就是组件要显示的内容
-fallback：就是组件没加载完全的“备胎”
-
-七、其他
-1.全局API的转移
-Vue 2.x 有许多全局 API 和配置。
-例如：注册全局组件、注册全局指令等。
-Vue3.0中对这些API做出了调整：
-将全局的API，即：Vue.xxx调整到应用实例（app）上
-2.x 全局 API（Vue）3.x 实例 API (app)
-Vue.config.xxxx app.config.xxxx
-Vue.config.productionTip移除
-Vue.component   app.component
-Vue.directive   app.directive
-Vue.mixin       app.mixin
-Vue.use         app.use
-Vue.prototype   app.config.globalProperties
-
-2.其他改变
-① data选项应始终被声明为一个函数
-② 过渡类名的更改
-Vue2.x写法
-.v-enter,
-.v-leave-to {
-  opacity: 0;
-}
-.v-leave,
-.v-enter-to {
-  opacity: 1;
-}
-Vue3.x写法
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-}
-.v-leave-from,
-.v-enter-to {
-  opacity: 1;
-}
-③ 移除keyCode作为 v-on 的修饰符，同时也不再支持config.keyCodes
-④ 移除v-on.native修饰符
-父组件中绑定事件
-<my-component
-  v-on:close="handleComponentEvent"
-  v-on:click="handleNativeClickEvent"
-/>
-子组件中声明自定义事件
-<script>
-  export default {
-    emits: ['close']
-  }
-</script>
-⑤ 移除过滤器（filter）
-
 深拷贝
 const isObject = (obj)=>(typeof obj === 'object' && obj != null)
 function deepClone(source, hash = new WeakMap()) {
@@ -25524,7 +25158,7 @@ function deepClone(obj){
   if(obj===null) return null;
   if(obj instanceof RegExp) return new RegExp(obj);
   if(obj instanceof Date) return new Date(obj);
-  if(typeof obj!=='function') return new Function(obj);
+  if(typeof obj==='function') return new Function(obj);
   if(typeof obj!=='object') return obj;
   let newObj = new obj.constructor
   for(let key in obj){
@@ -25643,23 +25277,18 @@ plugins: [
 
 webpack工作原理
 拿到⽂件中依赖，这⾥我们不推荐使⽤字符串截取，引⼊的模块名越多，就越麻烦，不灵活，这⾥
-我们推荐使⽤@babel/parser，这是babel7的⼯具，来帮助我们分析内部的语法，包括es6，返回
-⼀个ast抽象语法树
+我们推荐使⽤@babel/parser，这是babel7的⼯具，来帮助我们分析内部的语法，包括es6，返回⼀个ast抽象语法树
 
-接下来我们就可以根据body⾥⾯的分析结果，遍历出所有的引⼊模块，但是⽐较麻烦，这⾥还是推
-荐babel推荐的⼀个模块@babel/traverse，来帮我们处理。
+接下来我们就可以根据body⾥⾯的分析结果，遍历出所有的引⼊模块，但是⽐较麻烦，这⾥还是推荐babel推荐的⼀个模块@babel/traverse，来帮我们处理。
 npm install @babel/traverse --save
 
-接下来我们就可以根据body⾥⾯的分析结果，遍历出所有的引⼊模块，但是⽐较麻烦，这⾥还是推
-荐babel推荐的⼀个模块@babel/traverse，来帮我们处理。
+接下来我们就可以根据body⾥⾯的分析结果，遍历出所有的引⼊模块，但是⽐较麻烦，这⾥还是推荐babel推荐的⼀个模块@babel/traverse，来帮我们处理。
 npm install @babel/traverse --save
 
 webpack核⼼概念
-1、Entry（⼊⼝）：指示 webpack 应该使⽤哪个模块，来作为构建其内部依赖图的开始。进⼊⼊⼝起点后，
-webpack 会找出有哪些模块和库是⼊⼝起点（直接和间接）依赖的。
+1、Entry（⼊⼝）：指示 webpack 应该使⽤哪个模块，来作为构建其内部依赖图的开始。进⼊⼊⼝起点后，webpack 会找出有哪些模块和库是⼊⼝起点（直接和间接）依赖的。
 2、Output（出⼝）：告诉 webpack 在哪⾥输出它所创建的结果⽂件，以及如何命名这些⽂件，默认值为./dist。
-3、Loader（模块转换器）：将所有类型的⽂件转换为 webpack 能够处理的有效模块，然后你就可以利⽤
-webpack 的打包能⼒，对它们进⾏处理。
+3、Loader（模块转换器）：将所有类型的⽂件转换为 webpack 能够处理的有效模块，然后你就可以利⽤webpack 的打包能⼒，对它们进⾏处理。
 4、Plugins（插件）：在 Webpack 构建流程中的特定时机注⼊扩展逻辑来改变构建结果或做你想要的事情。
 5、Module(模块)：开发者将程序分解成离散功能块，并称之为模块
 
@@ -25667,11 +25296,9 @@ webpack执⾏流程
 webpack启动后会在entry⾥配置的module开始递归解析entry所依赖的所有module，每找到⼀个module, 就会根据配置的loader去找相应的转换规则，对module进⾏转换后在解析当前module所依赖的module，这些模块会以entry为分组，⼀个entry和所有相依赖的module也就是⼀个chunk，最后webpack会把所有chunk转换成⽂件输出，在整个流程中webpack会在恰当的时机执⾏plugin的逻辑
 1. 读取⼊⼝⽂件；
 2. 基于 AST（抽象语法树） 分析⼊⼝⽂件，并产出依赖列表；
-3. AST （Abstract Syntax Tree）抽象语法树 在计算机科学中，或简称语法树（Syntax tree），是源代码语法结
-构的⼀种抽象表示。它以树状的形式表现编程语⾔的语法结构，树上的每个节点都表示源代码中的⼀种结构。
+3. AST （Abstract Syntax Tree）抽象语法树 在计算机科学中，或简称语法树（Syntax tree），是源代码语法结构的⼀种抽象表示。它以树状的形式表现编程语⾔的语法结构，树上的每个节点都表示源代码中的⼀种结构。
 4. 使⽤ Babel 将相关模块编译到 ES5；
-5. webpack有⼀个智能解析器（各种babel），⼏乎可以处理任何第三⽅库。⽆论它们的模块形式是
-CommonJS、AMD还是普通的JS⽂件；甚⾄在加载依赖的时候，允许使⽤动态表
+5. webpack有⼀个智能解析器（各种babel），⼏乎可以处理任何第三⽅库。⽆论它们的模块形式是CommonJS、AMD还是普通的JS⽂件；甚⾄在加载依赖的时候，允许使⽤动态表
 require("、/templates/"+name+"、jade")。
 以下这些⼯具底层依赖了不同的解析器⽣成AST，⽐如eslint使⽤了espree、babel使⽤了acorn
 6. 对每个依赖模块产出⼀个唯⼀的 ID，⽅便后续读取模块相关内容；
@@ -25772,8 +25399,7 @@ require(['./a.js'], function (moduleA){
 SeaJS在推⼴过程中对模块定义的规范化产出，是⼀个同步模块定义，是SeaJS的⼀个标准，SeaJS是CMD概念的⼀个实现，SeaJS是淘宝团队提供的⼀个模块开发的js框架.
 通过define()定义，没有依赖前置，通过require加载jQuery插件，CMD是依赖就近，在什么地⽅使⽤到插件就在什么地⽅require该插件，即⽤即返，这是⼀个同步的概念
 特点
-1、CMD是在AMD基础上改进的⼀种规范，和AMD不同在于对依赖模块的执⾏时机处理不同，CMD是就近依
-赖，⽽AMD是前置依赖。
+1、CMD是在AMD基础上改进的⼀种规范，和AMD不同在于对依赖模块的执⾏时机处理不同，CMD是就近依赖，⽽AMD是前置依赖。
 // a.js
 define(function (require, exports, module){
 　　exports.a = 'hello world';
@@ -25831,8 +25457,7 @@ Sort()排序原理
 
 SPA单页面应用:计算首屏加载时间和首屏内容渲染完成速度慢怎么解决?
 1.什么是首屏加载
-首屏加载时间，指的是浏览器从用户输入相应网址，到首屏内容渲染完成的时间，此时整个网页不一定全部渲染完成，但需要展示当前视窗需要的内容，首屏加载时间是用户体验的重要指标
-计算首屏加载时间times = (performance.timing.domComplete - performance.timing.navigationStart)/1000
+首屏加载时间，指的是浏览器从用户输入相应网址，到首屏内容渲染完成的时间，此时整个网页不一定全部渲染完成，但需要展示当前视窗需要的内容，首屏加载时间是用户体验的重要指标 计算首屏加载时间times = (performance.timing.domComplete - performance.timing.navigationStart)/1000
 
 2.解决办法
 (1)减少入口文件体积
@@ -25995,6 +25620,15 @@ test()
 字符串算法  输出特定的树状结构
 'abc'->{value:'abc'}
 '[abc[bcd[def]]]'
+{
+  value:'abc',
+  children:{
+    value:'bcd',
+    children:{
+      value:'def'
+    }
+  }
+}
 const resultArr = (str)=>str.split(/[\[\]]/g).filter(Boolean)
 const resultArr = (str)=>str.match(/\w+/g);
 const normalize = (arr)=>{
@@ -26216,6 +25850,10 @@ function fibonacci(count){
   }
   return fn(count);
 }
+
+function fibonacci(n,ac1=1,ac2=1){//利用尾调用优化性能
+  return n<=1?ac2:fibonacci(n-1,ac2,ac1+ac2)
+}
 方法2
 function fibonacci(n){
     return [0,1].includes(n)?1:(fibonacci(n-1) + fibonacci(n-2))
@@ -26255,6 +25893,125 @@ function A(a){
 }
 A(1)  //1  
 A(2)  //4
+
+(9)随机生成一个长度为10的整数类型数组
+例如[2,10,3,35,5,11,10,11,20]  
+最终得到[[2,3,5],[10,11],[20],[35]]
+function getRandomNumber(min=0,max=100){
+  min = Math.ceil(min)
+  max= Math.floor(max)
+  return Math.floor(Math.random()*(max-min+1))
+}
+let initArr = Array.from({length:10},()=>getRandomNumber() )
+initArr = [...new Set(initArr)]
+initArr.sort((a,b)=>a-b)
+const map = {}
+initArr.forEach(item=>{
+  const key = Math.floor(item/10)
+  if(!map[key]){
+    map[key] = []
+  }
+  map[key].push(item)
+})
+console.log(Object.values(map))
+
+(10)将树状结构转换为属性平铺结构
+const entry = {
+  a:{
+    b:{
+      c:{
+        dd:'abcdd'
+      }
+    },
+    d:{
+      ee:'adee'
+    },
+    f:'af'
+  }
+}
+//要求转换为如下对象
+const output = {
+  'a.b.c.dd':'abcdd',
+  'a.d.ee':'adee',
+  'a.f':'af'
+}
+function flatObj(obj){
+  const queue = Object.entries(obj)
+  const result = {}
+  while(queue.length){
+    const [key,value] = queue.pop()
+    for(const [k,v] of Object.entries(value)){
+      if(typeof v === 'object'){
+        queue.push([`${key}.${k}`,v])
+      }else{
+        result[`${key}.${k}`] = v
+      }
+    }
+  }
+  return result;
+}
+console.log(flatObj(entry))
+
+(10)
+const data1 = { "a.b.c": 1, "a.b.d": 2 };
+const data2 = { "a.b.e": 3, "a.b.f": 4 };
+const newData = {...data1,...data2}
+const process = function(key,value){
+  const keyArr = key.split('.')
+  let result = {}
+  keyArr.reduce((pre,cur,idx,self)=>{
+    if(idx!==self.length-1){
+      pre[cur]={}
+    }else{
+      pre[cur] = value
+    }
+    return pre[cur] 
+  },result)
+  return result
+}
+function deepMerge(obj1, obj2) {
+  const isObj = (value)=>value?.toString() === "[object Object]"
+  for (const key in obj2) {
+    // 如果target(也就是obj1[key])存在，且是对象的话再去调用deepMerge，否则就是obj1[key]里面没这个对象，需要与obj2[key]合并
+    // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
+    obj1[key] = isObj(obj1[key]) && isObj(obj2[key])? deepMerge(obj1[key],obj2[key]) : (obj1[key] = obj2[key]);
+  }
+  return obj1;
+}
+const result = Object.entries(newData).map(([k,v])=>process(k,v)).reduce((pre,cur)=>deepMerge(pre,cur),{})
+console.log(result)//{a:{b: {c: 1, d: 2, e: 3, f: 4}}}
+
+(11)两个大数相加
+const num1 = 6453234253452432
+const num2 = 7326362323251323
+function addSum(num1,num2){
+  const arr1 = (num1+'').split('').map(Number).reverse()
+  const arr2 = (num2+'').split('').map(Number).reverse()
+  const maxLen = Math.max(arr1.length,arr2.length)
+  const result = []
+  let flag = 0
+  let sum = 0
+  for(let i=0;i<maxLen;i++){
+    const n1 = arr1[i]||0
+    const n2 = arr2[i]||0
+    sum = n1+n2+flag
+    if(sum>=10){
+      flag=1
+      sum=sum%10
+    }else{
+      flag = 0
+    }
+    result.push(sum)
+    if(i===maxLen-1&&flag) result.push(flag)
+  }
+  return result.reverse().join('')
+}
+console.log(addSum(num1,num2))
+
+(12)2022的阶乘
+function fn(n){
+  return BigInt(n)<=1n?1n:fn(BigInt(n)-1n)*BigInt(n)
+}
 
 有时候字符串的长度看着只有一个 但是.length却是2的问题引发的思考
 UTF-16 的编码逻辑
@@ -26328,7 +26085,9 @@ charCodeAt/codePointAt
 '😸'.charCodeAt(0)
 // -> 55357
 '😸'.codePointAt(0)
-// -> 128568
+// -> 128568   
+var num = 128568
+num.toString(16) //1f638
 而使用 codePointAt 则可以将字符正确识别，并返回正确的码点。
 
 正确的计算方式是 通过字符串的codePointAt(0)获取到码元  
@@ -26391,57 +26150,6 @@ HTML规范关于base64有哪些API
 window.atob() // 对base64编码过的字符串进行解码 如果传入字符串的长度不是4的倍数，则抛出DOMException。
 window.btoa() // 对ASCII编码的字符串进行base64编码（不支持汉字，汉字可通过URIencode预处理后再编码） 如果传入字符串的长度不是4的倍数，则抛出DOMException。
 
-前端使用gitlab-runner集成CI/CD CI持续集成 => CD持续部署  (可以参考https://zhuanlan.zhihu.com/p/184936276)
-首先安装gitlab runner
-gitlab runner 提供一个docker 镜像，我试了下有个坑， 工程打包的时候有个node-sass一直报错，然
-后我使用node镜像起了个服务试了下打包没有问题，
-docker pull node
-docker run-itd node:latest
-然后在启动的容器里安装gitlab-runner，安装文档在这里，我使用的二进制文件安装的，直接安装就
-行，安装完成之后之后执行
-gitlab-runner start
-没有报错说明安装成功，就可以配置runner了
-注册runner
-执行注册命令
-gitlab-runner register
-要求输入的Runner绑定的token和url， 获取方式如下（这里需要有项目的管理员权限）：
-Gitlab项目首页=>setting=>CI/CD=>Runners=>SpecificRunners
-这里的要求输入的tags参数需要注意，配置文件里需要使用，这里因为我们只需要工程打包，所以选
-Executor的时候只选了shell，如果有有其他需要比如生产docker镜像等操作请自己尝试，还要注意的
-是gitlab-runner工作目录加下权限，否则打包的时候有可能创建文件夹之类的操作没有权限
-编写.gitlab-ci.yml配置文件
-具体语法可以参考http://58.210.154.140:8888/help/ci/yaml/README.md#onlyexcept-advanced
-我们主要是使用的install和build两部分，这里的artifacts就是打完包之后的文件作为pipeline运行成功的
-附件上传，并在gitlab交互界面上提供下载 
-stages: # 分段
-  - install
- 
-cache: # 缓存
-  paths:
-    - node_modules/
-    - stagetreeMicro/
-
-install-job:
-  tags:
-    - BOC3.3-stage  //runner注册时填写的tag
-  only:
-    - BOC3.3-stage
-  stage: install
-  script:
-    - npm install --registry=http://10.10.5.36:4873/
-    - npm run build
-    - rm -rf stagetreeMicro
-    - mv dist stagetreeMicro
-    - sshpass -f /root/paasword.txt scp -r stagetreeMicro root@10.50.4.57:/tmp
-    - sshpass -f /root/paasword.txt ssh root@10.50.4.57 "docker cp /tmp/stagetreeMicro stage-web:/paas-web-micro"
-
-容器环境下进入容器  docker ps 
-docker exec -it 容器id sh 
-cd etc/gitlab-runner/config.toml  支持在这个文件中去修改配置  
-之后在重启 gitlab-runner restart
-如果jobs一直挂起(pending)状态 首先考虑是否runner并没有激活
-gitlab-runner verify   然后在重启
-
 base64的编码原理
 什么是base64编码
 Base64编码是将字符串以每3个8比特(bit)的字节子序列拆分成4个6比特(bit)的字节(6比特有效字节，最左边两个永远为0，其实也是8比特的字节)子序列，再将得到的子序列查找Base64的编码索引表，得到对应的字符拼接成新的字符串的一种编码方式。
@@ -26476,6 +26184,53 @@ function toBase64(str){
   return enCode+res
 }
 console.log(toBase64("js++"))
+
+前端使用gitlab-runner集成CI/CD CI持续集成 => CD持续部署  (可以参考https://zhuanlan.zhihu.com/p/184936276)
+首先安装gitlab runner
+gitlab runner 提供一个docker 镜像，我试了下有个坑， 工程打包的时候有个node-sass一直报错，然后我使用node镜像起了个服务试了下打包没有问题，
+docker pull node
+docker run-itd node:latest
+然后在启动的容器里安装gitlab-runner，安装文档在这里，我使用的二进制文件安装的，直接安装就行，安装完成之后之后执行
+gitlab-runner start
+没有报错说明安装成功，就可以配置runner了
+注册runner
+执行注册命令
+gitlab-runner register
+要求输入的Runner绑定的token和url， 获取方式如下（这里需要有项目的管理员权限）：
+Gitlab项目首页=>setting=>CI/CD=>Runners=>SpecificRunners
+这里的要求输入的tags参数需要注意，配置文件里需要使用，这里因为我们只需要工程打包，所以选Executor的时候只选了shell，如果有有其他需要比如生产docker镜像等操作请自己尝试，还要注意的是gitlab-runner工作目录加下权限，否则打包的时候有可能创建文件夹之类的操作没有权限
+编写.gitlab-ci.yml配置文件
+具体语法可以参考http://58.210.154.140:8888/help/ci/yaml/README.md#onlyexcept-advanced
+我们主要是使用的install和build两部分，这里的artifacts就是打完包之后的文件作为pipeline运行成功的
+附件上传，并在gitlab交互界面上提供下载 
+stages: # 分段
+  - install
+ 
+cache: # 缓存
+  paths:
+    - node_modules/
+    - stagetreeMicro/
+
+install-job:
+  tags:
+    - BOC3.3-stage  //runner注册时填写的tag
+  only:
+    - BOC3.3-stage
+  stage: install
+  script:
+    - npm install --registry=http://10.10.5.36:4873/
+    - npm run build
+    - rm -rf stagetreeMicro
+    - mv dist stagetreeMicro
+    - sshpass -f /root/paasword.txt scp -r stagetreeMicro root@10.50.4.57:/tmp
+    - sshpass -f /root/paasword.txt ssh root@10.50.4.57 "docker cp /tmp/stagetreeMicro stage-web:/paas-web-micro"
+
+容器环境下进入容器  docker ps 
+docker exec -it 容器id sh 
+cd etc/gitlab-runner/config.toml  支持在这个文件中去修改配置  
+之后在重启 gitlab-runner restart
+如果jobs一直挂起(pending)状态 首先考虑是否runner并没有激活
+gitlab-runner verify   然后在重启
 
 常见 Web 安全攻防总结
 XSS
@@ -26783,7 +26538,7 @@ window.addEventListener("load",function(){
 // 页面的全部资源加载完才会执行，包括图片、视频等。
 })
 document.addEventListener("DOMContentLoaded",function(){
-//DOM 渲染完即可执行，此时样式表、图片、视频还可能没有加载完(比较好)
+//DOM 渲染完即可执行，此时样式表、图片、视频可能还没有加载完(比较好)
 })
 构建DOM树
 当浏览器接收到服务器响应来的HTML文档后，会遍历文档节点，生成DOM树。
@@ -26929,16 +26684,16 @@ let dfs = (node)=>{
 console.log(dfs(node_parent))//[div#parent, div.children1, div.children1-1, div.children1-1-1, div.children1-2, div.children1-2-1, div.children1-3, div.children2, div.children2-1, div.children2-1-1, div.children2-2, div.children2-2-1, div.children3, div.children3-1]
 //BFC广度优先遍历
 let bfs = (node)=>{
-  let stack = []//队列
+  let queue = []//队列
   let nodes = []//存所有节点
   if(node){
-    stack.push(node)
-    while(stack.length){
-      let item = stack.shift()//从前面取
+    queue.push(node)
+    while(queue.length){
+      let item = queue.shift()//从前面取
       nodes.push(item)
       let children  = item.children
       for(let i=0;i<children.length;i++){
-        stack.push(children[i])
+        queue.push(children[i])
       }
     }
   }
@@ -27182,3 +26937,427 @@ new操作符的实现步骤如下：
 3. 指向构造函数中的代码，构造函数中的this指向该对象（也就是为这个对象添加属性和方法）
 4. 返回新的对象
 所以，上面的第二、三步，箭头函数都是没有办法执行的。
+
+elementui表单验证失败，滚动到第一个错误的地方
+this.$nextTick(() => {
+  let isError = document.getElementsByClassName('is-error')
+  isError[0].scrollIntoView({
+      // 滚动到指定节点
+      // 值有start,center,end，nearest，当前显示在视图区域中间
+      block: 'center',
+      // 值有auto、instant,smooth，缓动动画（当前是慢速的）
+      behavior: 'smooth',
+  })
+})
+return;
+
+一文读懂Axios核心源码思想
+Features
+从浏览器创建 XMLHttpRequest
+从 Node.js 创建 HTTP 请求
+支持 Promise API
+拦截请求与响应
+取消请求
+自动装换 JSON 数据
+支持客户端 XSRF 攻击
+前两个特性解释了为什么 Axios 可以同时用于浏览器和 Node.js 的原因，简单来说就是通过判断是服务器还是浏览器环境，来决定使用 XMLHttpRequest 还是 Node.js 的 HTTP 来创建请求，这个兼容的逻辑被叫做适配器，对应的源码在 lib/defaults.js 中
+// defaults.js
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = require('./adapters/xhr');
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = require('./adapters/http');
+  }
+  return adapter;
+}
+以上是适配器的判断逻辑，通过侦测当前环境的一些全局变量，决定使用哪个 adapter。其中对于 Node 环境的判断逻辑在我们做 ssr 服务端渲染的时候，也可以复用。接下来我们来看一下 Axios 对于适配器的封装。
+
+Adapter xhr
+定位到源码文件 lib/adapters/xhr.js，先来看下整体结构，
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    // ...
+  })
+}
+导出了一个函数，接受一个配置参数，返回一个 Promise。我们把关键的部分提取出来，
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+
+    var request = new XMLHttpRequest();
+
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+    request.onreadystatechange = function handleLoad() {}
+    request.onabort = function handleAbort() {}
+    request.onerror = function handleError() {}
+    request.ontimeout = function handleTimeout() {}
+
+    request.send(requestData);
+  });
+};
+是不是感觉很熟悉？没错，这就是 XMLHttpRequest 的使用姿势呀，先创建了一个 xhr 然后 open 启动请求，监听 xhr 状态，然后 send 发送请求。我们来展开看一下 Axios 对于 onreadystatechange 的处理，
+request.onreadystatechange = function handleLoad() {
+  if (!request || request.readyState !== 4) {
+    return;
+  }
+
+  // The request errored out and we didn't get a response, this will be
+  // handled by onerror instead
+  // With one exception: request that using file: protocol, most browsers
+  // will return status as 0 even though it's a successful request
+  if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+    return;
+  }
+
+  // Prepare the response
+  var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+  var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+  var response = {
+    data: responseData,
+    status: request.status,
+    statusText: request.statusText,
+    headers: responseHeaders,
+    config: config,
+    request: request
+  };
+
+  settle(resolve, reject, response);
+
+  // Clean up request
+  request = null;
+};
+首先对状态进行过滤，只有当请求完成时（readyState === 4）才往下处理。需要注意的是，如果 XMLHttpRequest 请求出错，大部分的情况下我们可以通过监听 onerror 进行处理，但是也有一个例外：当请求使用文件协议（file://）时，尽管请求成功了但是大部分浏览器也会返回 0 的状态码。
+Axios 针对这个例外情况也做了处理。
+请求完成后，就要处理响应了。这里将响应包装成一个标准格式的对象，作为第三个参数传递给了 settle 方法，settle 在 lib/core/settle.js 中定义，
+function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+settle 对 Promise 的回调进行了简单的封装，确保调用按一定的格式返回。
+以上就是 xhrAdapter 的主要逻辑，剩下的是对请求头，支持的一些配置项以及超时，出错，取消请求等回调的简单处理，其中对于 XSRF 攻击的防范是通过请求头实现的。
+我们先来简单回顾下什么是 XSRF （也叫 CSRF，跨站请求伪造）。
+
+CSRF
+背景：用户登录后，需要存储登录凭证保持登录态，而不用每次请求都发送账号密码。
+
+怎么样保持登录态呢？
+
+目前比较常见的方式是，服务器在收到 HTTP请求后，在响应头里添加 Set-Cookie 选项，将凭证存储在 Cookie 中，浏览器接受到响应后会存储 Cookie，根据浏览器的同源策略，下次向服务器发起请求时，会自动携带 Cookie 配合服务端验证从而保持用户的登录态。
+
+所以如果我们没有判断请求来源的合法性，在登录后通过其他网站向服务器发送了伪造的请求，这时携带登录凭证的 Cookie 就会随着伪造请求发送给服务器，导致安全漏洞，这就是我们说的 CSRF，跨站请求伪造。
+
+所以防范伪造请求的关键就是检查请求来源，refferer 字段虽然可以标识当前站点，但是不够可靠，现在业界比较通用的解决方案还是在每个请求上附带一个 anti-CSRF token，这个的原理是攻击者无法拿到 Cookie，所以我们可以通过对 Cookie 进行加密（比如对 sid 进行加密），然后配合服务端做一些简单的验证，就可以判断当前请求是不是伪造的。
+
+Axios 简单地实现了对特殊 csrf token 的支持，
+// Add xsrf header
+// This is only done if running in a standard browser environment.
+// Specifically not if we're in a web worker, or react-native.
+if (utils.isStandardBrowserEnv()) {
+  // Add xsrf header
+  var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+    cookies.read(config.xsrfCookieName) :
+    undefined;
+
+  if (xsrfValue) {
+    requestHeaders[config.xsrfHeaderName] = xsrfValue;
+  }
+}
+
+Interceptor
+拦截器是 Axios 的一个特色 Feature，我们先简单回顾下使用方式
+// 拦截器可以拦截请求或响应
+// 拦截器的回调将在请求或响应的 then 或 catch 回调前被调用
+var instance = axios.create(options);
+
+var requestInterceptor = axios.interceptors.request.use(
+  (config) => {
+    // do something before request is sent
+    return config;
+  },
+  (err) => {
+    // do somthing with request error
+    return Promise.reject(err);
+  }
+);
+
+// 移除已设置的拦截器
+axios.interceptors.request.eject(requestInterceptor)
+那么拦截器是怎么实现的呢？
+
+定位到源码 lib/core/Axios.js 第 14 行，
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+通过 Axios 的构造函数可以看到，拦截器 interceptors 中的 request 和 response 两者都是一个叫做 InterceptorManager 的实例，这个 InterceptorManager 是什么？
+
+定位到源码 lib/core/InterceptorManager.js，
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected,
+    synchronous: options ? options.synchronous : false,
+    runWhen: options ? options.runWhen : null
+  });
+  return this.handlers.length - 1;
+};
+
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+InterceptorManager 是一个简单的事件管理器，实现了对拦截器的管理，
+
+通过 handlers 存储拦截器，然后提供了添加，移除，遍历执行拦截器的实例方法，存储的每一个拦截器对象都包含了作为 Promise 中 resolve 和 reject 的回调以及两个配置项。
+值得一提的是，移除方法是通过直接将拦截器对象设置为 null 实现的，而不是 splice 剪切数组，遍历方法中也增加了相应的 null 值处理。这样做一方面使得每一项ID保持为项的数组索引不变，另一方面也避免了重新剪切拼接数组的性能损失。
+
+拦截器的回调会在请求或响应的 then 或 catch 回调前被调用，这是怎么实现的呢？
+回到源码 lib/core/Axios.js 中第 27 行，Axios 实例对象的 request 方法，
+
+我们提取其中的关键逻辑如下，
+Axios.prototype.request = function request(config) {
+  // Get merged config
+  // Set config.method
+  // ...
+  var requestInterceptorChain = [];
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+ var responseInterceptorChain = [];
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  var promise;
+
+  var chain = [dispatchRequest, undefined];
+
+  Array.prototype.unshift.apply(chain, requestInterceptorChain);
+
+  chain.concat(responseInterceptorChain);
+
+  promise = Promise.resolve(config);
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+可以看到，当执行 request 时，实际的请求（dispatchRequest）和拦截器是通过一个叫 chain 的队列来管理的。整个请求的逻辑如下
+1.首先初始化请求和响应的拦截器队列，将 resolve，reject 回调依次放入队头
+2.然后初始化一个 Promise 用来执行回调，chain 用来存储和管理实际请求和拦截器
+3.将请求拦截器放入 chain 队头，响应拦截器放入 chain 队尾
+4.队列不为空时，通过 Promise.then 的链式调用，依次将请求拦截器，实际请求，响应拦截器出队
+5.最后返回链式调用后的 Promise
+这里的实际请求是对适配器的封装，请求和响应数据的转换都在这里完成。
+
+那么数据转换是如何实现的呢？
+Transform data
+定位到源码 lib/core/dispatchRequest.js，
+function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+  
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+这里的 throwIfCancellationRequested 方法用于取消请求，关于取消请求稍后我们再讨论，可以看到发送请求是通过调用适配器实现的，在调用前和调用后会对请求和响应数据进行转换。
+
+转换通过 transformData 函数实现，它会遍历调用设置的转换函数，转换函数将 headers 作为第二个参数，所以我们可以根据 headers 中的信息来执行一些不同的转换操作，
+
+// 源码 core/transformData.js
+function transformData(data, headers, fns) {
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+Axios 也提供了两个默认的转换函数，用于对请求和响应数据进行转换。默认情况下，
+
+Axios 会对请求传入的 data 做一些处理，比如请求数据如果是对象，会序列化为 JSON 字符串，响应数据如果是 JSON 字符串，会尝试转换为 JavaScript 对象，这些都是非常实用的功能，
+
+对应的转换器源码可以在 lib/default.js 的第 31 行找到，
+
+var defaults = {
+ // Line 31
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+  
+  transformResponse: [function transformResponse(data) {
+    var result = data;
+    if (utils.isString(result) && result.length) {
+      try {
+        result = JSON.parse(result);
+      } catch (e) { /* Ignore */ }
+    }
+    return result;
+  }],
+}
+
+我们说 Axios 是支持取消请求的，怎么个取消法呢？
+CancelToken
+其实不管是浏览器端的 xhr 或 Node.js 里 http 模块的 request 对象，都提供了 abort 方法用于取消请求，所以我们只需要在合适的时机调用 abort 就可以实现取消请求了。
+
+那么，什么是合适的时机呢？控制权交给用户就合适了。所以这个合适的时机应该由用户决定，也就是说我们需要将取消请求的方法暴露出去，Axios 通过 CancelToken 实现取消请求，我们来一起看下它的姿势。
+
+首先 Axios 提供了两种方式创建 cancel token，
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
+
+// 方式一，使用 CancelToken 实例提供的静态属性 source
+axios.post("/user/12345", { name: "monch" }, { cancelToken: source.token });
+source.cancel();
+
+// 方式二，使用 CancelToken 构造函数自己实例化
+let cancel;
+axios.post(
+  "/user/12345",
+  { name: "monch" },
+  {
+    cancelToken: new CancelToken(function executor(c) {
+      cancel = c;
+    }),
+  }
+);
+cancel();
+
+到底什么是 CancelToken？定位到源码 lib/cancel/CancelToken.js 第 11 行，
+function CancelToken(executor) {
+  if (typeof executor !== "function") {
+    throw new TypeError("executor must be a function.");
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+CancelToken 就是一个由 promise 控制的极简的状态机，实例化时会在实例上挂载一个 promise，这个 promise 的 resolve 回调暴露给了外部方法 executor，这样一来，我们从外部调用这个 executor方法后就会得到一个状态变为 fulfilled 的 promise，那有了这个 promise 后我们如何取消请求呢？
+
+是不是只要在请求时拿到这个 promise 实例，然后在 then 回调里取消请求就可以了？
+
+定位到适配器的源码 lib/adapters/xhr.js 第 158 行，
+if (config.cancelToken) {
+  // Handle cancellation
+  config.cancelToken.promise.then(function onCanceled(cancel) {
+    if (!request) {
+      return;
+    }
+
+    request.abort();
+    reject(cancel);
+    // Clean up request
+    request = null;
+  });
+}
+
+以及源码 lib/adaptors/http.js 第 291 行，
+if (config.cancelToken) {
+  // Handle cancellation
+  config.cancelToken.promise.then(function onCanceled(cancel) {
+    if (req.aborted) return;
+
+    req.abort();
+    reject(cancel);
+  });
+}
+果然如此，在适配器里 CancelToken 实例的 promise 的 then 回调里调用了 xhr 或 http.request 的 abort 方法。试想一下，如果我们没有从外部调用取消 CancelToken 的方法，是不是意味着 resolve 回调不会执行，适配器里的 promise 的 then 回调也不会执行，就不会调用 abort 取消请求了。
